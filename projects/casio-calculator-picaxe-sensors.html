@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" data-page="home">
 <head>
-  <title>Michael Fenton — Digital Multimeters as Datalogger Substitutes</title>
-
+  <title>Michael Fenton — Casio graphics calculators as a sensor display and data analysis tool</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Academic portfolio and CV for Michael Fenton, showcasing innovative teaching, research, talks, workshops, and publications." />
@@ -37,8 +36,6 @@
   <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
   <link rel="manifest" href="../site.webmanifest" />
   <link rel="shortcut icon" href="../favicon.ico" />
-
-  
   <link rel="stylesheet" href="../assets/css/style.css" />
 </head>
 <body>
@@ -46,7 +43,7 @@
   <header class="topbar" role="banner" aria-label="Primary site header">
     <div class="brand">
       <span class="brand__logo" aria-hidden="true">MF</span>
-      <a class="brand__name" href="index.html" aria-label="Home page of Michael Fenton">Michael Fenton</a>
+      <a class="brand__name" href="../index.html" aria-label="Home page of Michael Fenton">Michael Fenton</a>
     </div>
     <button class="nav-toggle" aria-expanded="false" aria-controls="mainnav" aria-label="Toggle navigation menu">
       <span class="nav-toggle__bar" aria-hidden="true"></span>
@@ -82,100 +79,59 @@
     </aside>
     <main id="content" class="content" role="main" tabindex="-1">
       <section class="intro" aria-labelledby="intro-heading">
-        <h2 id="intro-heading">Development of Multimeter-Based Sensor Systems</h2>
+        <h2 id="intro-heading">Development of Casio Calculator to Picaxe Sensor Systems</h2>
 	<p>Michael Fenton came to Secondary teaching with research and industry experience.
 	He knew that investigating how the world works requires seeing more than the eyes alone can reveal.
-	School science equipment is limited, with expensive data loggers and sensors reserved for senior classes 
-	and limited to specialist subject use. This means that junior general science classes 
-	are unlikely to access tools that could transform their learning and view of the world.
-	From the early 2000's Michael developed and trialed low-cost sensor systems for cross-curricular learning
-	in junior science and mathematics classes. Their use was extended to senior specialist subject areas
-	with great success.</p>
+	School science equipment is limited, with expensive data loggers and sensors reserved for senior classes.
+ 	After teaching Chemistry, Biology, Physics and Calculus, he wondered if he could invent a low cost system that would permit authentic hands-on data collection for cross-curricula learning in these subject.</p> 
+<p>He was using Picaxe microcontrollers with his Nexus Research Group students, so he focused on connecting a Picaxe-18 to a Casio FX-9750 graphics calculator. He invented a reliable and robust connector and interface circuit for bi-directional communication. This upgrades the Casio FX-9750 and Casio FX-9860 graphics calulators to robot remote control units as well as Picaxe (or Arduino) sensor data display units.</p>
         <h3 id="key-ideas">Key ideas</h3>
           <ul>
-            <li>Michael pioneered the concept of using digital multimeters as substitutes for data loggers for cross-curricular learning at all levels.</li>
-            <li>He developed a wide range of DIY home-made and low-cost sensors, many cost just a few cents. Sensors can measure water vapour, temperature, pressure, alpha radiation, visible light, ultra violet (UV) light, infra red (IR) light, water hardness, static electric fields, mobile phone signals, angles, magnetic fields, and salinity.</li>
-	    <li>These robust digital multimeters (DMM) can be used in a wide variety of subjects, such as Physical Education, Horticulture, Calculus and Statistics.</li>
-            <li>Michael invented the "Build it, Test it, Use it" pedagogy for inquiry-based learning and discovery at home as well as school.</li>
-	    <li>He promoted affordable, inquiry-driven cross-curricula learning sharing his research at conferences, through publications, and on his Nexus Research Group website.</li>
-            <li>Michael's DMM digital multimeter datalogger technology is still being shared by other educators. Michael pioneered the general use of a low-cost, scalable solution to make experimental and hands-on authentic maths, science, and discovery learning accessible in resource-limited schools.</li>
+            <li>Michael pioneered classroom trials for using a standard school Casio graphics calulator as a datalogger sensor system for cross-curricular learning.</li>
+            <li>He developed a wide range of DIY home-made and low-cost sensors, many cost just a few cents. Sensors can measure range (distance), water vapour, temperature, pressure, alpha radiation, visible light, ultra violet (UV) light, infra red (IR) light, water hardness, static electric fields, mobile phone signals, angles, magnetic fields, and salinity.</li>
+	    <li>This system provided a robust low-cost tool for collecting data for use in senior high school subjects, such as Physical Education, Horticulture, Biology, Chemistry, Physics, Earth and Space Science, Calculus, and Statistics.</li>
+	    <li>Although forum discussions survive, the original concept and wider implementation of using a school-issue Casio graphics calculator as a field data logger and display tool were first published by Michael Fenton on the Nexus Research Group website (now offline). This work was presented at various national and international education conferences.</li>
+            <li>Michael pioneered the general use of a low-cost, scalable solution to make experimental and hands-on authentic maths, science, and discovery learning accessible in resource-limited schools.</li>
           </ul>
 	</section>
 	<h3 id="build-it">Build it</h3>
-	<p>Under-confident teachers and students were found to be confused by the markings on the digital multimeters. Two strategies were employed that seemed to overcome this. Firstly, a plastic cover was cut and placed over the central dial to cover distracting labels on the meter. An erasable marker was used to label the dial setting as ‘heat’ or ‘light’ or ‘salt’, etc. This aided the second strategy which was to remind students each time that we treat the meter as a ‘what does it measure today?’ machine.</p>
-<p>For safety reasons, as well as the ability to quickly change sensors, an electrical terminal block was fitted to the DMM probes. The probes that come with the meters had pointed ends that could cause injury if used improperly. In the trial only single component sensors were used. Some components must be inserted ‘the right way around’, such as light emitting diodes (LED’s) and signal diodes. It was a simple matter to remind students that if the display does not give an appropriate reading, just insert the sensor the other way around. </p>
-<img src="../assets/img/digital-multimeter-built-it.jpg" alt="Digital multimeter data logger assembly" width="400" height="400" />
-<p> </p>
-<blockquote><span lang="en">"<strong>'Build it'</strong> Digital multimeter data logger assembly. Meter lead tips are fitted into a terminal block with a LED functioning as a visible light sensor fitted to the other side of the block. The dial cover is in place. The dial setting is to 200mV range.</span></blockquote>
+	<p>Picaxe microcontrollers are low cost. The 08M2 being small, very robust, and easily capable of communicating with the Casio graphics calculator at T9600 baud. Constructing a bi-directional cable is simple and low-cost, using two 2.5mm 3-pin plugs</p>
+	<blockquote><span lang="en"><strong>'Build it '</strong><a href="../files/michael-fenton-casio-calculator-picaxe-sensors.pdf" target="_blank"> Download Picaxe circuit and coding guide [PDF]</a></span></blockquote>
 	<h3 id="test-it">Test it</h3>
-	<p>Students had not used multimeters before. Students carried out a number of teacher-guided activities pre-tested and guaranteed to work using different sensors. This built up their confidence and provide some prior knowledge before embarking on their own investigations. A typical introductory worksheet had three stages;
+	<p>Students were familiar with many standard calculator functions, but learners had no experience of Casio Basic to code their own programmes. Students carried out a number of teacher-guided activities pre-tested and guaranteed to work. Temperature and range (distance) sensors were attached to the Picaxe which sent data at regular intervals to the Casio FX-9750. This built up their confidence and provided some prior knowledge before embarking on their own investigations. A typical introductory worksheet had three stages;
 </p>
           <ul>
-            <li><strong>Build a sensor</strong> - a ‘howto’ description or image of how to connect the electrical component as a sensor and which dial setting to use.</li>
-            <li><strong>Test your sensor</strong> - an activity already tested (and calibrated if appropriate) by the teacher to demonstrate the equipment has been assembled correctly and is performing as expected.</li>
-	    <li><strong>Use your sensor</strong> - a first attempt at an authentic learning activity that permits students to develop play with the equipment and gain confidence in questioning and data collection. As student worked in pairs or teams, this also helped with participating and contributing skills.</li>
+            <li><strong>Build a sensor</strong> - a ‘howto’ description for using the picaxe sensor unit and setting up the Casio FX-9750 calculator.</li>
+            <li><strong>Test your sensor</strong> - an activity already tested by the teacher to demonstrate the equipment has been assembled correctly and is performing as expected. With senior classes in maths or science, it was expected some sensors would need calibrating, a useful additional skill.</li>
+	    <li><strong>Use your sensor</strong> - students invented their own authentic activity to replace a contrived NCEA task of little relevance or interest to them. Gamification and simulation made for much more engaging summative assessment.</li>
           </ul>
 
-	<p>Activities generally fall into simple “presence/absence” qualitative measurements suitable for younger students or quantitative measurements suitable for older students to analyse further. </p>
+<p>When analysing the data and discussing the activities, there were plenty of opportunities for students to learn about calibrating sensors, such as the temperature and ultrasonic range finder sensors.</p>
 
-<p>When selecting a sensor, it is helpful to consider the prior knowledge and experience of the students. Not all sensors behave in a positive linear fashion and this can confuse some teachers as well as students. For example, a light emitting diode (LED) will generate a voltage in proportion to the intensity of light they receive. This means the bigger the reading on the meter, the more light is present. This is expected by younger students. However, care must be taken if using a signal diode as a temperature sensor since the resistance reading decreases with an increase in temperature and is only linear over a certain range of temperatures. Sensors used in the trial were selected on the basis of cost, chemical and electrical safety, simplicity and robustness. In general, a good sensor will affect the meters ability to measure current, voltage or electrical resistance as a consequence of a change in a single environmental factor.</p> 
-
-<p>When analysing the data and discussing the activities, there were plenty of opportunities for students to learn about calibrating sensors, such as the temperature and angle sensors. When activities were based on surveys or mapping, students talked about the need to take more than one measurement to get an average reading.</p>
-
-<img src="../assets/img/digital-multimeter-angle-sensor.jpg" alt="'Test It' activity - angle sensor" width="400" height="400" />
+<img src="../assets/img/casio-picaxe-list-data.jpg" alt="'Test It' activity - receiving sensor data from a Picaxe sensor unit." width="300" height="300" />
 <p> </p>
-<blockquote><span lang="en">"<strong>'Test it'</strong> digital multimeter angle sensor. Students calibrate the sensor plotting a simple line graph. The change in resistance of a volume control dial functions as an angle sensor.</span></blockquote>
+<blockquote><span lang="en">"<strong>'Test it'</strong> Receiving sensor data from a Picaxe sensor unit into the Casio FX-9750 as a list.</span></blockquote>
+<img src="../assets/img/casio-picaxe-graphed-data.jpg" alt="'Test It' activity - plotting data from a Picaxe sensor unit." width="300" height="300" />
+<blockquote><span lang="en">"<strong>'Test it'</strong> plotting data from a Picaxe sensor unit.</span></blockquote>
+<img src="../assets/img/casio-picaxe-temperature-calibration.png" alt="'Test It' activity - calibrating a temperature sensor in cooling water." width="300" height="300" />
+<p> </p>
+<blockquote><span lang="en">"<strong>'Test it'</strong> calibrating a temperature sensor in cooling water.</span></blockquote>
+<p></p>
 	<h3 id="use-it">Use it</h3>
-<p>While qualitative presence/absence readings may seem the less advanced activity compared to quantitative investigations, surveys of school grounds or local parks and estuaries can encourage higher level thinking and should not be dismissed without a clear understanding of the other learning opportunities that could arise. 
-</p>
+<img src="../assets/img/casio-picaxe-mission-to-mars.jpg" alt="'Uee It' activity - Engineers problem-solving a prototype Mars Orbiter to scan the surface of Mars." width="300" height="300" />
 	<h4 id="authentic-learning-at-school-and-home">Authentic cross-curricula learning at school and home</h4>
-	<p>In general the devices enabled students to sense more of the world around them. Students could sense things they could not see or touch themselves, and this raised their curiosity and interest. Collecting real data was exciting, and the data they collected had real-world consequences for them. Taking the multimeters out of the classroom permits learners to survey the school grounds, survey parks, and investigate their homes. Engaging with their own data, collected using equipment they built and understood, was shown to supported authentic learning, permit real-world problem solving, and enabled most students to reach the relational stage or higher on the SOLO taxonomy (Hattie and Brown, 2004). Students also used the f-word. They reported they had fun!</p>
-	<blockquote><span lang="en"><a href="../files/michael-fenton-angle-sensor-investigation.pdf" target="_blank">Download a student activity [PDF]</a></span></blockquote>
+	<p>The Calculus students trialing this tool were preparing for an external summative assessment on the topic of “Integrate functions and
+use integrals to solve problems”. This includes using Simpson’s rule. Demonstrating the required skills through a student-led case-based inquiry raised their curiosity, their interest, and their own expectations for what a successful outcome should look like. It was more than just maths. Collecting real data was exciting; they were engineers prototyping a space vehicle and its sensors for a mission to Mars. The real-world data collected had off-world conseqences for them. Important soft skills such as perserverance and creativity were shown, enabling all students to reach the extended abstract level on the SOLO taxonomy (Hattie and Brown, 2004). Many concepts in senior Physics were part of discussions. Students also used the f-word. They reported they had fun!</p>
+	<blockquote><span lang="en"><a href="../files/michael-fenton-elearning-report.pdf" target="_blank">Download research report and class use [PDF]</a></span></blockquote>
 
 	<h4 id="making-diy-home-made-sensors">Making low cost DIY home-made sensors</h4>
 	<p>Since the early 2000's Michael has developed a number of sensors; some are shown on his YouTube channel. Some sensors are very simple single component sensors costing a few cents. Other sensors are inexpensive but include a power source and a few more components. Apart from the straightforward voltage, current and resistance measurements, the multi-meters can also detect; visible light, infra-red light, ultra-violet light, ionising radiation such as alpha particles, temperature, angle, bend, salt, humidity, pressure, touch, paper thickness, mobile phone transmissions, static electric fields, and more.</p>
-
-	<blockquote><span lang="en"><a href="../files/michael-fenton-using-digital-multimeters.pdf" target="_blank">Download a workshop presentation [PDF]</a></span></blockquote>
-<p>In this video Michael imagines equitable access to authentic learning tools if his digital multimeter kit is added to a learners school stationery supply. Green School Educators Programme, Teaching for sustainability: wall-less teaching draft video</p>
-<iframe width="370" height="370"
-        src="https://www.youtube.com//embed/WK13ocHyJAk"
-        title="5 minute sales pitch - using digital multimeters for cross-curricula STEM learning at home."
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-</iframe>
+<p>All of these sensors can be connected to a Casio graphics calculator using a low-cost ($6) Picaxe microcontroller.</p>
 	<h3 id="presentations">YouTube videos</h3>
-	<p>Michael has documented the simple assembly process and working principles in YouTube videos. He demonstrates the use of a terminal block to attach sensors to a digital multimeter. The markings around the dial are hidden using a plastic cover and the 'yellow boxes' become simply a heat sensor, or a light sensor, depending on the label written in marker. This focuses students attenttion to the readings until they become expert users and understand the different settings.</p>
+	<p>Michael has documented many of his do-it-yourself, low-cost sensors and science equipment in YouTube videos. Casi was a Picaxe controlled tracked robot that was driven remotely using a Casio FX-9750 graphics calculator connected to a Picaxe 08M2 interface unit. Casi, sadly, no longer exists.</p>
 <iframe width="370" height="370"
-        src="https://www.youtube.com/embed/qccXDdQrPfI?rel=0"
+        src="https://www.youtube.com/embed/MnuDkM_8Cdg"
         title="Digital multimeter heat sensor"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-</iframe>
-<p></p>
-<iframe width="370" height="370"
-        src="https://www.youtube.com/embed/Lx7_HHxRH-s"
-        title="Digital multimeter LED light sensor"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-</iframe>
-<p></p>
-<iframe width="370" height="370"
-        src="https://www.youtube.com/embed/uRymEI3nO2g?rel=0"
-        title="Digital multimeter angle sensor"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-</iframe>
-<p></p>
-<iframe width="370" height="370"
-        src="https://www.youtube.com/embed/kSPDjAhl1Qc?rel=0"
-        title="Digital multimeter salt sensor"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-</iframe>
-<p></p>
-<iframe width="370" height="370"
-        src="https://www.youtube.com/embed/tEDIJp42vrQ?rel=0"
-        title="Digital multimeter cell phone sensor"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen>
 </iframe>
