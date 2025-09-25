@@ -1,5 +1,5 @@
 /* ===============================
-   Academic Portfolio — GitHub Pages Build (Dark Mode + A11y + SEO)
+   Academic Portfolio — GitHub Pages Build (Dark Mode + A11y + SEO + Scaled images + Scaled embedded YouTube videos)
    =============================== */
 
 :root {
@@ -103,6 +103,57 @@ li{margin:.35rem 0}
 
 /* Blockquotes */
 blockquote{margin:1rem 0;padding:.75rem 1rem .75rem 1rem;border-left:4px solid var(--quote);background:color-mix(in oklab,var(--quote) 8%,transparent);border-radius:.5rem;font-style:italic}
+
+/* Warning Box Style */
+.warning-box {
+  margin: 1.5rem auto;
+  padding: 1rem 1.5rem;
+  border-radius: 4px;
+  
+  /* --- Light Mode (Default) --- */
+  border-left: 5px solid #d9534f;     /* A medium red border */
+  background-color: #fdf7f7;        /* A very light, almost white, red */
+  color: #f2190a;                   /* A dark, desaturated red for text */
+}
+
+.warning-box p:last-child {
+  margin-bottom: 0; /* Removes extra space at the bottom of the box */
+}
+
+/* --- Dark Mode Override --- */
+[data-theme="dark"] .warning-box {
+  border-left-color: #ff8a80;      /* A brighter red for dark backgrounds */
+  background-color: #6e1f19;      /* A dark, muted red background */
+  color: #ffcdd2;                 /* A light, soft red for readable text */
+}
+
+
+/* Scaled images */
+.page__content img {
+  width: 100%;      /* Makes the image responsive, filling its container */
+  max-width: 600px; /* Caps the maximum width at 600px */
+  height: auto;     /* Maintains the aspect ratio to prevent distortion */
+  display: block;   /* Removes extra space below the image */
+  margin: 1.5rem auto; /* Centers the image and adds vertical spacing */
+}
+
+/* Scaled YouTube videos */
+.video-container {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  margin: 1.5rem auto; /* Optional: centers the container */
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
 
 /* Cards */
 .card{background:linear-gradient(180deg,color-mix(in oklab,var(--bg-soft) 90%,transparent),var(--bg-soft));border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:1rem;margin-bottom:1rem}
