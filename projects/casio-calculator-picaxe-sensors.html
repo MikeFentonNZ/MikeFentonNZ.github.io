@@ -97,6 +97,13 @@
 	<h3 id="build-it">Build it</h3>
 	<p>Picaxe microcontrollers are low cost. The 08M2 being small, very robust, and easily capable of communicating with the Casio graphic calculator at T9600 baud. Constructing a bi-directional cable is simple and low-cost, using two 2.5mm 3-pin plugs</p>
 	<blockquote><span lang="en"><strong>'Build it '</strong><a href="../files/michael-fenton-casio-calculator-picaxe-sensors.pdf" target="_blank"> Download Picaxe circuit and coding guide [PDF]</a></span></blockquote>
+<p>The Casio FX-9750G and FX-9860G series of graphic calculators all use the same 3-pin cable and communication protocol for calculator-to-calculator transfers. This means they can also send and receive data when connected to a Picaxe microcontroller or ESP development board.
+The cable used for this connection is the Casio SB-62, which is a 3-pin to 3-pin cable. The underlying communication is a TTL (Transistor-Transistor Logic) asynchronous serial protocol.</p>
+<div class="warning-box">
+  <p><strong>Warning: The Casio calculator's 3-pin port uses a 5V TTL logic level.</strong> </p>
+ <p>A picaxe running on 3xAA (4.5V) or 5V supply can be safely connected to the calculator.</p>
+ <p>3.3V devices such as ESP32 or BBC Microbit <strong>CANNOT </strong>be connected UNLESS a bidirectional logic level converter (or shifter) is used.</p>
+</div>
 	<h3 id="test-it">Test it</h3>
 	<p>Students were familiar with many standard calculator functions, but learners had no experience of Casio Basic to code their own programmes. Students carried out a number of teacher-guided activities pre-tested and guaranteed to work. Temperature and range (distance) sensors were attached to the Picaxe which sent data at regular intervals to the Casio FX-9750. This built up their confidence and provided some prior knowledge before embarking on their own investigations. A typical introductory worksheet had three stages;
 </p>
