@@ -81,7 +81,7 @@
       <section class="intro" aria-labelledby="intro-heading">
         <h2 id="intro-heading">Next-Generation Calculator Datalogger $10 upgrade</h2>
 	<h3>Providing equity and accessibility in STEM education</h3>
-	<p>Michael Fenton has improved his original Picaxe-to-Casio communication protocols developed and published in the mid-2000s. The updated system transforms the Casio FX-9750GIII so it can sense the real world using Picaxe, ESP8266 or ESP32 microcontrollers. The open-source design encourages teacher customisation and student innovation while providing robust, classroom-tested reliability.</p>
+	<p>Michael Fenton has improved his original Picaxe-to-Casio communication protocols developed and published in the mid-2000s. The updated system transforms the Casio FX-9750 calculator family so they can sense the real world using Picaxe, ESP8266 or ESP32 microcontrollers. The open-source design encourages teacher customisation and student innovation while providing robust, classroom-tested reliability.</p>
 
 <p>Michael has identified a method that allows the Casio FX 9750G and FX 9860G calculators to pause indefinitely during a RECEIVE() operation without triggering a COM ERROR. This enables external sensor units to send data at preset intervals (e.g., every 10 seconds, every minute) without requiring specialized hardware such as the EA 200 Data Analyzer, CLAB or E-Con application. Michael's system realises a hundred-fold decrease in cost.</p>
 
@@ -92,7 +92,8 @@
 <blockquote><span lang="en">"<strong>'Wireless remote control'</strong> - older Casio calculators with black box sensor units connected. Portable and battery powered.</span></blockquote>
         <h3 id="key-ideas">Key ideas</h3>
           <ul>
-        <li><strong>Entirely portable and affordable on a budget</strong>Take to the fields, the gym, on a walk, on  holiday.</li>    
+        <li><strong>Entirely portable and affordable on a budget:</strong> Take to the fields, the gym, on a walk, on  holiday.</li>    
+<li><strong>Single simple Casio BASIC program:</strong> One master program connects to any microcontroller; Picaxe, Arduino, ESP8266, ESP32.</ii>
 	<li><strong>Multi-sensor input:</strong> Connect up to 3 sensors simultaneously to a single calculator for data logging, live graphing, and statistical analysis.</li>
 	<li><strong>Optional wireless bi-directional communication:</strong> Over 200-metre range for remote data collection and remote equipment control. Drive a robot using your calculator!</li>
 	<li><strong>Web-based data sharing option:</strong> Live data served as webpages with graphs accessible on smartphones, tablets, and laptops.</li>
@@ -116,9 +117,12 @@
 
 	<h3 id="build-it">Build it</h3>
 	<p>Picaxe microcontrollers are low cost. The 08M2 being small, very robust, and easily capable of communicating with the Casio graphic calculator at T9600 baud. Two (2) sensors maximum can be send data to the FX-9750GIII. Constructing a bi-directional cable is simple and low-cost, using two 2.5mm 3-pin plugs</p>
+<p>Alternative DIY sensor units use Picaxe 14M2 or ESP microcontrollers. Up to 3 sensors can be used simultaneously.</p>
+<p>A single master Picaxe BASIC programme works with 08M2 and 14M2 chips.</p>
+<p>A single Casio BASIC program works with all connected microcontrollers; Picaxe, Arduino, ESP8266, ESP32.</p>
 <p>The cable used for this demonstration photo and video is the Casio SB-62, which is a 3-pin to 3-pin crossover cable. The underlying communication is a TTL (Transistor-Transistor Logic) asynchronous serial protocol.</p>
 <div class="warning-box">
-  <p><strong>Warning: The Casio FX-9750GIII 3-pin port uses a 3V TTL logic level.</strong> </p>
+  <p><strong>Warning: The Casio FX-9750 3-pin port uses a 3V TTL logic level.</strong> </p>
  <p>A Picaxe 08M2 or 14M2 running on 2 x AA (3V) can be safely connected to the calculator.</p>
  <p><strong>DO NOT </strong>be connect 5V logic lines UNLESS a bidirectional logic level converter (or shifter) is used.</p>
  <p>It IS safe to power an ESP8266 Wemos D1 mini using 4 x AAA (6V) connected to the 5V input pin, because the onboard regulator converts this to 3.3V logic at pins D6 and D5 which connect to the SB-62 plug. See the image below.</p>
@@ -127,10 +131,10 @@
 <p> </p>
 <blockquote><span lang="en">"<strong>'Build it'</strong> - receiving sensor data from a Wemos D1 mini ESP8266 sensor unit.</span></blockquote>
 	<h3 id="test-it">Test it</h3>
-	<p>Experience shows students were familiar with many standard calculator functions, but learners had no experience of Casio Basic to code their own programmes. Teacher-guided simple activities pre-tested and guaranteed to work will build leeanrer confidence and wonderings. The new Casio BASIC code supplied to learners permits universal connection to microcontrollers ans simple menu selections to begin daa collection. Temperature and light intensity make good first experiences. Michael would use an introductory worksheet with three stages;
+	<p>Experience shows students were familiar with many standard calculator functions, but learners had no experience of Casio BASIC to code their own programmes. Teacher-guided simple activities pre-tested and guaranteed to work will build learner confidence and wonderings. The new Casio BASIC code supplied to learners permits universal connection to microcontrollers and simple menu selections to begin data collection. Temperature and light intensity make good first experiences. Michael would use an introductory worksheet with three stages;
 </p>
           <ul>
-            <li><strong>Build your datalogger</strong> - a ‘howto’ description for connecting Casio FX-9750GIII to the microcontroller sensor unit. A "universal" Casio BASIC program is provided for learners to install on their own Casio FX-9750GIII  calculator.</li>
+            <li><strong>Build your datalogger</strong> - a ‘howto’ description for connecting Casio FX-9750 to the microcontroller sensor unit. A "universal" Casio BASIC program is provided for learners to install on their own Casio calculator.</li>
             <li><strong>Test your datalogger</strong> - an activity already tested by the teacher to demonstrate the datalooger has been assembled correctly and the Casio program is performing as expected. With senior classes in maths or science, it is expected some sensors would need calibrating, a useful additional skill. You could leave this for a later class activity.</li>
 	    <li><strong>Use your data logger</strong> - introductory investigations should be teacher-led so technical problems or misunderstandings are identfied and addressed. Later, once learners are confident users, learners can design and carry out their own investigations. The Casio BASIC program can be modfied and learners are encouraged to do so. Different sensors can be used or new ones designed and tested. Again, learners and teachers are encouraged to do so.</li>
           </ul>
