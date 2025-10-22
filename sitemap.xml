@@ -1,99 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset 
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://MikeFentonNZ.github.io/</loc>
-    <lastmod>2025-09-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>1.0</priority>
+    <loc>https://mikefentonnz.github.io/</loc>
   </url>
   <url>
-    <loc>https://MikeFentonNZ.github.io/teaching.html</loc>
-    <lastmod>2025-09-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://mikefentonnz.github.io/teaching.html</loc>
   </url>
   <url>
-    <loc>https://MikeFentonNZ.github.io/projects.html</loc>
-    <lastmod>2025-09-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://mikefentonnz.github.io/projects.html</loc>
   </url>
   <url>
-    <loc>https://MikeFentonNZ.github.io/projects/artificial-intelligence-in-education.html</loc>
-    <lastmod>2025-09-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://mikefentonnz.github.io/projects/artificial-intelligence-in-education.html</loc>
   </url>
   <url>
-    <loc>https://MikeFentonNZ.github.io/projects/b9-robot-mobile-laboratory.html</loc>
-    <lastmod>2025-09-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://mikefentonnz.github.io/projects/b9-robot-mobile-laboratory.html</loc>
   </url>
   <url>
-    <loc>https://MikeFentonNZ.github.io/projects/casio-calculator-picaxe-sensors.html</loc>
-    <lastmod>2025-09-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://mikefentonnz.github.io/projects/casio-calculator-picaxe-sensors.html</loc>
   </url>
   <url>
-    <loc>https://MikeFentonNZ.github.io/projects/casio-calculator-sensor-upgrade.html</loc>
-    <lastmod>2025-09-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://mikefentonnz.github.io/projects/casio-calculator-sensor-upgrade.html</loc>
   </url>
   <url>
-    <loc>https://MikeFentonNZ.github.io/projects/digital-multimeters-as-dataloggers.html</loc>
-    <lastmod>2025-09-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://mikefentonnz.github.io/projects/digital-multimeters-as-dataloggers.html</loc>
   </url>
   <url>
-    <loc>https://MikeFentonNZ.github.io/projects/game-design-coding-learning.html</loc>
-    <lastmod>2025-09-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://mikefentonnz.github.io/projects/game-design-coding-learning.html</loc>
   </url>
   <url>
-    <loc>https://MikeFentonNZ.github.io/projects/maker-science-robotics-electronics.html</loc>
-    <lastmod>2025-09-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://mikefentonnz.github.io/projects/maker-science-robotics-electronics.html</loc>
   </url>
   <url>
-    <loc>https://MikeFentonNZ.github.io/projects/rigel-games-electronics-link.html</loc>
-    <lastmod>2025-09-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://mikefentonnz.github.io/projects/rigel-games-electronics-link.html</loc>
   </url>
   <url>
-    <loc>https://MikeFentonNZ.github.io/talks.html</loc>
-    <lastmod>2025-09-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://mikefentonnz.github.io/talks.html</loc>
   </url>
   <url>
-    <loc>https://MikeFentonNZ.github.io/workshops.html</loc>
-    <lastmod>2025-09-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://mikefentonnz.github.io/workshops.html</loc>
   </url>
   <url>
-    <loc>https://MikeFentonNZ.github.io/publications.html</loc>
-    <lastmod>2025-09-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://mikefentonnz.github.io/publications.html</loc>
   </url>
   <url>
-    <loc>https://MikeFentonNZ.github.io/cv.html</loc>
-    <lastmod>2025-09-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://mikefentonnz.github.io/cv.html</loc>
   </url>
   <url>
-    <loc>https://MikeFentonNZ.github.io/files/</loc>
-    <lastmod>2025-09-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://mikefentonnz.github.io/files/</loc>
   </url>
 </urlset>
