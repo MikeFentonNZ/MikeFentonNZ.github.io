@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" data-page="home">
 <head>
-  <title>Michael Fenton — Pause RECEIVE(): Real-time Sensor Logging wand remote control uisng  Casio FX-9750 Calculator</title>
+  <title>Michael Fenton — Next generation Casio calculator data logger and remote control</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Academic portfolio and CV for Michael Fenton. Michael Fenton invented a new method to pause RECEIVE() on Casio FX-9750G calculators without COM error. Enables real-time data logging from sensors using SB-62 cable and microcontrollers like ESP32 or Picaxe. The open-source design encourages teacher customisation and student innovation while providing robust, classroom-tested reliability." />
+  <meta name="description" content="Academic portfolio and CV for Michael Fenton. Michael Fenton has improved his original Picaxe-to-Casio communication protocols developed and published in the mid-2000s. The updated system transforms the Casio FX-9750GIII so it can sense the real world using Picaxe, ESP8266 or ESP32 microcontrollers. The open-source design encourages teacher customisation and student innovation while providing robust, classroom-tested reliability." />
   <meta name="author" content="Michael Fenton" />
   <meta name="theme-color" content="#151a2f" />
   <link rel="canonical" href="https://MikeFentonNZ.github.io/" />
@@ -19,21 +19,10 @@
   <meta name="twitter:image" content="https://MikeFentonNZ.github.io/assets/img/profile.png" />
   <script type="application/ld+json">{
     "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "Pause Casio RECEIVE() for Sensor Integration",
-    "author": {
-      "@type": "Person",
-      "name": "Michael Fenton"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "mikefentonnz.github.io"
-    },
+    "@type": "Person",
     "name": "Michael Fenton, MRSNZ",
     "jobTitle": "Scientist, STEM Education lecturer, Education innovator, Consultant, Writer",
-    "url": "https://mikefentonnz.github.io/projects/casio-calculator-sensor-upgrade.html",
-    "datePublished": "2025-10-15",
-    "description": "This article explains how to pause RECEIVE() mid-communication on Casio FX-9750G calculators, enabling reliable data logging with ESP32, Picaxe, and other microcontrollers using the SB-62 serial cable."
+    "url": "https://MikeFentonNZ.github.io/",
     "image": "https://MikeFentonNZ.github.io/assets/img/profile.png",
     "sameAs": [
       "https://nz.linkedin.com/in/mikefentonnz",
@@ -90,11 +79,11 @@
     </aside>
     <main id="content" class="content" role="main" tabindex="-1">
       <section class="intro" aria-labelledby="intro-heading">
-        <h2 id="intro-heading">Next-Generation Casio FX-9750 Datalogger $10 upgrade</h2>
+        <h2 id="intro-heading">Next-Generation Calculator Datalogger $10 upgrade</h2>
 	<h3>Providing equity and accessibility in STEM education</h3>
 	<p>Michael Fenton has improved his original Picaxe-to-Casio communication protocols developed and published in the mid-2000s. The updated system transforms the Casio FX-9750 calculator family so they can sense the real world using Picaxe, ESP8266 or ESP32 microcontrollers. The open-source design encourages teacher customisation and student innovation while providing robust, classroom-tested reliability.</p>
 
-<p>Michael has invented a method that allows the Casio FX 9750G and FX 9860G calculators to pause a RECEIVE() operation without triggering a COM ERROR. This enables external sensor units to send data using the SB-62 serial cable at preset intervals (e.g., every 10 seconds, every minute) without requiring specialized hardware such as the EA 200 Data Analyzer, CLAB or E-Con application. Michael's system realises a hundred-fold decrease in cost.</p>
+<p>Michael has identified a method that allows the Casio FX 9750G and FX 9860G calculators to pause indefinitely during a RECEIVE() operation without triggering a COM ERROR. This enables external sensor units to send data at preset intervals (e.g., every 10 seconds, every minute) without requiring specialized hardware such as the EA 200 Data Analyzer, CLAB or E-Con application. Michael's system realises a hundred-fold decrease in cost.</p>
 
 <p>This represents a paradigm shift from "dataloggers are for senior students only" to "every student deserves tools to investigate their world." The system has proven particularly powerful for engaging learners who traditionally see science as abstract and inaccessible, transforming them into confident, curious investigators.</p>
 
@@ -104,7 +93,7 @@
         <h3 id="key-ideas">Key ideas</h3>
           <ul>
         <li><strong>Entirely portable and affordable on a budget:</strong> Take to the fields, the gym, on a walk, on  holiday.</li>    
-<li><strong>Single simple Casio BASIC program:</strong> One master program connects to any microcontroller; Picaxe, Arduino, ESP8266, ESP32.</ii>
+<li><strong>Single simple Casio BASIC program:</strong> One master program connects to any microcontroller; Picaxe, Arduino, ESP8266, ESP32.</li>
 	<li><strong>Multi-sensor input:</strong> Connect up to 3 sensors simultaneously to a single calculator for data logging, live graphing, and statistical analysis.</li>
 	<li><strong>Optional wireless bi-directional communication:</strong> Over 200-metre range for remote data collection and remote equipment control. Drive a robot using your calculator!</li>
 	<li><strong>Web-based data sharing option:</strong> Live data served as webpages with graphs accessible on smartphones, tablets, and laptops.</li>
@@ -141,6 +130,7 @@
 <img src="../assets/img/michael-fenton-casio-FX9750GIII-ESP8266.jpg" alt="'Build It' activity - receiving sensor data from a Wemos D1 mini ESP8266 sensor unit." />
 <p> </p>
 <blockquote><span lang="en">"<strong>'Build it'</strong> - receiving sensor data from a Wemos D1 mini ESP8266 sensor unit.</span></blockquote>
+<img src="../assets/img/michael-fenton-casio-serial-pause-receive.svg" alt="Pause Receive() flow control." />
 	<h3 id="test-it">Test it</h3>
 	<p>Experience shows students were familiar with many standard calculator functions, but learners had no experience of Casio BASIC to code their own programmes. Teacher-guided simple activities pre-tested and guaranteed to work will build learner confidence and wonderings. The new Casio BASIC code supplied to learners permits universal connection to microcontrollers and simple menu selections to begin data collection. Temperature and light intensity make good first experiences. Michael would use an introductory worksheet with three stages;
 </p>
@@ -156,7 +146,6 @@
 <p>There is no need to calibrate temperature sensors using boiling water. Where in the real world would a student expect to record that temperature? For some reason teachers default to using ice and boiling water to calibrate sensors. If you are investigating cooling curves, YOU should safely get sensor readings at 100 &degC and PROVIDE THIS to learners.</p>
 	<h3 id="use-it">Use it</h3>
 <p>Always remind learners that scientists work carefully and safely, no matter what they see in movies or TV!</p>
-
 <img src="../assets/img/michael-fenton-casio-receive-pause.png" alt="Comparison of Michael's hack." />
 <p> MORE DETAILS WILL FOLLOW - including source code, lesson ideas, and learning materials. If you would like to see Michael's original work with teaching ideas and examples, click the button below.</p>
 	<p><a href="casio-calculator-picaxe-sensors.html" class="button" aria-label="See the original Casio - Picaxe data logger by Michael Fenton">Go to original Casio-Picaxe data logger</a></p>
