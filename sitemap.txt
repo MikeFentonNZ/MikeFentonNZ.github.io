@@ -3,9 +3,9 @@ https://mikefentonnz.github.io/teaching.html
 https://mikefentonnz.github.io/projects.html
 https://mikefentonnz.github.io/projects/artificial-intelligence-in-education.html
 https://mikefentonnz.github.io/projects/b9-robot-mobile-laboratory.html
-https://mikefentonnz.github.io/projects/casio-calculator-picaxe-datalogger.html
-https://mikefentonnz.github.io/projects/casio-calculator-sensor-upgrade.html
-https://mikefentonnz.github.io/projects/digital-multimeters-as-dataloggers.html
+https://mikefentonnz.github.io/projects/casio-calculator-picaxe-data-logger.html
+https://mikefentonnz.github.io/projects/casio-calculator-data-logger-hack.html
+https://mikefentonnz.github.io/projects/digital-multimeters-as-data-loggers.html
 https://mikefentonnz.github.io/projects/game-design-coding-learning.html
 https://mikefentonnz.github.io/projects/maker-science-robotics-electronics.html
 https://mikefentonnz.github.io/projects/rigel-games-electronics-link.html
