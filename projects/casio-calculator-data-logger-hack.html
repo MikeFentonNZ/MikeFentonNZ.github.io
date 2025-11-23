@@ -4,7 +4,7 @@
   <title>Michael Fenton — Updated Casio calculator data logger and remote control</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Michael Fenton upgrades his Picaxe Casio calculator data logger developed and published in the mid-2000s. Michael's Casio serial protocol hack uses Casio FX-9750 and FX-9860 calculators for data logging at ultra low cost.  Attach sensors to connect Casio calculators to Picaxe, ESP8266 or ESP32 microcontrollers. The open-source design encourages teacher customisation and student innovation while providing robust, classroom-tested reliability." />
+  <meta name="description" content="Michael Fenton upgrades his Picaxe Casio calculator data logger developed and published in the mid-2000s. Michael's Casio serial protocol hack uses Casio FX-9750 and FX-9860 calculators for data logging at ultra low cost.  Attach sensors to connect Casio calculators to Picaxe, Microbit, ESP8266 or ESP32. The open-source design encourages teacher customisation and student innovation while providing robust, classroom-tested reliability." />
 
   <meta name="author" content="Michael Fenton" />
   <meta name="theme-color" content="#151a2f" />
@@ -24,7 +24,7 @@
     "name": "Michael Fenton, MRSNZ",
     "jobTitle": "Scientist, STEM Education lecturer, Education innovator, Consultant, Writer",
     "url": "https://MikeFentonNZ.github.io/",
-    "keywords": "Casio fx-9750G, Casio fx-98060, casio calculator data logger, Picaxe, ESP8266, ESP32, pause mid receive ,casio serial protocol, RECEIVE hack",
+    "keywords": "Casio fx-9750G, Casio fx-98060, casio calculator data logger, Picaxe, ESP8266, ESP32, micro:bit, Microbit, pause mid receive, casio serial protocol, RECEIVE hack",
     "image": "https://MikeFentonNZ.github.io/assets/img/profile.png",
     "sameAs": [
       "https://nz.linkedin.com/in/mikefentonnz",
@@ -83,7 +83,7 @@
       <section class="intro" aria-labelledby="intro-heading">
         <h2 id="intro-heading">Next-Generation Calculator Data Logger $10 upgrade</h2>
 	<h3>Providing equity and accessibility in STEM education</h3>
-	<p>Michael Fenton has improved his original Picaxe Casio calculator data logger developed in the mid-2000s. Michael discovered a Casio serial protocol hack to permit time interval data logging using Casio FX-9750 calculators connected to Picaxe, ESP8266 or ESP32 microcontrollers. The open-source design encourages teacher customisation and student innovation while providing robust, classroom-tested reliability.</p>
+	<p>Michael Fenton has improved his original Picaxe Casio calculator data logger developed in the mid-2000s. Michael discovered a Casio serial protocol hack to permit time interval data logging using Casio FX-9750 calculators connected to Picaxe, Micro:bit, ESP8266 or ESP32. The open-source design encourages teacher customisation and student innovation while providing robust, classroom-tested reliability.</p>
 
 <p>Michael has identified a method that allows the Casio FX 9750G and FX 9860G calculators to pause during a RECEIVE() operation without triggering a COM ERROR. This enables external sensor units to send data at preset intervals (e.g., every 10 seconds, every minute) without requiring specialized hardware such as the EA 200 Data Analyzer, CLAB or E-Con application. Michael's system realises a hundred-fold decrease in cost.</p>
 
@@ -95,7 +95,7 @@
         <h3 id="key-ideas">Key ideas</h3>
           <ul>
         <li><strong>Entirely portable and affordable on a budget:</strong> Take to the fields, the gym, on a walk, on  holiday.</li>    
-<li><strong>Single simple Casio BASIC program:</strong> One master program connects to any microcontroller; Picaxe, Arduino, ESP8266, ESP32.</li>
+<li><strong>Single simple Casio BASIC program:</strong> One master program connects to any microcontroller; Picaxe, Arduino, Microbit, ESP8266, ESP32.</li>
 	<li><strong>Multi-sensor input:</strong> Connect up to 3 sensors simultaneously to a single calculator for data logging, live graphing, and statistical analysis.</li>
 	<li><strong>Optional wireless bi-directional communication:</strong> Over 200-metre range for remote data collection and remote equipment control. Drive a robot using your calculator!</li>
 	<li><strong>Web-based data sharing option:</strong> Live data served as webpages with graphs accessible on smartphones, tablets, and laptops.</li>
@@ -119,9 +119,9 @@
 
 	<h3 id="build-it">Build it</h3>
 	<p>Picaxe microcontrollers are low cost. The 08M2 being small, very robust, and easily capable of communicating with the Casio graphic calculator at T9600 baud. Two (2) sensors maximum can be send data to the FX-9750GIII. Constructing a bi-directional cable is simple and low-cost, using two 2.5mm 3-pin plugs</p>
-<p>Alternative DIY sensor units use Picaxe 14M2 or ESP microcontrollers. Up to 3 sensors can be used simultaneously.</p>
+<p>Alternatively, you can connect Micro:bit, ESP8266 or ESP32 developent boards (higher cost but more functionality, e.g., remotely located sensors).</p>
 <p>A single master Picaxe BASIC programme works with 08M2 and 14M2 chips.</p>
-<p>A single Casio BASIC program works with all connected microcontrollers; Picaxe, Arduino, ESP8266, ESP32.</p>
+<p>A single Casio BASIC program works with all connected microcontrollers; Picaxe, Arduino, Microbit, ESP8266, ESP32.</p>
 <p>The cable used for this demonstration photo and video is the Casio SB-62, which is a 3-pin to 3-pin crossover cable. The underlying communication is a TTL (Transistor-Transistor Logic) asynchronous serial protocol.</p>
 <div class="warning-box">
   <p><strong>Warning: The Casio FX-9750 3-pin port uses a 3V TTL logic level.</strong> </p>
@@ -129,7 +129,7 @@
  <p><strong>DO NOT </strong>be connect 5V logic lines UNLESS a bidirectional logic level converter (or shifter) is used.</p>
  <p>It IS safe to power an ESP8266 Wemos D1 mini using 4 x AAA (6V) connected to the 5V input pin, because the onboard regulator converts this to 3.3V logic at pins D6 and D5 which connect to the SB-62 plug. See the image below.</p>
 </div>
-<img src="../assets/img/michael-fenton-casio-FX9750GIII-ESP8266.jpg" alt="'Build It' activity - receiving sensor data from a Wemos D1 mini ESP8266 sensor unit." />
+<img src="../assets/img/michael-fenton-casio-FX9750GIII-ESP8266.jpg" alt="'Build It' activity - receiving sensor data from a Wemos D1 mini ESP8266 sensor unit." width="400" />
 <p> </p>
 <blockquote><span lang="en">"<strong>'Build it'</strong> - receiving sensor data from a Wemos D1 mini ESP8266 sensor unit.</span></blockquote>
 <div style="display: flex; justify-content: center; padding: 20px;">
@@ -150,6 +150,10 @@
 <p>There is no need to calibrate temperature sensors using boiling water. Where in the real world would a student expect to record that temperature? For some reason teachers default to using ice and boiling water to calibrate sensors. If you are investigating cooling curves, YOU should safely get sensor readings at 100 &degC and PROVIDE THIS to learners.</p>
 	<h3 id="use-it">Use it</h3>
 <p>Always remind learners that scientists work carefully and safely, no matter what they see in movies or TV!</p>
+<p>Casi II - a remake of the original Casio calculator remote controlled robot, replacing the Picaxe with a Microbit. A second Micro:bit is connected to the Casio FX-9750, which sends calculator key presses by radio to the Microbit on the robot to operate it.</p> 
+<br>
+<img src="../assets/img/microbit-robot.jpg" alt="'Use It' Microbit robot controlled by Casio FX-9750 using radio." width="500" />
+<p> </p>
 <img src="../assets/img/michael-fenton-casio-receive-pause.png" alt="Comparison of Michael's hack." />
 <br>
 <h3 id="downloads">'How-to' downloads and code</h3>
@@ -157,7 +161,7 @@
 <img src="../assets/img/picaxe-code.jpg" alt="'Picaxe basic code example'; Picaxe BASIC code will be provided" />
 <br>
 	<blockquote><span lang="en"><strong>Downloads available December 2025 - check back soon!</strong> [ Wiring diagram, RECEIVE() and SEND() protocols, code explanations and experiment lab manual ]</span></blockquote>
-<img src="../assets/img/casio-calculator-picaxe-esp32-manual.jpg" alt="'Michael Fenton's experiment manual'; Casio calculator data logger manual." />
+<img src="../assets/img/casio-calculator-picaxe-esp32-microbit-manual.jpg" alt="'Michael Fenton's experiment manual'; Casio calculator data logger manual." />
 <br>
 	<p><a href="casio-calculator-picaxe-data-logger.html" class="button" aria-label="See the original Casio - Picaxe data logger by Michael Fenton">Go to original Casio-Picaxe data logger</a></p>
 	<h3 id="presentations">YouTube videos</h3>
