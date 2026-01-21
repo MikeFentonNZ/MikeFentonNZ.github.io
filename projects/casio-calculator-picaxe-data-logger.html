@@ -94,7 +94,7 @@
             <li>He developed a wide range of DIY home-made and low-cost sensors, many cost just a few cents. Sensors can measure range (distance), water vapour, temperature, pressure, alpha radiation, visible light, ultra violet (UV) light, infra red (IR) light, water hardness, static electric fields, mobile phone signals, angles, magnetic fields, and salinity.</li>
 	    <li>This Picaxe / Casio calculator communication system provided a robust low-cost tool for collecting data for use in senior high school subjects, such as Physical Education, Horticulture, Biology, Chemistry, Physics, Earth and Space Science, Calculus, and Statistics.</li>
 	    <li>Although forum discussions survive, the original concept and wider implementation of using a school-issue Casio graphic calculator as a field data logger and display tool were first published by Michael Fenton on the Nexus Research Group website (now offline). This work was presented at various national and international education conferences.</li>
-            <li>Michael pioneered the general use of a low-cost, scalable solution to make experimental and hands-on authentic maths, science, and discovery learning accessible in resource-limited schools.</li>
+            <li>Michael pioneered the general use of a low-cost, scalable solution to make experimental and hands-on authentic maths, science, and discovery learning accessible in resource-limited schools. He discovered a timing exploit in the serial protocol that permitted time interval recording but this was not implemented in the experiments students carried out. Later in 2025 Michael discovered a second READY-gated time delay window and published an update on his github site (see link above) and various online communities (Picaxe forum, Electronics-lab.com, Casiopeia.net, Cemetech.net, Forum.arduino.cc).</li>
           </ul>
 	</section>
 	<h3 id="build-it">Build it</h3>
@@ -103,7 +103,7 @@
 <p>The Casio FX-9750G and FX-9860G series of graphic calculators all use the same 3-pin cable and communication protocol for calculator-to-calculator transfers. This means they can also send and receive data when connected to a Picaxe microcontroller or ESP development board.
 The cable used for this connection is the Casio SB-62, which is a 3-pin to 3-pin cable. The underlying communication is a TTL (Transistor-Transistor Logic) asynchronous serial protocol.</p>
 <div class="warning-box">
-  <p><strong>Warning: The Casio calculator's 3-pin port uses a 5V TTL logic level.</strong> </p>
+  <p><strong>Warning: The older model Casio FX-9750G calculator's 3-pin port uses a 5V TTL logic level.</strong> </p>
  <p>A picaxe running on 3xAA (4.5V) or 5V supply can be safely connected to the calculator.</p>
  <p>3.3V devices such as ESP32 or BBC Microbit <strong>CANNOT </strong>be connected UNLESS a bidirectional logic level converter (or shifter) is used.</p>
 </div>
