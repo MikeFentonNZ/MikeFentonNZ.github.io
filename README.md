@@ -57,6 +57,11 @@ Michael Fenton's Maker Science pedagogy transforms abstract STEM concepts into t
 
 Analysis of current AI use in education, including a response to Auckland University research on AI's impact on student learning outcomes and assessment design.
 
+### Why 'Science is Everywhere' Does Science Education a Disservice
+[https://mikefentonnz.github.io/projects/science-is-not-everywhere-but-it-can-begin-anywhere.html](https://mikefentonnz.github.io/projects/science-is-not-everywhere-but-it-can-begin-anywhere.html)
+
+A better way to for teachers and children to see themselves as scientists and understand how technology and science are different but interdependent. With a simple and practical approach to seeing that science is not everywhere but science can begin anywhere. Another chance to see the B9 robot from Lost in Space as a gateway to experiencing authentic science!
+
 ---
 
 ## Key Areas of Expertise

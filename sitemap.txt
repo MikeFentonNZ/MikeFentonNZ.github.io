@@ -1,6 +1,7 @@
 https://mikefentonnz.github.io/
 https://mikefentonnz.github.io/teaching.html
 https://mikefentonnz.github.io/projects.html
+https://mikefentonnz.github.io/projects/aligning-pedagogy-and-purpose-instructional-design-and-moderation.html
 https://mikefentonnz.github.io/projects/artificial-intelligence-in-education.html
 https://mikefentonnz.github.io/projects/b9-robot-mobile-laboratory.html
 https://mikefentonnz.github.io/projects/casio-calculator-picaxe-data-logger.html
@@ -9,6 +10,7 @@ https://mikefentonnz.github.io/projects/digital-multimeters-as-data-loggers.html
 https://mikefentonnz.github.io/projects/game-design-coding-learning.html
 https://mikefentonnz.github.io/projects/maker-science-robotics-electronics.html
 https://mikefentonnz.github.io/projects/rigel-games-electronics-link.html
+https://mikefentonnz.github.io/projects/science-is-not-everywhere-but-it-can-begin-anywhere.html
 https://mikefentonnz.github.io/talks.html
 https://mikefentonnz.github.io/workshops.html
 https://mikefentonnz.github.io/publications.html
