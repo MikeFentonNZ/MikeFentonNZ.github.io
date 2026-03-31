@@ -31,6 +31,9 @@ A fully working, AI-powered child-friendly likeness of the B9 Environmental Cont
 
 Michael Fenton pioneered timed-interval data logging using Casio FX-9750, FX-9860, and FX-CG50 calculators connected to low-cost Picaxe sensor units. He discovered READY-gated timing windows in the Casio serial communication protocol to pause RECEIVE() without a COM error. Ultra low cost timed sensor recording using common school graphing calculators. Project-based learning resources scaffold science, mathematics, and data literacy in schools world-wide.
 
+Simultaneous synchronous multi-sensor transmission paper in preparation. SHA-256 hash of manuscript in preparation, March 2026: [6F0C9402CD3F0715F3660BC864322569D40205D0C96F509097A62C10A98B0B3A]
+
+
 ### Digital Multimeters as Science Data Loggers
 [https://mikefentonnz.github.io/projects/digital-multimeters-as-data-loggers.html](https://mikefentonnz.github.io/projects/digital-multimeters-as-data-loggers.html)
 
