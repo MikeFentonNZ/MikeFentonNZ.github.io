@@ -49,7 +49,7 @@ if (toggle && nav) {
 (function(){
   const page = document.documentElement.getAttribute('data-page');
   if (!page) return;
-  const map = {home:['index.html','./',''],teaching:['teaching.html'],projects:['projects.html'],talks:['talks.html'],workshops:['workshops.html'],publications:['publications.html'],cv:['cv.html']};
+  const map = {home:['index.html','./',''],research:['research-outputs-publications-portfolio.html'],teaching:['teaching-instructional-design-moderation.html'],projects:['projects-stem-inventions.html'],workshops:['workshops-talks-science-communication.html'],nexus:['nexus-research-group.html'],cv:['curriculum-vitae-michael-fenton.html'],dbs:['design-by-subversion-stem-framework.html']};
   const targets = map[page]||[];
   document.querySelectorAll('.mainnav a').forEach(a=>{
     const href = (a.getAttribute('href')||'').toLowerCase();
