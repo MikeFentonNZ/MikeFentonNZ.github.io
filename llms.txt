@@ -2,7 +2,7 @@
 
 > New Zealand scientist, researcher, and STEM educator based in Taranaki. Professional member of the Royal Society of New Zealand and a Ministry of Education E-Learning Fellow. Work spans molecular microbiology, low-cost science instrumentation, and STEM education across a 35-year research record archived on Zenodo.
 
-Michael Fenton has taught every science and mathematics subject, plus coding and electronics, at secondary and sub-degree level, and has led the design of NZQA-approved qualifications from Level 3 to Level 7. He founded the Nexus Research Group, believed to be New Zealand's only secondary school-based research laboratory, with Dr Sir William Pickering as patron. He is available for PhD research, employment, and education consultancy.
+Michael Fenton has taught every science and mathematics subject, plus coding and electronics, at secondary and sub-degree level, and has led the design of NZQA-approved qualifications from Level 3 to Level 7. He founded the Nexus Research Group, believed to be New Zealand's only secondary school-based research laboratory, with Dr Sir William Pickering as patron. He is seeking PhD enrolment by publication, and is available for employment and education consultancy.
 
 ## Pages
 - Home: https://mikefentonnz.github.io/
@@ -20,7 +20,7 @@ Michael Fenton has taught every science and mathematics subject, plus coding and
 - SMART, Sound-to-Motion Analysis and Recording Tool (2026): https://doi.org/10.5281/zenodo.20542011
 - RIGEL, universal sensor interface (2026): https://doi.org/10.5281/zenodo.19508521
 - Distance teacher professional development design materials (2026): https://doi.org/10.5281/zenodo.20078593
-- Skill Standards: A Workflow to Navigate Narrative Traps (2026): https://doi.org/10.5281/zenodo.20337481
+- Skill Standards: Navigating Old Narrative Traps - A Briefing Note for Instructional Designers in New Zealand Vocational Education and Training (2026): https://doi.org/10.5281/zenodo.20337481
 - Rediscovering the 3-Pin Port, Casio RECEIVE() discovery (2025): https://doi.org/10.5281/zenodo.19281514
 - The B9 Robot Mobile Laboratory (2024): https://doi.org/10.5281/zenodo.19528980
 - Using a Digital Multi-meter as an Inexpensive Data Logger Substitute (2011): https://doi.org/10.5281/zenodo.19325413
