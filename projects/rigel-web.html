@@ -95,7 +95,7 @@
       </article>
 
       <h3>What it does</h3>
-      <p>RIGEL-WEB connects a computer to microcontroller-based sensor units, including the Picaxe 08M2 and 14M2, Arduino, ESP8266, ESP32, and the BBC Micro:bit, over USB-serial, Bluetooth, or WiFi. It logs and graphs sensor data live in the browser, all from a single local HTML file that runs offline once opened.</p>
+      <p><a href="rigel-games-electronics-link.html">RIGEL began as a Windows application</a>. Both RIGEL and RIGEL-WEB connect a computer or tablet to microcontroller-based sensor units, including the Picaxe 08M2 and 14M2, Arduino, ESP8266, ESP32, and the BBC Micro:bit, over USB-serial, Bluetooth, or WiFi. RIGEL-WEB logs and graphs sensor data live in the browser, all from a single local HTML file that runs offline once opened.</p>
       <p>Data a learner gathers directly from a real sensor has a transparent provenance. As AI-generated datasets, drawn from models trained on an increasingly polluted literature, become harder to trust, first-hand measurement of this kind matters more, not less. And because RIGEL-WEB is free and works with sensors costing a few dollars, the old cost-and-access defence of simulation no longer applies: with the equipment barrier removed, simulation must be justified on other grounds.</p>
 
       <h3>STEM modules</h3>
@@ -117,8 +117,15 @@
         <img src="../assets/img/flight-sim.png" alt="RIGEL-WEB 3D Flight Simulator module controlled by pitch and roll sensors" width="600" />
         <figcaption>RIGEL-WEB 3D Flight Simulator: pitch and roll controlled by real sensors, linking physical movement to on-screen flight.</figcaption>
       </figure>
+      <h3>Safety</h3>
+      <div class="warning-box">
+        <p><strong>Warning: DO NOT let students test boiling water or live electrical outlets!</strong></p>
+      </div>
+      <p>There is no need to calibrate temperature sensors using boiling water. Where in the real world would a student expect to record that temperature? For some reason teachers default to using ice and boiling water to calibrate sensors. If you are investigating cooling curves, YOU should safely get sensor readings at 100 &deg;C and PROVIDE THIS to learners.</p>
+      <p>Always remind learners that scientists work carefully and safely, no matter what they see in movies or TV!</p>
+
       <h3>How it relates to RIGEL and SMART</h3>
-      <p>RIGEL began as a Windows application built by repurposing game design software into a universal science instrument. RIGEL-WEB carries that whole idea into a single browser file. Its sister application, <a href="smart.html">SMART</a>, uses the browser audio subsystem for fast acoustic timing, while RIGEL-WEB focuses on many-channel sensor work through a microcontroller. Together they form a zero-cost, cross-platform laboratory instrument suite that uses hardware schools already own.</p>
+      <p><a href="rigel-games-electronics-link.html">RIGEL</a> began as a Windows application built by repurposing game design software into a universal science instrument. RIGEL-WEB carries that whole idea into a single browser file. Its sister application, <a href="smart.html">SMART</a>, uses the browser audio subsystem for fast acoustic timing, while RIGEL-WEB focuses on many-channel sensor work through a microcontroller. Together they form a zero-cost, cross-platform laboratory instrument suite that uses hardware schools already own.</p>
 
       <h3>Browser compatibility</h3>
       <p>The USB-serial connection uses the Web Serial API, currently supported in Chromium-based browsers such as Chrome and Edge. For the widest device reach, including Chromebooks and Safari-only iPad deployments, the sister tool SMART uses the broadly supported audio path instead.</p>
