@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="robots" content="noindex" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RIGEL — Science & Technology Interface</title>
@@ -1219,7 +1218,6 @@
     </style>
 </head>
 <body>
-<a href="rigel-web.html" style="position:fixed;left:8px;bottom:8px;z-index:99999;background:#151a2f;color:#fff;padding:6px 10px;border-radius:8px;font:600 13px system-ui,-apple-system,sans-serif;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.3);opacity:.92" aria-label="Back to Michael Fenton portfolio">&#8592; Back to portfolio</a>
 
 <!-- ═══ TOOLBAR ═══════════════════════════════════════════════════════════ -->
 <div id="toolbar">
@@ -1784,6 +1782,7 @@ let serialWriter     = null;
 let isConnected      = false;
 let isDemoMode       = true;
 let waitingForResp   = false;
+let lastSendTs       = 0;     // timestamp of last request packet (watchdog)
 let requestLoopId    = null;
 let sensorHeadingsDone = false;
 let linkAnnounced      = false;   // true once "Serial link successful…" has been spoken for this link
@@ -2252,7 +2251,7 @@ function processPacket(payload) {
         });
     });
 
-    // Evaluate control rules on every received packet regardless of active screen
+    // Control rules are screen-gated inside processControlRules()
     if (typeof processControlRules === 'function') processControlRules();
 }
 
@@ -2281,8 +2280,15 @@ async function startReadLoop() {
 }
 
 async function sendRequest() {
-    if (!serialWriter || waitingForResp) return;
+    if (!serialWriter) return;
+    if (waitingForResp) {
+        // Watchdog: if the microcontroller hasn't replied within 750ms,
+        // clear the flag and resend instead of stalling the link forever.
+        if (Date.now() - lastSendTs < 750) return;
+        waitingForResp = false;
+    }
     waitingForResp = true;
+    lastSendTs = Date.now();
     const outputBytes = globalOutputs.map(o => o.encoded);
     const packet = new Uint8Array([82, outputBytes.length, ...outputBytes, 10]);
     try {
@@ -2423,10 +2429,16 @@ async function discoverPorts() {
     }
 
     if (availablePorts.length === 0) {
-        portsEl.textContent = 'None';
+        // getPorts() only lists ports this page was PREVIOUSLY granted.
+        // On first run it is always empty even when COM ports exist, so the
+        // Connect button must stay enabled to let the user open the browser
+        // port picker (requestPort) and grant access once.
+        portsEl.textContent = 'None granted \u2014 click Connect';
         portsEl.className = 'diag-val warn';
         populatePortMenu([]);
         setDemoMode();
+        connectBtn.textContent = 'Connect: choose COM port\u2026';
+        connectBtn.disabled = false;
         return;
     }
 
@@ -2533,8 +2545,13 @@ function setupLiveBars(sensors) {
 }
 
 function updateLiveBars(sensors) {
-    if (!liveBarData.length) setupLiveBars(sensors);
     const count = Math.min(sensors.length, 2);
+    // Rebuild whenever the sensor set differs from what the bars were built
+    // with (e.g. demo bars showing Temperature/Humidity persisting after a
+    // real connection) so the names under each bar stay accurate.
+    const stale = liveBarData.length !== count ||
+        liveBarData.some((b, i) => sensors[i] && b.typeCode !== sensors[i].typeCode);
+    if (stale) setupLiveBars(sensors);
     for (let i = 0; i < count && i < liveBarData.length; i++) {
         const pct = Math.max(0, Math.min(100, sensors[i].value));
         liveBarData[i].fill.style.height = pct + '%';
@@ -2586,7 +2603,7 @@ function startSimulation() {
             else globalSensors[i].value = s.value;
         });
 
-        // Evaluate control rules on every tick regardless of active screen
+        // Control rules are screen-gated inside processControlRules()
         if (typeof processControlRules === 'function') processControlRules();
 
         // Feed science lab sensor windows
@@ -3503,6 +3520,11 @@ function renderIndRule(rule) {
 // ── Rule engine — evaluated every 250ms ─────────────────────────────────────
 
 function processControlRules() {
+    // Rules are evaluated ONLY while the Industrial M&C screen is active.
+    // (Previously they also ran from processPacket() and the demo simulation
+    // loop on every tick, so rules kept firing in the background after
+    // returning to the main menu or entering another module.)
+    if (currentScreen !== 'industrial') return;
     const HYST = 4;                       // dead-band to stop chatter at the threshold
     let anyChange = false;
     const sensors = imcSensors(), outs = imcOutputs();
