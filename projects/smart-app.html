@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="robots" content="noindex" />
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SMART — Sound-to-Motion Analysis &amp; Recording Tool</title>
@@ -219,6 +218,12 @@
     .scope-freeze:hover, .scope-scroll:hover  { background: #1e3059; }
     .scope-freeze.frozen { background: var(--amber); color: #0d1422; border-color: #f59e0b; }
     .scope-scroll.frozen { background: var(--accent); color: #fff; border-color: #2563eb; }
+    .scope-burst { padding: 3px 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
+        background: rgba(30,48,89,0.88); color: #cbd5e1; border: 1px solid #2a3a5a;
+        border-radius: 5px; cursor: pointer; transition: background 0.12s; }
+    .scope-burst:hover { background: #1e3059; }
+    .scope-burst.armed { background: #7f1d1d; color: #fca5a5; border-color: #ef4444; animation: burst-pulse 1s ease-in-out infinite; }
+    @keyframes burst-pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.65; } }
     .meter-row { display: flex; gap: 10px; align-items: stretch; height: 64px; }
     .meter-col { display: flex; flex-direction: column; align-items: center; gap: 3px; }
     .meter-track {
@@ -366,7 +371,6 @@
 </style>
 </head>
 <body>
-<a href="smart.html" style="position:fixed;left:8px;bottom:8px;z-index:99999;background:#151a2f;color:#fff;padding:6px 10px;border-radius:8px;font:600 13px system-ui,-apple-system,sans-serif;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.3);opacity:.92" aria-label="Back to Michael Fenton portfolio">&#8592; Back to portfolio</a>
 
 <!-- ═══ TOOLBAR ═══════════════════════════════════════════════════════════ -->
 <div id="toolbar">
@@ -466,6 +470,7 @@
             <canvas id="cal-scope"></canvas>
             <div class="scope-tag" id="cal-scope-tag">SCOPE</div>
             <div class="scope-btns">
+                <button class="scope-burst" id="cal-burst" onclick="toggleCalBurst()">⊙ Capture Burst</button>
                 <button class="scope-scroll" id="cal-scroll" onclick="toggleScroll()">⇤ Scroll</button>
                 <button class="scope-freeze" id="cal-freeze" onclick="toggleFreeze()">⏸ Freeze</button>
             </div>
@@ -904,6 +909,10 @@ let scopeHead = [0,0];
 /* Event list — the common intermediate representation feeding all physics. */
 let events = [];          // {idx, ch, role, edge, sample, time, value}
 let recording = false;
+let linCaptureLocked = false;   // true after a successful drop; blocks new edges until Clear
+let linDropTimer     = null;    // silence-timer: fires linDropComplete 800 ms after last edge
+let calBurstArmed    = false;   // true when C&C is waiting to capture the next burst
+let calBurstTimer    = null;    // silence-timer: fires calBurstComplete 800 ms after last edge
 
 /* Channel → role docking (saved per experiment). */
 let roles = { A:null, B:null };   // role -> channel index
@@ -949,6 +958,7 @@ function rebuildDetectors(){
 
 /* Consume one detected edge (from any source) */
 function onEdge(ch, edge, sample, value){
+    if(linCaptureLocked) return;            // drop complete — ignore noise until Clear
     // Determine logical role for this channel (if docked)
     let role = null;
     if(roles.A === ch) role = 'A';
@@ -958,7 +968,68 @@ function onEdge(ch, edge, sample, value){
     const prev = events.length ? events[events.length-1] : null;
     const dt   = prev ? (time - prev.time) : null;
     events.push({ idx:events.length+1, ch, role, edge, sample, time, value, dt });
+    // Linear: (re)start silence timer; 800 ms of quiet after last edge fires linDropComplete
+    if(currentScreen === 'linear' && !useSim){
+        if(linDropTimer) clearTimeout(linDropTimer);
+        linDropTimer = setTimeout(linDropComplete, 800);
+    }
+    // C&C: if Capture Burst is armed, (re)start the burst silence timer
+    if(currentScreen === 'calibrate' && !useSim && calBurstArmed){
+        if(calBurstTimer) clearTimeout(calBurstTimer);
+        calBurstTimer = setTimeout(calBurstComplete, 800);
+    }
     onEventsChanged();
+}
+
+/* Called 800 ms after the last edge on the linear screen (real sensor only).
+   Locks edge detection and freezes the scope so the user can inspect the waveform. */
+function linDropComplete(){
+    linDropTimer = null;
+    if(currentScreen !== 'linear') return;
+    const r = computeG();
+    if(r.slope === null) return;            // not enough data yet — stay live
+    linCaptureLocked = true;
+    frozenSnap = snapshot();                // capture true waveform from the ring buffer
+    scopeFrozen   = true;
+    scopeScrolling = false;
+    panPos = MAX_PAN;
+    updateScopeBtns();
+}
+
+/* C&C Capture Next Burst — one-shot armed capture for Capture & Calibrate.
+   Arms on button press; 800 ms of silence after a burst triggers auto-freeze. */
+function toggleCalBurst(){
+    if(calBurstArmed){
+        calBurstArmed = false;
+        if(calBurstTimer){ clearTimeout(calBurstTimer); calBurstTimer = null; }
+    } else {
+        calBurstArmed = true;
+    }
+    updateCalBurstBtn();
+}
+function updateCalBurstBtn(){
+    const b = document.getElementById('cal-burst'); if(!b) return;
+    b.classList.toggle('armed', calBurstArmed);
+    b.textContent = calBurstArmed ? '⊙ Armed…' : '⊙ Capture Burst';
+    const tag = document.getElementById('cal-scope-tag'); if(!tag) return;
+    tag.textContent = calBurstArmed ? '● ARMED — waiting for burst' : 'SCOPE';
+    tag.style.color = calBurstArmed ? '#ef4444' : '';
+}
+function calBurstComplete(){
+    calBurstTimer = null;
+    calBurstArmed = false;
+    if(currentScreen !== 'calibrate') return;
+    frozenSnap    = snapshot();
+    scopeFrozen   = true;
+    scopeScrolling = false;
+    panPos = MAX_PAN;
+    updateScopeBtns();
+    updateCalBurstBtn();
+}
+function resetCalBurst(){
+    if(calBurstTimer){ clearTimeout(calBurstTimer); calBurstTimer = null; }
+    calBurstArmed = false;
+    updateCalBurstBtn();
 }
 
 /* Feed a block of samples into scope + (fallback/sim) detector.
@@ -1125,6 +1196,7 @@ async function stopAudio(){
     try { if(mediaStream){ mediaStream.getTracks().forEach(t=>t.stop()); mediaStream=null; } } catch(e){}
     try { if(audioCtx){ await audioCtx.close(); audioCtx=null; } } catch(e){}
     analysers = [];
+    resetCalBurst();            // disarm burst capture if mic is stopped
     audioRunning = false;
     setStatus('demo', 'Audio Idle');
     refreshDiag();
@@ -1326,6 +1398,8 @@ function updateScopeBtns(){
     });
 }
 function toggleFreeze(){
+    // If Capture Burst is armed, manual Freeze takes precedence and disarms it
+    if(calBurstArmed) resetCalBurst();
     scopeFrozen = !scopeFrozen;
     scopeScrolling = false;
     frozenSnap = scopeFrozen ? snapshot() : null;
@@ -1456,7 +1530,14 @@ function onEventsChanged(){
     if(currentScreen==='twoevent')   renderTwoEvent();
     const c = document.getElementById('cal-count'); if(c) c.textContent = events.length + ' events captured';
 }
-function clearEvents(){ events=[]; rebuildDetectors(); onEventsChanged(); }
+function clearEvents(){
+    if(linDropTimer){ clearTimeout(linDropTimer); linDropTimer = null; }
+    linCaptureLocked = false;
+    if(currentScreen === 'linear') resetFreeze();   // return waveform to live view
+    resetCalBurst();                                // disarm and restore scope tag
+    if(currentScreen === 'calibrate') resetFreeze();
+    events = []; rebuildDetectors(); onEventsChanged();
+}
 
 function renderCalTable(){
     const tb = document.querySelector('#cal-table tbody'); if(!tb) return;
@@ -2261,9 +2342,15 @@ function showScreen(name){
 let lastExperiment = null;
 function navTo(name){
     if(!audioRunning){ alert('Start the audio engine (or simulator) first — see the main menu.'); return; }
+    // Leaving calibrate: disarm any pending burst capture
+    if(currentScreen === 'calibrate') resetCalBurst();
     if(name!=='resonance') setTone(false);
     // pick the simulator profile + the detector edge type appropriate to the experiment
-    if(name==='linear'){ simProfile='picket'; detCfg[0].edge=detCfg[1].edge='rising'; }
+    if(name==='linear'){
+        simProfile='picket'; detCfg[0].edge=detCfg[1].edge='rising';
+        if(linDropTimer){ clearTimeout(linDropTimer); linDropTimer=null; }
+        linCaptureLocked = false;           // always start fresh when entering linear
+    }
     else if(name==='periodic'){ simProfile='pendulum'; detCfg[0].edge=detCfg[1].edge='both'; }
     else if(name==='rotational'){ simProfile='rotation'; detCfg[0].edge=detCfg[1].edge='rising'; }
     else if(name==='twoevent'){ teEnter(); }
