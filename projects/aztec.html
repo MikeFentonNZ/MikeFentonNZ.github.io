@@ -1,0 +1,1717 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AZTEC — Tomb of Quetzalcoatl (Homage)</title>
+<style>
+  :root{ --bg:#0b0a08; --frame:#3a2c16; --frame2:#5b4521; --ink:#e9d8a6; --accent:#d9a441; }
+  html,body{ margin:0; height:100%; background:#000; color:var(--ink);
+    font-family:"Courier New",monospace; overflow:hidden; display:flex; flex-direction:column; }
+  .appbar{ flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:#16110a; padding:6px 16px; font-size:12px; letter-spacing:1px; }
+  header.appbar{ border-bottom:2px solid #5b4521; color:#caa24a; }
+  header.appbar .ttl{ color:#d9a441; font-weight:700; letter-spacing:3px; }
+  header.appbar .ver{ color:#8a7340; font-size:11px; letter-spacing:1px; }
+  #main{ flex:1 1 auto; display:flex; min-height:0; }
+  aside.credit-box{ flex:0 0 auto; width:210px; background:#16110a; border-right:2px solid #5b4521;
+    color:#b59a6a; font-size:11px; line-height:1.6; padding:16px 14px; overflow:auto;
+    display:flex; flex-direction:column; gap:9px; }
+  aside.credit-box .about-head{ color:#d9a441; font-weight:700; letter-spacing:2px; }
+  aside.credit-box b{ color:#e9d8a6; }
+  aside.credit-box a{ color:#caa24a; text-decoration:underline; }
+  aside.credit-box .tag{ font-style:italic; opacity:.9; }
+  #wrap{ flex:1 1 auto; min-width:0; display:flex; align-items:center; justify-content:center; min-height:0; }
+  canvas{ image-rendering:pixelated; image-rendering:crisp-edges;
+    background:#000; box-shadow:0 0 0 2px #000, 0 0 40px rgba(217,164,65,.15); max-width:100%; max-height:100%; }
+  #setup{ position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+    background:rgba(0,0,0,.55); z-index:10; font-family:"Courier New",monospace; }
+  #setup .panel{ background:#16110a; border:2px solid #5b4521; padding:24px 30px; width:460px;
+    color:#e9d8a6; box-shadow:0 0 40px rgba(217,164,65,.2); }
+  #setup h2{ margin:0 0 16px; color:#d9a441; letter-spacing:3px; font-size:20px; text-align:center; }
+  #setup .srow{ margin:14px 0; }
+  #setup .lbl{ display:block; color:#caa24a; font-size:12px; letter-spacing:2px; margin-bottom:6px; }
+  #setup label{ display:block; padding:3px 0; cursor:pointer; font-size:14px; }
+  #setup .shint{ color:#7a6a44; font-size:11px; margin-top:6px; }
+  #setup .sstart{ margin-top:18px; width:100%; padding:12px; background:#3a2c16; color:#ffd36e;
+    border:1px solid #caa24a; font-family:inherit; font-size:15px; letter-spacing:2px; cursor:pointer; }
+  #setup .sstart:hover{ background:#4a3a20; }
+  #setup input[type=file]{ color:#e9d8a6; font-size:12px; }
+</style>
+</head>
+<body>
+<header class="appbar">
+  <span class="ttl">AZTEC</span>
+  <span class="ver">Tomb of Quetzalcoatl &middot; v1.0 web homage</span>
+</header>
+<div id="main">
+  <aside class="credit-box" id="about-box">
+    <div class="about-head">ABOUT</div>
+    <div><b>AZTEC</b> &middot; Tomb of Quetzalcoatl</div>
+    <div class="tag">Original-art homage to the 1982 Datasoft game. Educational, non-commercial use.</div>
+    <div>Licence: <a id="about-licence" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a></div>
+    <div id="about-credit">Author: Michael Fenton &middot; &copy; 2026</div>
+    <div>Portfolio: <a id="about-portfolio" href="https://mikefentonnz.github.io/" target="_blank" rel="noopener">mikefentonnz.github.io</a></div>
+    <div>All bundled music &amp; lyrics &copy; Michael Fenton.</div>
+    <div>Not affiliated with or endorsed by Datasoft.</div>
+  </aside>
+  <div id="wrap"><canvas id="game" width="960" height="600"></canvas></div>
+</div>
+<div id="setup">
+  <div class="panel">
+    <h2>EXPEDITION SETUP</h2>
+    <div class="srow"><span class="lbl">DIFFICULTY</span>
+      <label><input type="radio" name="aztec-diff" value="1" checked> Easy &middot; 6 levels</label>
+      <label><input type="radio" name="aztec-diff" value="2"> Normal &middot; 7 levels</label>
+      <label><input type="radio" name="aztec-diff" value="3"> Hard &middot; 8 levels</label>
+    </div>
+    <div class="srow"><span class="lbl">MUSIC</span>
+      <label><input type="checkbox" id="aztec-bundled" checked onchange="document.getElementById('aztec-filewrap').style.display=this.checked?'none':'block'"> Use bundled tracks</label>
+      <div id="aztec-filewrap" style="display:none">
+        <input type="file" id="aztec-files" accept="audio/*" multiple>
+        <div class="shint">Pick your level tracks. Filenames starting 1- &hellip; 8- map to those levels.</div>
+      </div>
+    </div>
+    <button class="sstart" onclick="aztecStart()">BEGIN DESCENT &#9656;</button>
+    <div class="shint">Esc to go back &middot; M toggles music in-game</div>
+  </div>
+</div>
+<script>
+/* ===== aztec-audio.js (inlined for single-file release) =====
+   Edit BUNDLED_TITLE / BUNDLED_LOOP / BUNDLED_LEVELS below to point at
+   your mp3s in this folder. Missing files simply play silent. ===== */
+/* ====================================================================
+   AZTEC - music system (companion to Aztec.html)
+   - Title theme on the title/setup screen.
+   - One looping track per level, crossfaded on transitions.
+   - "Use bundled tracks": uses the files named below in this folder.
+     Otherwise the player picks files; a leading number in the filename
+     (e.g. "1-explorers-warning.mp3") maps it to that level.
+   - M key toggles mute (handled in the game).
+   - Robust against browser autoplay policy: if a play() is blocked, the
+     desired track is retried on the next key press or click (a real user
+     gesture), so music starts reliably the moment you interact.
+   - Missing / unreadable files simply play silent - never throw.
+   ==================================================================== */
+(function(){
+  "use strict";
+
+  /* ---- EDIT THESE to match the mp3s in your game folder ---- */
+  const BUNDLED_TITLE  = "title-theme_loop.mp3";     // title-screen theme
+  const BUNDLED_LOOP   = "1-low_loop.mp3";  // fallback level loop
+  // Optional per-level bundled tracks (index 0 = level 1). Empty = loop
+  // BUNDLED_LOOP on every level.
+  const BUNDLED_LEVELS = ["1-low_loop.mp3","2-explorers_warning-v2.mp3","3-explorers_warning-v3.mp3","4-explorers_warning-v4.mp3","5-explorers_warning-v5.mp3","6-explorers_warning-v6.mp3","7-exciting_loop.mp3","8-dramatic_loop.mp3"]; 
+  // e.g. ["1-explorers-warning.mp3","2-deeper.mp3", ...]
+
+  const VOL = 0.6;
+  let titleAudio = null;
+  let levelAudio = {};      // 0-based level index -> HTMLAudioElement
+  let current = null;       // element we last switched to (or null)
+  let desired = null;       // element we WANT audible (drives gesture-retry)
+  let muted = false;
+  let lastError = "";
+
+  function log(){ try{ console.log.apply(console, ["[AztecMusic]"].concat([].slice.call(arguments))); }catch(e){} }
+
+  function makeAudio(src){
+    if (!src) return null;
+    try {
+      const a = new Audio(src);
+      a.loop = true; a.preload = "auto"; a.volume = 0;
+      a.addEventListener("error", function(){
+        lastError = "could not load " + (a.currentSrc || src);
+        log("LOAD ERROR:", a.currentSrc || src, "- check the filename/path");
+      });
+      return a;
+    } catch(e){ lastError = String(e); return null; }
+  }
+
+  function fade(audio, target, ms){
+    if (!audio) return;
+    if (audio._ft) clearInterval(audio._ft);
+    const steps = Math.max(1, Math.floor(ms/40));
+    const from = audio.volume, d = (target - from)/steps;
+    let i = 0;
+    audio._ft = setInterval(function(){
+      i++; audio.volume = Math.max(0, Math.min(1, from + d*i));
+      if (i >= steps){ clearInterval(audio._ft); audio._ft=null; if (target===0){ try{ audio.pause(); }catch(e){} } }
+    }, 40);
+  }
+
+  // Try to start the desired track. Safe to call repeatedly and from gestures.
+  function ensurePlaying(){
+    if (!desired || muted) return;
+    if (desired.paused){
+      const p = desired.play();
+      if (p && p.then) p.then(function(){ log("playing", desired.currentSrc); }).catch(function(err){
+        lastError = "autoplay blocked (" + (err && err.name || err) + ") - will retry on next input";
+        log(lastError);
+      });
+    }
+  }
+
+  function switchTo(audio){
+    desired = audio;
+    if (current === audio){ ensurePlaying(); return; }
+    const prev = current;
+    current = audio;
+    if (prev) fade(prev, 0, 450);
+    if (audio){ audio.volume = 0; ensurePlaying(); fade(audio, VOL, 550); }
+  }
+
+  // Retry playback on any real user gesture (covers autoplay-blocked starts).
+  function onGesture(){ ensurePlaying(); }
+  window.addEventListener("keydown", onGesture, true);
+  window.addEventListener("pointerdown", onGesture, true);
+  window.addEventListener("touchstart", onGesture, true);
+
+  window.AztecMusic = {
+    playTitle: function(){
+      if (!titleAudio) titleAudio = makeAudio(BUNDLED_TITLE);
+      switchTo(titleAudio);
+    },
+    loadBundled: function(levels){
+      levelAudio = {};
+      for (let i=0;i<levels;i++) levelAudio[i] = makeAudio(BUNDLED_LEVELS[i] || BUNDLED_LOOP);
+      log("bundled tracks loaded for", levels, "levels");
+    },
+    loadFiles: function(fileList, levels){
+      levelAudio = {};
+      const files = Array.prototype.slice.call(fileList);
+      let mapped = 0;
+      for (const f of files){
+        const m = f.name.match(/^\s*(\d+)/);   // leading number -> level (1-based)
+        if (!m) continue;
+        const lvl = parseInt(m[1],10) - 1;
+        if (lvl >= 0 && lvl < levels){ levelAudio[lvl] = makeAudio(URL.createObjectURL(f)); mapped++; }
+      }
+      log("picked files mapped to", mapped, "levels");
+    },
+    playLevel: function(idx){ switchTo(levelAudio[idx] || null); },
+    stopAll: function(){ if (current) fade(current, 0, 300); current = desired = null; },
+    toggleMute: function(){
+      muted = !muted;
+      if (muted){ if (current){ try{ current.pause(); }catch(e){} } }
+      else { ensurePlaying(); if (current) fade(current, VOL, 400); }
+      return muted;
+    },
+    isMuted: function(){ return muted; },
+    // for an on-screen indicator / debugging
+    status: function(){
+      return { muted: muted,
+               hasTrack: !!desired,
+               playing: !!(desired && !desired.paused && !muted),
+               error: lastError };
+    }
+  };
+  log("ready");
+})();
+</script>
+<script>
+"use strict";
+/* =====================================================================
+   AZTEC — web homage.  Milestone 1: playable vertical slice.
+   Single-file HTML5 canvas. Original art, synthesized audio.
+   Adapted (not literally ported) from the GameMaker 6 design doc:
+   3-floor view, discrete vertical transitions, FSM player & enemies,
+   dynamite-as-tool, risk/reward, find-the-idol-and-escape.
+   ===================================================================== */
+
+/* ----------------------------- Geometry ---------------------------- */
+const SCREEN_W = 960, SCREEN_H = 600;
+const MARGIN = 24, HUD_H = 84;
+const PLAY_L = MARGIN, PLAY_R = SCREEN_W - MARGIN;
+const PLAY_TOP = MARGIN, PLAY_BOTTOM = SCREEN_H - HUD_H - MARGIN;
+const PLAY_W = PLAY_R - PLAY_L;          // 912
+const PLAY_H = PLAY_BOTTOM - PLAY_TOP;   // 468
+const LEVEL_H = PLAY_H;                   // one band == one viewport tall
+const ROOM_W = 3000;                      // world width of a band
+const FLOOR_Y = [120, 280, 430];          // floor surface, relative to band top
+const FLOOR_COUNT = 3;
+const TILE = 40;                          // floor segment width
+const FLOOR_THICK = 14;
+let LEVEL_COUNT = 6;                       // temple depth (set by difficulty)
+let DIFFICULTY = 1;                        // 1 Easy, 2 Normal, 3 Hard
+const DIFF = {
+  1: { name:"EASY",   depth:6, hpMax:120, enemyBase:2, enemyDepth:0.5, decoy:[0,1], trap:[0,1], emptyChest:0.42, dynamite:5 },
+  2: { name:"NORMAL", depth:7, hpMax:100, enemyBase:2, enemyDepth:1.0, decoy:[1,2], trap:[1,2], emptyChest:0.60, dynamite:4 },
+  3: { name:"HARD",   depth:8, hpMax:80,  enemyBase:3, enemyDepth:1.0, decoy:[2,3], trap:[1,3], emptyChest:0.74, dynamite:3 },
+};
+function applyDifficulty(d){ DIFFICULTY=d; LEVEL_COUNT=DIFF[d].depth; inv.hpMax=DIFF[d].hpMax; }
+
+/* ----------------------------- Physics ----------------------------- */
+const WALK = 2.2, RUN = 4.0, CRAWL = 1.3, FASTCRAWL = 2.3;
+const JUMP_V = -7.6, GRAV = 0.42, MAXFALL = 11;
+const PLAYER_W = 26, PLAYER_H = 50, CRAWL_H = 26;
+
+/* ----------------------------- Helpers ----------------------------- */
+const rnd = (a, b) => a + Math.random() * (b - a);
+const ri  = (a, b) => Math.floor(rnd(a, b + 1));
+const clamp = (v, lo, hi) => v < lo ? lo : v > hi ? hi : v;
+const aabb = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+function floorWorldY(band, idx){ return band * LEVEL_H + FLOOR_Y[idx]; }
+
+/* ----------------------------- Canvas ------------------------------ */
+const cv = document.getElementById("game");
+const ctx = cv.getContext("2d");
+ctx.imageSmoothingEnabled = false;
+
+/* ---- offscreen layer for dynamic lighting ---- */
+const lightCv = document.createElement("canvas"); lightCv.width = PLAY_W; lightCv.height = PLAY_H;
+const lightCtx = lightCv.getContext("2d");
+function bandDarkness(b){
+  if (godMode) return 0;                            // god mode sees all
+  if (b <= 1) return 0;                             // levels 1-2 fully lit (ease-in)
+  return Math.min(0.82, 0.22 + (b - 1) * 0.13);     // ramps darker with depth
+}
+
+/* --------------------- Title art (temple SVG) ---------------------- */
+// Phosphor-green CRT Aztec temple, used as the title-screen centrepiece.
+const TEMPLE_SVG = `<svg width="800" height="520" viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <linearGradient id="sky" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" stop-color="#001100"/><stop offset="100%" stop-color="#000000"/>
+  </linearGradient>
+  <pattern id="scan" patternUnits="userSpaceOnUse" width="800" height="4">
+    <rect width="800" height="2" fill="#00ff41" opacity="0.13"/>
+  </pattern>
+</defs>
+<rect width="800" height="520" fill="url(#sky)"/>
+<path d="M0 380 Q120 280 280 360 Q420 240 580 340 Q720 260 800 370 L800 520 L0 520 Z" fill="#002200" opacity="0.9"/>
+<rect x="80" y="340" width="640" height="60" fill="#00aa44" stroke="#003300" stroke-width="14"/>
+<polygon points="120,320 680,320 640,260 160,260" fill="#00bb55" stroke="#003300" stroke-width="12"/>
+<polygon points="170,250 630,250 590,190 210,190" fill="#00cc66" stroke="#003300" stroke-width="12"/>
+<rect x="280" y="110" width="240" height="70" fill="#006622" stroke="#003300" stroke-width="12"/>
+<polygon points="260,110 540,110 510,70 290,70" fill="#007733" stroke="#003300" stroke-width="10"/>
+<rect x="370" y="260" width="70" height="110" fill="#003322" stroke="#00bb55" stroke-width="18"/>
+<rect x="385" y="270" width="40" height="92" fill="#000800"/>
+<rect x="320" y="240" width="28" height="140" fill="#00aa44" stroke="#00ee88" stroke-width="6"/>
+<rect x="460" y="240" width="28" height="140" fill="#00aa44" stroke="#00ee88" stroke-width="6"/>
+<path d="M332 280 Q315 310 335 335" fill="none" stroke="#00ff99" stroke-width="9" stroke-linecap="round"/>
+<circle cx="325" cy="265" r="7" fill="#00ff99"/>
+<path d="M478 280 Q495 310 475 335" fill="none" stroke="#00ff99" stroke-width="9" stroke-linecap="round"/>
+<circle cx="485" cy="265" r="7" fill="#00ff99"/>
+<rect x="310" y="410" width="190" height="22" fill="#00aa44" stroke="#003300" stroke-width="6" rx="2"/>
+<rect x="335" y="390" width="140" height="22" fill="#00aa44" stroke="#003300" stroke-width="6" rx="2"/>
+<rect x="360" y="370" width="90" height="22" fill="#00aa44" stroke="#003300" stroke-width="6" rx="2"/>
+<rect x="310" y="145" width="22" height="28" fill="#002211" stroke="#00ffaa" stroke-width="4"/>
+<rect x="350" y="145" width="22" height="28" fill="#002211" stroke="#00ffaa" stroke-width="4"/>
+<rect x="430" y="145" width="22" height="28" fill="#002211" stroke="#00ffaa" stroke-width="4"/>
+<rect x="470" y="145" width="22" height="28" fill="#002211" stroke="#00ffaa" stroke-width="4"/>
+<rect width="800" height="520" fill="url(#scan)"/>
+</svg>`;
+const templeImg = new Image();
+let templeReady = false;
+templeImg.onload = () => { templeReady = true; };
+templeImg.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(TEMPLE_SVG);
+
+/* ----------------------------- Input ------------------------------- */
+const keys = {}, pressed = {};
+const KEYMAP = { ArrowLeft:"left", ArrowRight:"right", ArrowUp:"up", ArrowDown:"down",
+  ShiftLeft:"run", ShiftRight:"run", KeyZ:"jump", KeyO:"open", KeyD:"dyn",
+  KeyF:"fight", KeyT:"torch", KeyL:"flare", KeyM:"music", KeyG:"god", Space:"attack", Escape:"pause", Enter:"start" };
+addEventListener("keydown", e => {
+  const k = KEYMAP[e.code]; if (!k) return;
+  if (["left","right","up","down","jump","attack","pause","start"].includes(k)) e.preventDefault();
+  if (!keys[k]) pressed[k] = true;
+  keys[k] = true;
+});
+addEventListener("keyup", e => { const k = KEYMAP[e.code]; if (k) keys[k] = false; });
+function consume(k){ if (pressed[k]){ pressed[k] = false; return true; } return false; }
+
+/* ----------------------------- Audio ------------------------------- */
+const AudioFX = (() => {
+  let ac = null;
+  function ensure(){ if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)(); return ac; }
+  function tone(freq, dur, type = "square", vol = 0.18, slideTo = null){
+    const a = ensure(); if (a.state === "suspended") a.resume();
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, a.currentTime);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, a.currentTime + dur);
+    g.gain.setValueAtTime(vol, a.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + dur);
+    o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime + dur);
+  }
+  function noise(dur, vol = 0.25){
+    const a = ensure(); if (a.state === "suspended") a.resume();
+    const n = a.sampleRate * dur, buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+    const s = a.createBufferSource(), g = a.createGain();
+    s.buffer = buf; g.gain.value = vol; s.connect(g); g.connect(a.destination); s.start();
+  }
+  return {
+    jump:()  => tone(240, .14, "square", .15, 420),
+    chirp:() => tone(1300, .05, "square", .06, 1700),   // enemy first-sighting blip
+    machete:()=> tone(300, .09, "sawtooth", .14, 140),
+    gun:()   => { tone(900, .06, "square", .18, 200); noise(.08, .18); },
+    pickup:()=> { tone(660, .08, "square", .15); setTimeout(() => tone(990, .1, "square", .15), 70); },
+    hit:()   => { tone(180, .16, "sawtooth", .2, 80); noise(.06, .12); },
+    boom:()  => { noise(.4, .35); tone(90, .35, "sawtooth", .22, 40); },
+    step:()  => tone(120, .04, "triangle", .05),
+    idol:()  => { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.18,"square",.16),i*120)); },
+    die:()   => { [330,260,200,140].forEach((f,i)=>setTimeout(()=>tone(f,.22,"sawtooth",.18),i*150)); },
+    win:()   => { [523,659,784,1047,1319].forEach((f,i)=>setTimeout(()=>tone(f,.22,"square",.16),i*150)); },
+    resume:()=> ensure(),
+  };
+})();
+
+/* ----------------------------- World ------------------------------- */
+// Floor segments are individual destructible tiles → enables dynamite holes.
+let segs = [];        // {band, idx, x, y, w, alive}
+let walls = [];       // {x,y,w,h}  world rects (solid)
+let stairs = [];      // {band, x, hi, lo}  hi<lo floor indices
+let connectors = [];  // {band, x, floor, up, valid, destBand, destFloor}
+let chests = [];      // {band, x, floor, opened, idol}
+let piles = [];       // {band, x, floor, stage, gone}
+let torches = [];     // {band, x, floor}
+let exitZone = null;  // {band, x, floor}
+let enemies = [], bullets = [], dynamites = [], grenades = [], explosions = [], particles = [], flares = [];
+
+function addFloorRow(band, idx, x0, x1, gaps){
+  // gaps: array of [gx0,gx1] world ranges to leave empty
+  const y = floorWorldY(band, idx);
+  for (let x = x0; x < x1; x += TILE){
+    let skip = false;
+    for (const g of gaps) if (x + TILE > g[0] && x < g[1]) { skip = true; break; }
+    if (!skip) segs.push({ band, idx, x, y, w: TILE, alive: true });
+  }
+}
+
+/* ====================================================================
+   PROCEDURAL GENERATION (path-first, verified solvable)
+   Each band gets 3 floors with small jumpable (1-tile) gaps, a stair
+   chain connecting all floors, and a real down/up connector pair on the
+   critical path from entrance (band 0) to the idol (deepest band).
+   Decoys, containers, traps and depth-scaled enemies fill the rest.
+   ==================================================================== */
+let trapTriggers = [];
+const trap = { active:false, timer:0, max:0, wallL:null, wallR:null, band:0 };
+let godMode = false;   // Shift+G test mode: invincible, full kit, path shown
+
+function clearX(band, floor, x, margin){
+  return !!(segAt(band,floor,x) && segAt(band,floor,x-margin) && segAt(band,floor,x+margin));
+}
+function pickClearX(band, floor, avoid, minX, maxX){
+  for (let t=0; t<50; t++){
+    const x = ri(minX, maxX);
+    if (!clearX(band, floor, x, 26)) continue;
+    let ok = true;
+    for (const ax of avoid) if (Math.abs(ax - x) < 110){ ok = false; break; }
+    if (ok) return x;
+  }
+  return -1;
+}
+function genGaps(count){
+  const g = [];
+  for (let i=0;i<count;i++){ const gx = ri(320, ROOM_W-420); g.push([gx, gx+TILE]); } // 1-tile, jumpable
+  return g;
+}
+function placeStair(b, hi, lo, avoid){
+  for (let t=0;t<50;t++){
+    const x = ri(260, ROOM_W-260);
+    if (clearX(b,hi,x,26) && clearX(b,lo,x,26)){
+      let ok=true; for (const ax of avoid) if (Math.abs(ax-x)<90){ ok=false; break; }
+      if (ok){ stairs.push({ band:b, x, hi, lo }); avoid.push(x); return x; }
+    }
+  }
+  return -1;
+}
+function pickEnemyType(b, f){
+  const pool = ["snake","snake","spider","hole"];
+  if (b>=1) pool.push("spider","hole");
+  if (b>=2) pool.push("warrior","panther");
+  if (b>=3) pool.push("panther","warrior","priest");
+  if (b>=4) pool.push("alligator","priest","warrior");
+  if (f===2 && b>=2) pool.push("alligator");
+  return pool[ri(0, pool.length-1)];
+}
+function verifyPath(idolBand){
+  for (let b=0;b<idolBand;b++){
+    if (!connectors.some(c=>c.band===b   && !c.up && c.valid)) return false;
+    if (!connectors.some(c=>c.band===b+1 &&  c.up && c.valid && c.destBand===b)) return false;
+  }
+  for (let b=0;b<=idolBand;b++){
+    if (!stairs.some(s=>s.band===b && s.hi===0 && s.lo===1)) return false;
+    if (!stairs.some(s=>s.band===b && s.hi===1 && s.lo===2)) return false;
+  }
+  return chests.some(c=>c.idol);
+}
+
+function generateTemple(){
+  let attempt=0, ok=false;
+  do {
+    attempt++;
+    segs=[]; walls=[]; stairs=[]; connectors=[]; chests=[]; piles=[]; torches=[];
+    enemies=[]; bullets=[]; dynamites=[]; grenades=[]; explosions=[]; particles=[]; trapTriggers=[]; flares=[];
+    trap.active=false; trap.wallL=trap.wallR=null;
+
+    const idolBand = LEVEL_COUNT - 1;
+    const dc = DIFF[DIFFICULTY];
+
+    // floors + boundary walls
+    for (let b=0;b<LEVEL_COUNT;b++){
+      addFloorRow(b,0,0,ROOM_W, genGaps(b>0?ri(0,2):ri(0,1)));
+      addFloorRow(b,1,0,ROOM_W, genGaps(ri(1,2)));
+      addFloorRow(b,2,0,ROOM_W, genGaps(b===idolBand?0:ri(0,1)));
+      walls.push({ x:-20,    y:b*LEVEL_H, w:20, h:LEVEL_H });
+      walls.push({ x:ROOM_W, y:b*LEVEL_H, w:20, h:LEVEL_H });
+    }
+
+    const avoid = Array.from({length:LEVEL_COUNT}, ()=>[]);
+
+    // ---- critical path: real connector pairs entrance -> idol ----
+    let pathOK = true;
+    for (let b=0;b<idolBand;b++){
+      const xDown = pickClearX(b,   2, avoid[b],   500, ROOM_W-300);
+      const xUp   = pickClearX(b+1, 0, avoid[b+1], 200, ROOM_W-300);
+      if (xDown<0 || xUp<0){ pathOK=false; break; }
+      connectors.push({ band:b,   x:xDown, floor:2, up:false, valid:true, destBand:b+1, destFloor:0 });
+      connectors.push({ band:b+1, x:xUp,   floor:0, up:true,  valid:true, destBand:b,   destFloor:2 });
+      avoid[b].push(xDown); avoid[b+1].push(xUp);
+    }
+    if (!pathOK) continue;
+
+    // ---- stair chains in every band ----
+    for (let b=0;b<LEVEL_COUNT;b++){
+      if (placeStair(b,0,1,avoid[b])<0){ pathOK=false; break; }
+      if (placeStair(b,1,2,avoid[b])<0){ pathOK=false; break; }
+      if (Math.random()<0.6){ const lo=ri(0,1); placeStair(b,lo,lo+1,avoid[b]); }
+    }
+    if (!pathOK) continue;
+
+    exitZone = { band:0, x:70, floor:0 };
+
+    // ---- the idol ----
+    let idolFloor = ri(0,2);
+    let ix = pickClearX(idolBand, idolFloor, avoid[idolBand], 400, ROOM_W-200);
+    if (ix<0){ idolFloor=2; ix = pickClearX(idolBand,2,avoid[idolBand],400,ROOM_W-200); }
+    if (ix<0) continue;
+    chests.push({ band:idolBand, x:ix, floor:idolFloor, opened:false, idol:true });
+    avoid[idolBand].push(ix);
+
+    // ---- fill each band ----
+    for (let b=0;b<LEVEL_COUNT;b++){
+      for (let i=0;i<ri(1,2);i++){ const f=ri(0,2), x=pickClearX(b,f,avoid[b],300,ROOM_W-200); if(x>0){ chests.push({band:b,x,floor:f,opened:false,idol:false}); avoid[b].push(x);} }
+      for (let i=0;i<ri(2,3);i++){ const f=ri(0,2), x=pickClearX(b,f,avoid[b],300,ROOM_W-200); if(x>0){ piles.push({band:b,x,floor:f,stage:0,gone:false}); avoid[b].push(x);} }
+      if (b<idolBand){ const nd=ri(dc.decoy[0],dc.decoy[1]); for(let i=0;i<nd;i++){ const x=pickClearX(b,2,avoid[b],500,ROOM_W-300); if(x>0){ connectors.push({band:b,x,floor:2,up:false,valid:false,destBand:b+1,destFloor:0}); avoid[b].push(x);} } }
+      for (let f=0;f<3;f++){ torches.push({band:b,x:ri(200,ROOM_W-200),floor:f}); }
+      if (b>=1){ const nt=ri(dc.trap[0],dc.trap[1]); for(let i=0;i<nt;i++){ const f=ri(0,2), x=pickClearX(b,f,avoid[b],400,ROOM_W-300); if(x>0){ trapTriggers.push({band:b,x,floor:f,used:false}); avoid[b].push(x);} } }
+      const nEn = dc.enemyBase + Math.floor(b*dc.enemyDepth) + ri(0,1);
+      let holeHere = false;
+      for (let i=0;i<nEn;i++){
+        let f=ri(0,2); let type=pickEnemyType(b,f); if(type==="alligator") f=2;
+        if (type==="hole") holeHere=true;
+        let x=pickClearX(b,f,[],250,ROOM_W-250); if(x<0) x=ri(300,ROOM_W-300);
+        spawnEnemy(type, b, x, f);
+      }
+      // Easy keeps the moving-hole hazard: guarantee one from level 2 downward
+      if (DIFFICULTY===1 && b>=1 && !holeHere){
+        let f=ri(0,2), x=pickClearX(b,f,[],250,ROOM_W-250); if(x<0) x=ri(300,ROOM_W-300);
+        spawnEnemy("hole", b, x, f);
+      }
+    }
+
+    ok = verifyPath(idolBand);
+  } while (!ok && attempt<14);
+  return ok;
+}
+
+/* --------------------------- Collision ----------------------------- */
+function segAt(band, idx, wx){
+  for (const s of segs) if (s.alive && s.band === band && s.idx === idx && wx >= s.x && wx < s.x + s.w) return s;
+  return null;
+}
+// returns floor index the given world-x has solid ground on at/below py within band, else -1
+function groundFloorBelow(band, wx, relY){
+  for (let i = 0; i < FLOOR_COUNT; i++){
+    const fy = FLOOR_Y[i];
+    if (fy >= relY - 2 && segAt(band, i, wx)) return i;
+  }
+  return -1;
+}
+
+/* ----------------------------- Player ------------------------------ */
+const ST = { IDLE:0, WALK:1, RUN:2, CRAWL:3, FASTCRAWL:4, JUMP:5, STAIRS:6,
+             ATTACK:7, PLACEDYN:8, HIT:9, DEAD:10 };
+const player = {
+  band:0, x:90, y:floorWorldY(0,0), vx:0, vy:0, w:PLAYER_W, h:PLAYER_H,
+  facing:1, floor:0, onGround:true, state:ST.IDLE, anim:0, stateTimer:0,
+  invuln:0, attackTimer:0, climbTarget:null, climbStair:null, stairCD:0, airStartY:0,
+};
+const inv = {
+  hpMax:100, hp:100, bullets:6, dynamite:3,
+  machete:true, pistol:false, torch:false, flares:0, idol:false, fightMode:0, // 0 off,1 machete,2 pistol
+};
+
+function playerRect(){
+  const h = (player.state===ST.CRAWL||player.state===ST.FASTCRAWL||player.state===ST.PLACEDYN)?CRAWL_H:PLAYER_H;
+  return { x: player.x - player.w/2, y: player.y - h, w: player.w, h };
+}
+function hurtPlayer(dmg){
+  if (godMode) return;
+  if (player.invuln > 0 || player.state === ST.DEAD) return;
+  inv.hp -= dmg; player.invuln = 40; AudioFX.hit();
+  flash(player.x, player.y - 24, "#ff5a4a");
+  if (inv.hp <= 0){ inv.hp = 0; killPlayer(); }
+  else if (player.state !== ST.STAIRS){ player.state = ST.HIT; player.stateTimer = 12; }
+}
+function killPlayer(){
+  if (godMode){ inv.hp = inv.hpMax; clearTrap(); return; }
+  player.state = ST.DEAD; player.vx = 0; player.vy = 0;
+  AudioFX.die(); message("You died. Returning to the temple mouth...", 150);
+  setTimeout(respawn, 2100);
+}
+function respawn(){
+  if (game.mode === "win") return;
+  clearTrap();
+  inv.hp = inv.hpMax;
+  // resume at the entry of the current level (not all the way back to the surface)
+  player.x = 90; player.floor = 0; player.y = floorWorldY(player.band, 0); player.airStartY = player.y;
+  player.vx = player.vy = 0; player.state = ST.IDLE; player.facing = 1; player.invuln = 60;
+}
+
+/* find a stair usable from current floor at player x; dir -1 up, +1 down */
+function stairFor(dir){
+  for (const s of stairs){
+    if (s.band !== player.band) continue;
+    if (Math.abs(s.x - player.x) > 30) continue;
+    if (dir < 0 && s.lo === player.floor) return s;   // climb up: from lo to hi
+    if (dir > 0 && s.hi === player.floor) return s;   // descend: from hi to lo
+  }
+  return null;
+}
+
+function updatePlayer(){
+  if (player.invuln > 0) player.invuln--;
+  if (player.stairCD > 0) player.stairCD--;
+  if (game.transition.active){ player.vx = 0; return; }
+
+  if (player.state === ST.DEAD){ return; }
+
+  // universal: weapon cycle + attack + open + dynamite handled per-state where valid
+  const L = keys.left, R = keys.right, U = keys.up, D = keys.down, run = keys.run;
+
+  // ---- STAIRS state (deterministic climb) ----
+  if (player.state === ST.STAIRS){
+    const s = player.climbStair, destY = floorWorldY(player.band, player.climbTarget);
+    player.x += (s.x - player.x) * 0.4;
+    const dir = Math.sign(destY - player.y);
+    player.y += dir * 3.2;
+    player.anim += 0.3;
+    if (Math.abs(player.y - destY) <= 3.5){
+      player.y = destY; player.floor = player.climbTarget; player.onGround = true;
+      player.state = ST.IDLE; player.climbStair = null;
+      player.stairCD = 12;   // brief lockout so we don't instantly re-trigger the same stair
+    }
+    return;
+  }
+
+  // ---- HIT / PLACEDYN / ATTACK timed states ----
+  if (player.state === ST.HIT){ player.vx *= 0.7; applyMotion(); if (--player.stateTimer<=0) player.state=ST.IDLE; return; }
+  if (player.state === ST.ATTACK){ player.vx = 0; if (--player.attackTimer<=0) player.state=ST.IDLE; resolveCombat(); applyMotion(); return; }
+  if (player.state === ST.PLACEDYN){ player.vx=0; if (--player.stateTimer<=0) player.state=ST.CRAWL; applyMotion(); return; }
+
+  // weapon cycle / light handling
+  if (consume("fight")) cycleFight();
+  if (consume("torch")) toggleTorch();
+  if (consume("flare")) dropFlare();
+  // attack — if it puts us into the ATTACK state, stop here so locomotion
+  // doesn't overwrite the state on the same frame (the swing resolves in the
+  // ATTACK block on subsequent frames).
+  if (consume("attack")){
+    startAttack();
+    if (player.state === ST.ATTACK){ player.vx = 0; resolveCombat(); applyMotion(); return; }
+  }
+
+  const crawling = (player.state === ST.CRAWL || player.state === ST.FASTCRAWL);
+
+  // open / search
+  if (consume("open")) tryOpen();
+  // dynamite — breaks trap walls when trapped, otherwise placed while crawling
+  if (consume("dyn")){
+    if (trap.active) useDynamiteInTrap();
+    else if (crawling) placeDynamite();
+    else message("Crouch (Down) to place dynamite.", 60);
+  }
+
+  // ---- locomotion decisions ----
+  if (!crawling){
+    // climb UP via stairs / connector / exit  (Up key)
+    if (U && player.onGround && player.stairCD <= 0){
+      const up = stairFor(-1);
+      if (up){ player.state = ST.STAIRS; player.climbStair = up; player.climbTarget = up.hi; return; }
+      const c = connectorAt(true);
+      if (c) { tryConnector(c); return; }
+      const ex = atExit();
+      if (ex) { tryExit(); return; }
+    }
+    // DOWN key: descend a down-stair if standing on one, else crouch into a crawl
+    if (D && player.onGround){
+      const dn = (player.stairCD <= 0) ? stairFor(1) : null;
+      if (dn){ player.state = ST.STAIRS; player.climbStair = dn; player.climbTarget = dn.lo; return; }
+      player.state = ST.CRAWL;
+    }
+    // jump
+    if (consume("jump") && player.onGround){ player.vy = JUMP_V; player.onGround = false; player.state = ST.JUMP; AudioFX.jump(); }
+    // horizontal
+    let sp = run ? RUN : WALK;
+    player.vx = 0;
+    if (L){ player.facing = -1; player.vx = -sp; }
+    if (R){ player.facing = 1; player.vx = sp; }
+    if (player.state !== ST.CRAWL){          // Down may have just set CRAWL - don't clobber it
+      if (!player.onGround) player.state = ST.JUMP;
+      else if (player.vx === 0) player.state = ST.IDLE;
+      else player.state = run ? ST.RUN : ST.WALK;
+    }
+  } else {
+    // crawling
+    let sp = run ? FASTCRAWL : CRAWL;
+    player.vx = 0;
+    if (L){ player.facing = -1; player.vx = -sp; }
+    if (R){ player.facing = 1; player.vx = sp; }
+    player.state = run ? ST.FASTCRAWL : ST.CRAWL;
+    // down-connector while crawling on bottom floor
+    if (consume("open")) tryOpen();
+    if (U){ // stand up
+      player.state = ST.IDLE;
+    }
+    // descend connector by crawling onto it
+    const c = connectorAt(false);
+    if (c) { tryConnector(c); return; }
+  }
+
+  // step sfx
+  if ((player.state===ST.WALK||player.state===ST.RUN) && player.onGround){
+    player.anim += 0.25;
+    if (Math.floor(player.anim)%6===0) AudioFX.step();
+  } else if (player.state===ST.CRAWL||player.state===ST.FASTCRAWL){ player.anim += 0.2; }
+  else player.anim += 0.1;
+
+  applyMotion();
+}
+
+// fall damage + brief daze when landing well below where we left the ground
+function playerLand(){
+  const drop = player.y - player.airStartY;
+  player.airStartY = player.y;
+  if (drop < 100 || godMode || player.invuln > 0 || player.state === ST.DEAD) return;
+  const dmg = Math.min(45, Math.round(drop/14));
+  inv.hp -= dmg; player.invuln = 40; AudioFX.hit();
+  flash(player.x, player.y - 24, "#ff7a4a");
+  message("Hard landing! -" + dmg + " HP", 90);
+  if (inv.hp <= 0){ inv.hp = 0; killPlayer(); }
+  else { player.state = ST.HIT; player.stateTimer = 20; }   // dazed, like a dynamite jolt
+}
+function applyMotion(){
+  player.x = clamp(player.x + player.vx, 10, ROOM_W - 10);
+
+  // gravity / ground test
+  const relY = player.y - player.band * LEVEL_H;
+  const onFloorExact = FLOOR_Y.includes(Math.round(relY));
+  const segHere = segAt(player.band, player.floor, player.x);
+
+  if (!player.onGround || player.state === ST.JUMP){
+    player.vy = Math.min(player.vy + GRAV, MAXFALL);
+    player.y += player.vy;
+    let landed = false;
+    // landing check: find first floor at/below
+    const nrelY = player.y - player.band * LEVEL_H;
+    for (let i = 0; i < FLOOR_COUNT; i++){
+      const fy = FLOOR_Y[i];
+      if (player.vy >= 0 && nrelY >= fy - 2 && nrelY <= fy + 16 && segAt(player.band, i, player.x)){
+        player.y = floorWorldY(player.band, i); player.floor = i; player.vy = 0; player.onGround = true; landed = true;
+        if (player.state === ST.JUMP) player.state = ST.IDLE;
+        break;
+      }
+    }
+    // fell below the bottom floor -> land on the bottom
+    if (!player.onGround && player.y - player.band*LEVEL_H > FLOOR_Y[2] + 40){
+      player.y = floorWorldY(player.band, 2); player.floor = 2; player.vy = 0; player.onGround = true; landed = true;
+      if (player.state===ST.JUMP) player.state = ST.IDLE;
+    }
+    if (landed) playerLand();
+  } else {
+    // standing: is there still ground under us? (dynamite may have removed it)
+    if (!segHere){ player.onGround = false; player.airStartY = player.y; player.vy = 0.1; }
+    else { player.y = floorWorldY(player.band, player.floor); player.airStartY = player.y; }
+  }
+  // wall collision
+  for (const w of walls){
+    const pr = playerRect();
+    if (aabb(pr, w)){
+      if (player.vx > 0) player.x = w.x - player.w/2 - 1;
+      else if (player.vx < 0) player.x = w.x + w.w + player.w/2 + 1;
+    }
+  }
+}
+
+/* --------------------------- Connectors / exit --------------------- */
+function connectorAt(up){
+  for (const c of connectors){
+    if (c.band !== player.band || c.up !== up) continue;
+    if (c.floor !== player.floor) continue;
+    if (Math.abs(c.x - player.x) < 26) return c;
+  }
+  return null;
+}
+function tryConnector(c){
+  if (!c.valid){ message("The stair crumbles into rubble — a dead end.", 90); return; }
+  beginTransition(c.destBand, c.destFloor);
+}
+function atExit(){
+  if (!exitZone || exitZone.band !== player.band || exitZone.floor !== player.floor) return false;
+  return Math.abs(exitZone.x - player.x) < 30;
+}
+function tryExit(){
+  if (inv.idol){ winGame(); }
+  else message("The temple mouth. You need the idol to leave with honour.", 110);
+}
+
+/* --------------------------- Transitions --------------------------- */
+const game = {
+  mode:"title", // title, play, pause, dead, win
+  transition:{ active:false, phase:0, t:0, destBand:0, destFloor:0 },
+  msg:"", msgTimer:0, frame:0, time:0, startTime:0,
+};
+function beginTransition(destBand, destFloor){
+  game.transition.active = true; game.transition.phase = 0; game.transition.t = 0;
+  game.transition.destBand = destBand; game.transition.destFloor = destFloor;
+  message(destBand > player.band ? "Descending deeper..." : "Ascending...", 60);
+}
+function updateTransition(){
+  const tr = game.transition; if (!tr.active) return;
+  tr.t++;
+  if (tr.phase === 0 && tr.t >= 24){
+    player.band = tr.destBand; player.floor = tr.destFloor;
+    player.y = floorWorldY(tr.destBand, tr.destFloor);
+    player.vx = player.vy = 0; player.onGround = true; player.state = ST.IDLE;
+    if (window.AztecMusic) AztecMusic.playLevel(player.band);
+    tr.phase = 1; tr.t = 0;
+  } else if (tr.phase === 1 && tr.t >= 24){
+    tr.active = false; tr.phase = 0; tr.t = 0;
+  }
+}
+
+/* ----------------------------- Combat ------------------------------ */
+function cycleFight(){
+  let safety = 0;
+  do { inv.fightMode = (inv.fightMode + 1) % 3; safety++; }
+  while (!(inv.fightMode === 0 || (inv.fightMode===1 && inv.machete) || (inv.fightMode===2 && inv.pistol)) && safety < 5);
+  message("Weapon: " + ["NONE","MACHETE","PISTOL"][inv.fightMode], 50);
+}
+function startAttack(){
+  if (inv.fightMode === 1 && inv.machete){
+    player.state = ST.ATTACK; player.attackTimer = 10; AudioFX.machete();
+  } else if (inv.fightMode === 2 && inv.pistol){
+    if (inv.bullets > 0){
+      inv.bullets--; AudioFX.gun();
+      bullets.push({ band:player.band, x:player.x + player.facing*18, y:player.y - 16,
+        vx:player.facing*9, w:8, h:8, life:60 });
+    } else message("Out of bullets.", 50);
+  } else message("No weapon selected (F to cycle).", 50);
+}
+function resolveCombat(){
+  // machete hitbox in front during attack
+  if (player.state !== ST.ATTACK) return;
+  const hb = { x: player.facing>0 ? player.x+6 : player.x-40, y: player.y - 44, w: 40, h: 44 };
+  for (const e of enemies){
+    if (e.band !== player.band || e.dead) continue;
+    if (aabb(hb, enemyRect(e))){ damageEnemy(e, 12); }
+  }
+}
+function damageEnemy(e, dmg){
+  e.hp -= dmg; e.hitTimer = 6; e.vx += player.facing * 1.2;
+  flash(e.x, e.y - e.h/2, "#ffd36e");
+  if (e.hp <= 0){ e.dead = true; AudioFX.hit(); burst(e.x, e.y - 10, "#9a6b3f", 10); }
+}
+
+/* ----------------------------- Enemies ----------------------------- */
+const ETYPE = {
+  snake:    { hp:16, speed:1.2, dmg:8,  w:30, h:14, col:"#6fae5a" },
+  spider:   { hp:12, speed:1.0, dmg:8,  w:26, h:18, col:"#7a5b8f" },
+  warrior:  { hp:42, speed:1.7, dmg:14, w:24, h:46, col:"#b5512f" },
+  panther:  { hp:34, speed:2.2, dmg:14, w:48, h:24, col:"#caa24a" },
+  alligator:{ hp:54, speed:0.6, dmg:20, w:60, h:20, col:"#5f7a4a" },
+  priest:   { hp:60, speed:1.4, dmg:4,  w:24, h:48, col:"#9a6fb0" },
+  hole:     { hp:26, speed:1.0, dmg:8,  w:30, h:18, col:"#6a5a7a" },
+};
+function spawnEnemy(type, band, x, floor){
+  const t = ETYPE[type];
+  enemies.push({ type, band, x, y:floorWorldY(band,floor), floor, vx:t.speed, w:t.w, h:t.h,
+    hp:t.hp, dmg:t.dmg, speed:t.speed, facing:1, dead:false, hitTimer:0, anim:Math.random()*6,
+    pauseT:0, lungeT:0, curseCD:0, corruptT:ri(0,60), chirped:false });
+}
+function enemyRect(e){ return { x:e.x - e.w/2, y:e.y - e.h, w:e.w, h:e.h }; }
+
+function updateEnemies(){
+  if (game.transition.active) return;
+  for (const e of enemies){
+    if (e.dead) continue;
+    if (e.band !== player.band){ continue; }      // only active on player's band
+    if (!e.chirped){                               // brief chirp the first time it appears on screen
+      const relx = e.x - cam.x;
+      if (relx > -10 && relx < PLAY_W + 10){ AudioFX.chirp(); e.chirped = true; }
+    }
+    if (e.hitTimer > 0) e.hitTimer--;
+    e.anim += 0.15;
+    switch (e.type){
+      case "warrior":   aiWarrior(e);   break;
+      case "panther":   aiChaser(e, 240, 1.7); break;
+      case "alligator": aiChaser(e, 130, 3.0); break;
+      case "priest":    aiPriest(e);    break;
+      case "hole":      aiHole(e);      break;
+      case "spider":    aiSpider(e);    break;
+      default:          patrol(e);
+    }
+    // separation: enemies stop beside the player, never overlapping the centre
+    if (e.floor === player.floor && player.onGround && player.state !== ST.DEAD){
+      const sep = e.w/2 + player.w/2 - 2;
+      const dx = e.x - player.x;
+      if (Math.abs(dx) < sep) e.x = player.x + (dx>=0 ? sep : -sep);
+    }
+    if (aabb(enemyRect(e), playerRect())) hurtPlayer(e.dmg);
+  }
+}
+function patrol(e){
+  const nx = e.x + e.vx;
+  if (!segAt(e.band, e.floor, nx + Math.sign(e.vx)*e.w/2)){ e.vx = -e.vx; e.facing = -e.facing; return; }
+  for (const w of walls){
+    if (!w.trap && w.x < nx + e.w/2 && w.x + w.w > nx - e.w/2 && Math.abs(w.y - e.y) < LEVEL_H){ e.vx=-e.vx; e.facing=-e.facing; return; }
+  }
+  e.x = nx; e.facing = Math.sign(e.vx);
+}
+function aiSpider(e){
+  if (e.pauseT>0){ e.pauseT--; } else patrol(e);
+  if (Math.random()<0.012) e.pauseT = ri(15,35);
+}
+// Generic ground chaser: pursue on same floor within range (with a closer lunge speed).
+function aiChaser(e, range, lungeMul){
+  const dist = Math.abs(e.x - player.x);
+  if (player.floor === e.floor && dist < range){
+    e.facing = player.x > e.x ? 1 : -1;
+    const sp = (dist < range*0.5) ? e.speed*lungeMul : e.speed;
+    const nx = e.x + e.facing*sp;
+    if (segAt(e.band, e.floor, nx + e.facing*e.w/2)) e.x = nx;
+  } else patrol(e);
+}
+function aiWarrior(e){
+  const dist = Math.abs(e.x - player.x);
+  if (dist < 360){
+    e.facing = player.x > e.x ? 1 : -1;
+    const nx = e.x + e.facing*e.speed;
+    if (segAt(e.band, e.floor, nx + e.facing*e.w/2)) e.x = nx;
+    if (player.floor !== e.floor){
+      for (const s of stairs){
+        if (s.band===e.band && Math.abs(s.x-e.x)<40){
+          if (player.floor<e.floor && s.hi<e.floor){ e.floor=Math.max(s.hi,player.floor); e.y=floorWorldY(e.band,e.floor); }
+          else if (player.floor>e.floor && s.lo>e.floor){ e.floor=Math.min(s.lo,player.floor); e.y=floorWorldY(e.band,e.floor); }
+        }
+      }
+    }
+  } else patrol(e);
+}
+function aiPriest(e){
+  if (e.curseCD>0) e.curseCD--;
+  const dist = Math.abs(e.x - player.x);
+  if (dist < 150 && player.floor===e.floor && e.curseCD<=0){
+    if (inv.machete && Math.random()<0.5){
+      inv.machete=false; if (inv.fightMode===1) inv.fightMode=0;
+      message("The temple priest stripped your MACHETE!", 130); e.curseCD=260; AudioFX.hit();
+    } else if (inv.bullets>0){
+      const lost=Math.min(3,inv.bullets); inv.bullets-=lost;
+      message("The priest stole "+lost+" bullets!", 130); e.curseCD=260; AudioFX.hit();
+    } else if (inv.pistol && Math.random()<0.4){
+      inv.pistol=false; if (inv.fightMode===2) inv.fightMode=0;
+      message("The priest took your PISTOL!", 130); e.curseCD=320; AudioFX.hit();
+    }
+  }
+  patrol(e);
+}
+function aiHole(e){
+  patrol(e);
+  e.corruptT++;
+  if (e.corruptT>=100){
+    e.corruptT=0;
+    const s = segAt(e.band, e.floor, e.x);
+    if (s){ s.alive=false; burst(s.x+TILE/2, s.y, "#6a5a7a", 8); }
+  }
+}
+
+/* --------------------------- Bullets / Dynamite -------------------- */
+function updateProjectiles(){
+  // bullets
+  for (const b of bullets){ b.x += b.vx; b.life--; }
+  bullets = bullets.filter(b => {
+    if (b.life <= 0) return false;
+    for (const e of enemies){ if (!e.dead && e.band===b.band && aabb({x:b.x,y:b.y,w:b.w,h:b.h}, enemyRect(e))){ damageEnemy(e, 14); return false; } }
+    for (const w of walls){ if (b.x>w.x && b.x<w.x+w.w && Math.abs(w.y-b.y)<LEVEL_H) return false; }
+    return true;
+  });
+  // dynamite (falls through holes; wraps to the ceiling if it drops off the bottom)
+  for (const d of dynamites){
+    d.t--; d.flash = (d.t % 10) < 5;
+    if (d.falling){
+      d.vy = Math.min((d.vy||0) + GRAV, MAXFALL);
+      d.y += d.vy;
+      const relY = d.y - d.band*LEVEL_H;
+      for (let i=0;i<FLOOR_COUNT;i++){
+        const fy = FLOOR_Y[i];
+        if (relY >= fy - 6 && relY <= fy + 16 && segAt(d.band, i, d.x)){
+          d.y = d.band*LEVEL_H + fy - 4; d.vy = 0; d.falling = false; break;
+        }
+      }
+      if (d.falling && relY > FLOOR_Y[2] + 60){          // fell off the bottom -> wrap to ceiling
+        d.y = d.band*LEVEL_H + FLOOR_Y[0] - 90; d.vy = 1;
+      }
+    }
+    if (d.t <= 0){ explode(d.band, d.x, d.y); d.done = true; }
+  }
+  dynamites = dynamites.filter(d => !d.done);
+  // flares burn down
+  for (const fl of flares) fl.t--;
+  flares = flares.filter(fl => fl.t > 0);
+  // explosions visuals
+  for (const ex of explosions){ ex.t--; }
+  explosions = explosions.filter(ex => ex.t > 0);
+  // particles
+  for (const p of particles){ p.x+=p.vx; p.y+=p.vy; p.vy+=0.2; p.life--; }
+  particles = particles.filter(p => p.life > 0);
+}
+function wallAhead(wx, wy){
+  for (const w of walls){
+    if (wx < w.x || wx > w.x + w.w) continue;
+    const top = (w.h >= LEVEL_H) ? player.band*LEVEL_H : w.y;
+    const bot = top + ((w.h >= LEVEL_H) ? LEVEL_H : w.h);
+    if (wy >= top && wy <= bot) return true;
+  }
+  return false;
+}
+function placeDynamite(){
+  if (inv.dynamite <= 0){ message("No dynamite left.", 60); return; }
+  inv.dynamite--; player.state = ST.PLACEDYN; player.stateTimer = 16;
+  const ahead = player.x + player.facing * 22;          // a couple px past the head
+  const headY = player.y - 16;
+  if (wallAhead(ahead, headY)){
+    // facing a wall: drop it at the feet, as before (no room to toss it forward)
+    dynamites.push({ band:player.band, x:player.x, y:player.y - 8, t:90, flash:false, falling:false, vy:0 });
+  } else {
+    // tossed just ahead of the head; gravity carries it down through any hole,
+    // wrapping to the ceiling if it falls off the bottom (the original's glitch)
+    dynamites.push({ band:player.band, x:ahead, y:player.y - 26, t:90, flash:false, falling:true, vy:0 });
+  }
+  message("Dynamite placed — fuse lit!", 60);
+}
+function explode(band, x, y){
+  AudioFX.boom(); explosions.push({ band, x, y, t:18 }); burst(x, y, "#ffb347", 24);
+  // destroy nearby floor segments (digging)
+  for (const s of segs){ if (s.alive && s.band===band && Math.hypot(s.x+TILE/2-x, s.y-y) < 56) s.alive = false; }
+  // destroy destructible walls
+  walls = walls.filter(w => !(w.destructible && Math.hypot(w.x+w.w/2-x, w.y-y) < 70));
+  // damage enemies
+  for (const e of enemies){ if (!e.dead && e.band===band && Math.hypot(e.x-x, e.y-e.h/2-y) < 90) damageEnemy(e, 50); }
+  // damage player (the cruelty: you can blow yourself up)
+  if (player.band===band){
+    const dist = Math.hypot(player.x-x, player.y-24-y);
+    if (dist < 110){ hurtPlayer(Math.max(6, Math.round(22 - dist/6))); }
+  }
+}
+function explodeGrenade(band, x, y){ explode(band, x, y); }
+
+/* ----------------------------- Traps ------------------------------- */
+function checkTrapTriggers(){
+  if (trap.active || game.transition.active || player.state===ST.DEAD) return;
+  for (const t of trapTriggers){
+    if (t.used || t.band!==player.band || t.floor!==player.floor) continue;
+    if (player.onGround && Math.abs(t.x - player.x) < 22){ activateTrap(t); break; }
+  }
+}
+function activateTrap(t){
+  if (trap.active) return;
+  t.used = true;
+  const fy = floorWorldY(player.band, player.floor);   // walls only span the player's floor
+  const wl = { x: player.x - 60, y: fy - 96, w: 14, h: 100, trap:true };
+  const wr = { x: player.x + 46, y: fy - 96, w: 14, h: 100, trap:true };
+  walls.push(wl, wr);
+  trap.active = true; trap.timer = 480; trap.max = 480; trap.wallL = wl; trap.wallR = wr; trap.band = player.band;
+  trap.minX = wl.x; trap.maxX = wr.x + wr.w;   // the boxed-in span; stepping outside = escaped
+  AudioFX.hit();
+  message("TRAPPED! Blast the walls with dynamite (D) before time runs out!", 180);
+}
+function useDynamiteInTrap(){
+  if (inv.dynamite <= 0){ message("Out of dynamite — claw at the walls!", 90); return; }
+  inv.dynamite--;
+  let target = walls.includes(trap.wallL) ? trap.wallL : (walls.includes(trap.wallR) ? trap.wallR : null);
+  if (target){
+    walls.splice(walls.indexOf(target), 1);
+    explosions.push({ band:trap.band, x:target.x+target.w/2, y:player.y-20, t:18 });
+    burst(target.x+target.w/2, player.y-20, "#ffb347", 16); AudioFX.boom();
+    message("Wall blasted away!", 60);
+  }
+}
+function updateTrap(){
+  if (!trap.active || game.transition.active) return;
+  const lAlive = walls.includes(trap.wallL), rAlive = walls.includes(trap.wallR);
+  const steppedOut = (player.x < trap.minX) || (player.x > trap.maxX);
+  if ((!lAlive && !rAlive) || steppedOut){ clearTrap(); message("You broke free!", 90); return; }
+  trap.timer--;
+  if (trap.timer <= 0){ clearTrap(); message("The walls close in...", 120); killPlayer(); }
+}
+function clearTrap(){
+  if (walls.includes(trap.wallL)) walls.splice(walls.indexOf(trap.wallL),1);
+  if (walls.includes(trap.wallR)) walls.splice(walls.indexOf(trap.wallR),1);
+  trap.active = false; trap.timer = 0; trap.wallL = trap.wallR = null;
+}
+
+/* --------------------------- Chests / Piles ------------------------ */
+function tryOpen(){
+  // chests
+  for (const c of chests){
+    if (c.band!==player.band || c.opened) continue;
+    if (c.floor!==player.floor || Math.abs(c.x-player.x) > 46) continue;
+    openChest(c); return;
+  }
+  // piles
+  for (const p of piles){
+    if (p.band!==player.band || p.gone) continue;
+    if (p.floor!==player.floor || Math.abs(p.x-player.x) > 46) continue;
+    searchPile(p); return;
+  }
+}
+function openChest(c){
+  c.opened = true; AudioFX.pickup();
+  if (c.idol){ inv.idol = true; AudioFX.idol(); message("YOU HAVE FOUND THE JADE IDOL! Escape to the temple mouth!", 260); return; }
+  const dc = DIFF[DIFFICULTY];
+  if (DIFFICULTY>=2 && Math.random() < 0.10){ message("It's a trap!", 80); grenades.push({band:c.band,x:c.x,y:c.y-8}); setTimeout(()=>explodeGrenade(c.band,c.x,c.y-8), 1200); return; }
+  if (Math.random() < dc.emptyChest){ message("The chest is empty.", 70); return; }
+  const k = Math.random();
+  if (k < 0.28){ if(!inv.pistol){inv.pistol=true; inv.bullets+=6; message("Found a PISTOL! +6 bullets.", 90);} else {inv.bullets+=6; message("Bullets +6.",80);} return; }
+  if (k < 0.50){ inv.dynamite += 2; message("Dynamite +2.", 80); return; }
+  if (k < 0.70){ inv.flares += 2; message("Flares +2 - drop with L to light dark rooms.", 100); return; }
+  inv.hp = Math.min(inv.hpMax, inv.hp+30); message("A healing draught. Health +30.", 80);
+}
+function searchPile(p){
+  p.stage++;
+  if (p.stage === 1){ message("Searching the pile...", 60); return; }
+  p.gone = true; AudioFX.pickup();
+  const r = Math.random();
+  if (r < 0.15){ message("Booby trap!", 80); setTimeout(()=>explodeGrenade(p.band,p.x,p.y-8), 900); return; }
+  if (r < 0.32){ inv.bullets += 3; message("Bullets +3.", 70); return; }
+  if (r < 0.48){ inv.dynamite += 1; message("Dynamite +1.", 70); return; }
+  if (r < 0.64){ inv.flares += 1; message("Flare +1.", 70); return; }
+  if (r < 0.80){ inv.hp = Math.min(inv.hpMax, inv.hp+15); message("Health +15.", 70); return; }
+  message("Nothing useful.", 60);
+}
+
+/* ----------------------------- Light items ------------------------- */
+function toggleTorch(){
+  if (inv.torch){
+    torches.push({ band:player.band, x:player.x, floor:player.floor });   // set it down (re-lights that spot)
+    inv.torch = false; message("Torch set down.", 60);
+  } else {
+    for (let i=0;i<torches.length;i++){
+      const t = torches[i];
+      if (t.band===player.band && t.floor===player.floor && Math.abs(t.x-player.x) < 46){
+        torches.splice(i,1); inv.torch = true; message("Torch taken - it lights your way.", 70); return;
+      }
+    }
+    message("No torch within reach.", 60);
+  }
+}
+function dropFlare(){
+  if (inv.flares <= 0){ message("No flares.", 60); return; }
+  inv.flares--; AudioFX.pickup();
+  flares.push({ band:player.band, x:player.x, y:floorWorldY(player.band,player.floor)-4, t:600 });  // ~10s
+  message("Flare lit.", 60);
+}
+
+/* ----------------------------- FX ---------------------------------- */
+function message(t, frames){ game.msg = t; game.msgTimer = frames; }
+function flash(x,y,col){ particles.push({x,y,vx:0,vy:0,life:8,col,big:true}); }
+function burst(x,y,col,n){ for(let i=0;i<n;i++) particles.push({x,y,vx:rnd(-3,3),vy:rnd(-4,1),life:ri(12,26),col}); }
+
+/* ----------------------------- Win / lose -------------------------- */
+function winGame(){
+  game.mode = "win"; AudioFX.win();
+  const secs = Math.floor((performance.now() - game.startTime)/1000);
+  game.winTime = secs;
+  try{ const best = JSON.parse(localStorage.getItem("aztec_best")||"null");
+    if (best===null || secs<best){ localStorage.setItem("aztec_best", String(secs)); game.best = secs; }
+    else game.best = best;
+  }catch(e){ game.best = secs; }
+}
+
+/* ============================ RENDERING ============================= */
+function worldToScreenX(wx){ return PLAY_L + (wx - cam.x); }
+function worldToScreenY(wy){ return PLAY_TOP + (wy - player.band * LEVEL_H); }
+const cam = { x:0 };
+function updateCamera(){
+  cam.x = clamp(player.x - PLAY_W/2, 0, ROOM_W - PLAY_W);
+}
+
+function px(x,y,w,h,c){ ctx.fillStyle=c; ctx.fillRect(Math.round(x),Math.round(y),w,h); }
+
+function drawFrame(){
+  // outer wall
+  px(0,0,SCREEN_W,SCREEN_H,"#0b0a08");
+  // decorative border
+  ctx.fillStyle="#2c2110"; ctx.fillRect(0,0,SCREEN_W,SCREEN_H);
+  ctx.fillStyle="#000"; ctx.fillRect(PLAY_L,PLAY_TOP,PLAY_W,PLAY_H);
+  // aztec border pattern
+  ctx.fillStyle="#5b4521";
+  for (let x=4;x<SCREEN_W-4;x+=20){ ctx.fillRect(x,6,10,4); ctx.fillRect(x,SCREEN_H-HUD_H-12,10,4); }
+  ctx.fillStyle="#3a2c16"; ctx.fillRect(PLAY_L-4,PLAY_TOP-4,PLAY_W+8,4); ctx.fillRect(PLAY_L-4,PLAY_BOTTOM,PLAY_W+8,4);
+  ctx.fillRect(PLAY_L-4,PLAY_TOP-4,4,PLAY_H+8); ctx.fillRect(PLAY_R,PLAY_TOP-4,4,PLAY_H+8);
+}
+
+function drawWorld(){
+  ctx.save();
+  ctx.beginPath(); ctx.rect(PLAY_L, PLAY_TOP, PLAY_W, PLAY_H); ctx.clip();
+  // background gradient per band
+  const g = ctx.createLinearGradient(0,PLAY_TOP,0,PLAY_BOTTOM);
+  if (player.band===0){ g.addColorStop(0,"#241c10"); g.addColorStop(1,"#140f08"); }
+  else { g.addColorStop(0,"#180f14"); g.addColorStop(1,"#0a0608"); }
+  ctx.fillStyle=g; ctx.fillRect(PLAY_L,PLAY_TOP,PLAY_W,PLAY_H);
+
+  // faint brick texture
+  ctx.fillStyle="rgba(120,90,50,0.05)";
+  for (let y=PLAY_TOP; y<PLAY_BOTTOM; y+=24){ for(let x=PLAY_L-(cam.x%48); x<PLAY_R; x+=48){ ctx.fillRect(x,y,40,2); } }
+
+  // torches (glow)
+  for (const t of torches){ if (t.band!==player.band) continue;
+    const sx=worldToScreenX(t.x), sy=worldToScreenY(floorWorldY(t.band,t.floor));
+    if (sx<PLAY_L-20||sx>PLAY_R+20) continue;
+    const fl = 6+Math.sin(game.frame*0.3+t.x)*2;
+    const rg=ctx.createRadialGradient(sx,sy-40,4,sx,sy-40,70);
+    rg.addColorStop(0,"rgba(255,180,80,0.30)"); rg.addColorStop(1,"rgba(255,150,40,0)");
+    ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(sx,sy-40,70,0,7); ctx.fill();
+    px(sx-2,sy-36,4,28,"#6b4a2a"); px(sx-3,sy-44,6,8,"#ffce5a"); px(sx-2,sy-48-fl/3,4,6,"#ff8c2a");
+  }
+
+  // stairs
+  for (const s of stairs){ if (s.band!==player.band) continue;
+    const sx=worldToScreenX(s.x); if (sx<PLAY_L-60||sx>PLAY_R+60) continue;
+    const yHi=worldToScreenY(floorWorldY(s.band,s.hi)), yLo=worldToScreenY(floorWorldY(s.band,s.lo));
+    ctx.fillStyle="#7a5e30";
+    const steps=6, dx=(34)/steps, dy=(yLo-yHi)/steps;
+    for(let i=0;i<steps;i++){ ctx.fillRect(sx-17+i*dx, yHi+i*dy-2, dx+3, 5); ctx.fillRect(sx-17+i*dx, yHi+i*dy, 4, yLo-(yHi+i*dy)); }
+  }
+
+  // connectors (down/up special stairs)
+  for (const c of connectors){ if (c.band!==player.band) continue;
+    const sx=worldToScreenX(c.x); if (sx<PLAY_L-40||sx>PLAY_R+40) continue;
+    const sy=worldToScreenY(floorWorldY(c.band,c.floor));
+    ctx.fillStyle = c.up ? "#caa24a" : "#a8702f";
+    for(let i=0;i<5;i++){ ctx.fillRect(sx-16+i*7, sy-(c.up?2:0)-i*6*(c.up?1:-1)- (c.up?0:24), 10, 4); }
+    // arrow marker
+    ctx.fillStyle="#ffe9a8"; ctx.font="10px monospace"; ctx.textAlign="center";
+    ctx.fillText(c.up?"▲":"▼", sx, sy-46);
+  }
+
+  // exit marker
+  if (exitZone && exitZone.band===player.band){
+    const sx=worldToScreenX(exitZone.x), sy=worldToScreenY(floorWorldY(exitZone.band,exitZone.floor));
+    px(sx-16,sy-58,32,58,"#1c130a"); px(sx-12,sy-52,24,52, inv.idol?"#2a4a2a":"#120c06");
+    ctx.fillStyle=inv.idol?"#7CFC9A":"#8a7340"; ctx.font="9px monospace"; ctx.textAlign="center"; ctx.fillText("EXIT",sx,sy-60);
+  }
+
+  // floor segments
+  for (const s of segs){ if (!s.alive || s.band!==player.band) continue;
+    const sx=worldToScreenX(s.x), sy=worldToScreenY(s.y);
+    if (sx<PLAY_L-TILE||sx>PLAY_R+TILE) continue;
+    px(sx, sy, s.w-1, FLOOR_THICK, "#6a4f2a");
+    px(sx, sy, s.w-1, 3, "#8a6a38");
+    px(sx, sy+FLOOR_THICK-2, s.w-1, 2, "#3c2a14");
+  }
+
+  // walls
+  for (const w of walls){ if (Math.abs(w.y-player.band*LEVEL_H) > LEVEL_H+50 && w.h<LEVEL_H) continue;
+    if (w.trap && trap.band!==player.band) continue;
+    const sx=worldToScreenX(w.x), sy=worldToScreenY(Math.max(w.y, player.band*LEVEL_H));
+    if (sx<PLAY_L-30||sx>PLAY_R+30) continue;
+    const h = w.h>=LEVEL_H ? PLAY_H : w.h;
+    const topY = w.h>=LEVEL_H?PLAY_TOP:sy;
+    px(sx, topY, w.w, h, w.trap?"#8a1c1c":(w.destructible?"#7a4a2a":"#4a3a20"));
+    if (w.trap){ ctx.fillStyle="#d83a2a"; for(let yy=0;yy<h;yy+=6) ctx.fillRect(sx,topY+yy,w.w,3); }
+    else if (w.destructible){ ctx.fillStyle="#aa6a3a"; for(let yy=0;yy<h;yy+=8) ctx.fillRect(sx,topY+yy,w.w,2); }
+  }
+
+  // chests
+  for (const c of chests){ if (c.band!==player.band) continue;
+    const sx=worldToScreenX(c.x), sy=worldToScreenY(floorWorldY(c.band,c.floor));
+    if (sx<PLAY_L-30||sx>PLAY_R+30) continue;
+    px(sx-15,sy-22,30,22,"#5a3d1e"); px(sx-15,sy-22,30,6,"#7a5428");
+    ctx.fillStyle="#caa14a"; ctx.fillRect(sx-15,sy-14,30,2);
+    if (!c.opened){ px(sx-3,sy-14,6,6,"#e8c860"); }
+    else { px(sx-15,sy-22,30,4,"#2a1d0e"); }
+  }
+  // piles
+  for (const p of piles){ if (p.band!==player.band || p.gone) continue;
+    const sx=worldToScreenX(p.x), sy=worldToScreenY(floorWorldY(p.band,p.floor));
+    if (sx<PLAY_L-30||sx>PLAY_R+30) continue;
+    const c = p.stage>0 ? "#6a5a48" : "#8a7a60";
+    px(sx-14,sy-10,28,10,c); px(sx-9,sy-15,18,6,c); px(sx-4,sy-18,8,4,c);
+  }
+
+  // dynamite
+  for (const d of dynamites){ if (d.band!==player.band) continue;
+    const sx=worldToScreenX(d.x), sy=worldToScreenY(d.y);
+    px(sx-3,sy-10,6,12, d.flash?"#ff4030":"#b02818"); px(sx-1,sy-14,2,4,"#ffd060");
+  }
+  // flares (lit ground light source)
+  for (const fl of flares){ if (fl.band!==player.band) continue;
+    const sx=worldToScreenX(fl.x), sy=worldToScreenY(fl.y);
+    if (sx<PLAY_L-30||sx>PLAY_R+30) continue;
+    const fade = fl.t<90 ? fl.t/90 : 1, h=4+Math.sin(game.frame*0.5)*2;
+    ctx.globalAlpha=fade;
+    px(sx-2,sy-7,4,7,"#b9bcc6");                          // spent stick
+    px(sx-3,sy-12-h/2,6,8,"#ff5a2a"); px(sx-2,sy-16-h/2,4,5,"#ffe070"); // flame
+    ctx.globalAlpha=1;
+  }
+  // explosions
+  for (const ex of explosions){ if (ex.band!==player.band) continue;
+    const sx=worldToScreenX(ex.x), sy=worldToScreenY(ex.y), r=(18-ex.t)*3+6;
+    ctx.fillStyle=`rgba(255,${150+ex.t*4},60,${ex.t/18})`; ctx.beginPath(); ctx.arc(sx,sy,r,0,7); ctx.fill();
+  }
+  // bullets
+  for (const b of bullets){ if (b.band!==player.band) continue;
+    const sx=worldToScreenX(b.x), sy=worldToScreenY(b.y); px(sx-4,sy-1,8,3,"#ffe070"); }
+
+  // enemies
+  for (const e of enemies){ if (e.dead || e.band!==player.band) continue; drawEnemy(e); }
+
+  // player
+  drawPlayer();
+
+  // god-mode path beacon: points to the valid down-connector (or the idol)
+  if (godMode){
+    const idolBand = LEVEL_COUNT - 1; let tx=null, ty=null, label="";
+    if (player.band < idolBand){
+      const c = connectors.find(cc=>cc.band===player.band && !cc.up && cc.valid);
+      if (c){ tx=c.x; ty=floorWorldY(c.band, c.floor); label="DOWN"; }
+    } else {
+      const ic = chests.find(cc=>cc.idol);
+      if (ic){ tx=ic.x; ty=floorWorldY(ic.band, ic.floor); label="IDOL"; }
+    }
+    if (tx!==null){
+      const gx=worldToScreenX(tx), gy=worldToScreenY(ty);
+      const pulse=0.5+0.5*Math.sin(game.frame*0.15);
+      if (gx>=PLAY_L-10 && gx<=PLAY_R+10){
+        ctx.fillStyle="rgba(90,255,150,"+(0.45+0.45*pulse)+")";
+        for(let i=0;i<3;i++){ const yy=gy-66-i*13-pulse*6; ctx.beginPath(); ctx.moveTo(gx-8,yy); ctx.lineTo(gx,yy+8); ctx.lineTo(gx+8,yy); ctx.lineTo(gx,yy+4); ctx.closePath(); ctx.fill(); }
+        ctx.fillStyle="#7CFC9A"; ctx.font="11px 'Courier New',monospace"; ctx.textAlign="center"; ctx.fillText(label, gx, gy-92); ctx.textAlign="left";
+      } else {
+        const left = gx < PLAY_L; const ax = left?PLAY_L+16:PLAY_R-16, ay=PLAY_TOP+26;
+        ctx.fillStyle="#7CFC9A"; ctx.beginPath();
+        if (left){ ctx.moveTo(ax-12,ay); ctx.lineTo(ax+5,ay-10); ctx.lineTo(ax+5,ay+10); } else { ctx.moveTo(ax+12,ay); ctx.lineTo(ax-5,ay-10); ctx.lineTo(ax-5,ay+10); }
+        ctx.closePath(); ctx.fill();
+        ctx.font="10px 'Courier New',monospace"; ctx.textAlign="center"; ctx.fillText(label, ax, ay+22); ctx.textAlign="left";
+      }
+    }
+  }
+
+  // particles
+  for (const p of particles){ if (p.big){ const sx=worldToScreenX(p.x),sy=worldToScreenY(p.y); ctx.fillStyle=p.col; ctx.globalAlpha=p.life/8; ctx.fillRect(sx-12,sy-12,24,24); ctx.globalAlpha=1; }
+    else { const sx=worldToScreenX(p.x),sy=worldToScreenY(p.y); px(sx-1,sy-1,3,3,p.col); } }
+
+  // dynamic lighting: dark lower levels lit by torches, flares and the player
+  const dark = bandDarkness(player.band);
+  if (dark > 0 && lightCtx) drawLighting(dark);
+
+  ctx.restore();
+}
+
+function drawLighting(darkness){
+  const lx = lightCtx;
+  lx.globalCompositeOperation = "source-over";
+  lx.clearRect(0,0,PLAY_W,PLAY_H);
+  lx.fillStyle = "rgba(3,2,7," + darkness + ")";
+  lx.fillRect(0,0,PLAY_W,PLAY_H);
+  lx.globalCompositeOperation = "destination-out";    // light erases darkness
+  const addLight = (wx,wy,r,strength)=>{
+    const sx = worldToScreenX(wx)-PLAY_L, sy = worldToScreenY(wy)-PLAY_TOP;
+    if (sx < -r || sx > PLAY_W+r) return;
+    const g = lx.createRadialGradient(sx,sy,0,sx,sy,r);
+    g.addColorStop(0, "rgba(0,0,0," + strength + ")");
+    g.addColorStop(0.55, "rgba(0,0,0," + (strength*0.45) + ")");
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    lx.fillStyle = g; lx.beginPath(); lx.arc(sx,sy,r,0,7); lx.fill();
+  };
+  addLight(player.x, player.y-22, 74, 0.62);                                  // faint player aura
+  if (inv.torch) addLight(player.x, player.y-30, 132, 1.0);                   // carried torch
+  for (const t of torches){ if (t.band===player.band) addLight(t.x, floorWorldY(t.band,t.floor)-30, 96, 0.92); }
+  for (const fl of flares){ if (fl.band===player.band){ const k=0.9+0.12*Math.sin(game.frame*0.4+fl.x); addLight(fl.x, fl.y-6, 140*k, 1.0); } }
+  lx.globalCompositeOperation = "source-over";
+  ctx.drawImage(lightCv, PLAY_L, PLAY_TOP);
+}
+
+function drawPlayer(){
+  const r = playerRect();
+  const sx = worldToScreenX(player.x), sy = worldToScreenY(player.y);
+  if (player.invuln > 0 && Math.floor(game.frame/3)%2===0) return; // blink
+  ctx.save(); ctx.translate(sx, sy); ctx.scale(player.facing, 1);
+  const crawl = (player.state===ST.CRAWL||player.state===ST.FASTCRAWL||player.state===ST.PLACEDYN);
+  // palette: base / Highlight / Dark shadow per material
+  const skin="#d8a06a", skinH="#ecb486", skinD="#b07c48";
+  const shirt="#c9a23a", shirtH="#e6c25a", shirtD="#9c7c26";
+  const pants="#5a4424", pantsH="#73582f", hat="#7a5a2a", hatH="#9c7438", boot="#2e2012";
+  const blade="#eef0f6";
+  if (player.state===ST.DEAD){
+    px(-18,-7,36,7,shirt); px(-18,-7,36,2,shirtD); px(-20,-9,9,9,skin); px(-20,-9,9,2,skinH);
+    ctx.restore(); return;
+  }
+  if (crawl){
+    // approved proportions kept; shading layered on top (no silhouette change)
+    px(-6,-14,22,14,shirt); px(12,-14,10,8,skin); px(10,-18,12,5,hat);
+    const legf=Math.sin(player.anim)*4; px(-19,-3,15,4,pants); px(9+legf,-5,8,6,pants);
+    px(-6,-14,22,3,shirtH);                 // lit back
+    px(-6,-3,22,2,shirtD);                  // under-shadow
+    px(10,-18,12,2,hatH); px(11,-13,11,2,"#5a4220"); // hat sheen + band
+    px(16,-11,3,3,"#22150a");               // eye (forward)
+    px(12,-7,8,2,skinD);                    // jaw shadow
+    px(-19,-3,15,2,pantsH);                 // leg highlight
+  } else if (player.state===ST.JUMP){
+    const rising = player.vy < 0;                          // pose reacts to rising vs falling
+    // torso (slight crouch)
+    px(-6,-38,12,22,shirt);
+    px(-6,-38,12,4,shirtH);                                // lit shoulders
+    px(-6,-20,12,3,shirtD);                                // waist shadow
+    px(-6,-34,12,3,"#6e4a24");                             // bandolier strap
+    px(-7,-22,14,3,"#3a2c16"); px(-2,-21,5,2,"#caa14a");   // belt + buckle
+    // legs tucked, knees bent (rear leg trailing, front knee up)
+    px(-8,-17,6,5,"#3e2f18");                              // rear thigh (behind)
+    px(-9,-13,5,7,"#3e2f18");                              // rear shin
+    px(-10,-8,6,4,"#211810");                              // rear foot
+    px(0,-18,8,5,pants); px(0,-18,8,2,pantsH);             // front thigh raised
+    px(6,-16,5,9,pants);                                   // front shin
+    px(5,-9,7,4,boot); px(5,-9,7,2,"#46321c");             // front foot (toe forward)
+    // arm raised for balance (or pistol kept level if drawn)
+    if (inv.fightMode===2 && inv.pistol){
+      px(8,-33,14,5,"#33333a"); px(8,-34,14,2,"#55555f"); px(4,-35,7,11,skin);
+    } else {
+      const ay = rising ? -48 : -44;                       // arm flung higher while rising
+      px(4,-37,5,7,skin);                                  // upper arm
+      px(7,ay,5,10,skin); px(7,ay,5,3,skinH);              // forearm raised
+    }
+    // head + fedora
+    px(-8,-52,16,15,skin);
+    px(-8,-39,16,2,skinD);                                 // jaw shadow
+    px(-10,-54,20,5,hat); px(-10,-54,20,2,hatH);           // brim + sheen
+    px(-10,-50,20,2,"#5a4220");                            // hat band
+    px(-6,-61,13,8,hat); px(-6,-61,13,2,hatH);             // crown
+    px(-1,-61,3,3,"#5e441f");                              // crown dent
+    px(3,-45,3,3,"#22150a"); px(0,-47,6,2,"#5a4228"); px(-9,-44,2,4,skinD); // eye/brow/ear
+  } else {
+    const moving = (player.state===ST.WALK||player.state===ST.RUN);
+    const sw = moving ? Math.sin(player.anim)*5 : 0;
+    const armSw = moving ? Math.sin(player.anim+Math.PI)*4 : 0;  // arm swings opposite the legs; 0 at rest
+    // legs (side-on: a far leg behind and a near leg that scissor when walking)
+    px(-3-sw,-16,5,16,"#3e2f18");                           // far leg (darker, behind)
+    px(-4-sw,-4,7,5,"#211810");                             // far foot (toe forward)
+    px(-2+sw,-16,5,16,pants);                               // near leg
+    px(-2+sw,-16,5,3,pantsH);                               // thigh highlight
+    px(-3+sw,-4,7,5,boot);                                  // near foot (toe forward)
+    px(-3+sw,-4,7,2,"#46321c");                             // boot cuff
+    // torso (12 wide - thinner than the 16-wide head)
+    px(-6,-38,12,24,shirt);
+    px(-6,-38,12,4,shirtH);                                 // lit shoulders
+    px(-6,-18,12,4,shirtD);                                 // shadowed waist
+    px(-6,-34,12,3,"#6e4a24");                              // bandolier strap
+    px(-7,-20,14,3,"#3a2c16"); px(-2,-19,5,2,"#caa14a");    // belt + buckle
+    // near arm: vertical at rest, forearm swings while walking
+    if (player.state===ST.ATTACK && inv.fightMode===1){
+      px(7,-37,26,4,blade); px(7,-38,26,2,"#ffffff");       // machete swing + glint
+      px(4,-39,7,12,skin); px(4,-39,7,3,skinH);             // forearm
+    } else if (inv.fightMode===2 && inv.pistol){
+      px(8,-33,14,5,"#33333a"); px(8,-34,14,2,"#55555f");   // pistol
+      px(4,-35,7,11,skin);
+    } else {
+      px(3,-36,5,9,skin); px(3,-36,5,2,skinH);              // upper arm at the shoulder
+      px(3+armSw,-28,5,9,skin);                             // forearm/hand swings (vertical at rest)
+    }
+    // head (wider than the body)
+    px(-8,-52,16,15,skin);
+    px(-8,-39,16,2,skinD);                                  // jaw shadow
+    // fedora: wide brim + raised crown (Indiana-Jones style)
+    px(-10,-54,20,5,hat); px(-10,-54,20,2,hatH);            // wide brim + sheen
+    px(-10,-50,20,2,"#5a4220");                             // hat band
+    px(-6,-61,13,8,hat); px(-6,-61,13,2,hatH);              // crown
+    px(-1,-61,3,3,"#5e441f");                               // crown dent
+    px(3,-45,3,3,"#22150a");                                // eye (forward)
+    px(0,-47,6,2,"#5a4228");                                // brow
+    px(-9,-44,2,4,skinD);                                   // ear
+  }
+  ctx.restore();
+}
+
+function drawEnemy(e){
+  const sx=worldToScreenX(e.x), sy=worldToScreenY(e.y);
+  if (sx<PLAY_L-40||sx>PLAY_R+40) return;
+  ctx.save(); ctx.translate(sx,sy); ctx.scale(e.facing,1);
+  const c = ETYPE[e.type].col;
+  if (e.hitTimer>0) ctx.globalAlpha=0.6;
+  if (e.type==="snake"){
+    for(let i=0;i<6;i++){ const yy=Math.sin(e.anim+i*0.6)*3; px(-17+i*6,-7+yy,7,7, i%2?c:"#5a934a"); px(-17+i*6,-7+yy,7,2,"#9fd07a"); } // body segments + light
+    px(8,-9,9,8,c); px(8,-9,9,2,"#9fd07a");                 // head + sheen
+    px(14,-7,3,3,"#000"); px(14,-7,1,1,"#fff");             // eye + glint
+    const tl=(Math.floor(e.anim*4)%4<2)?5:2;                // flicking forked tongue
+    px(17,-5,tl,1,"#d33"); px(17+tl-1,-6,2,1,"#d33"); px(17+tl-1,-4,2,1,"#d33");
+  } else if (e.type==="spider"){
+    ctx.strokeStyle=c; ctx.lineWidth=2;                     // jointed legs (two segments each)
+    for(let i=0;i<3;i++){ const a=Math.sin(e.anim+i)*2;
+      ctx.beginPath(); ctx.moveTo(-6,-8); ctx.lineTo(-12,-6-a+i*3); ctx.lineTo(-15,-2-a+i*3); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(6,-8); ctx.lineTo(12,-6+a+i*3); ctx.lineTo(15,-2+a+i*3); ctx.stroke(); }
+    px(-8,-14,16,10,c); px(-8,-14,16,3,"#9a7bb0");          // abdomen + sheen
+    px(-5,-18,10,6,c); px(-5,-18,10,2,"#9a7bb0");           // head
+    px(-4,-16,2,2,"#f33"); px(2,-16,2,2,"#f33"); px(-1,-15,1,1,"#fbb"); px(1,-15,1,1,"#fbb"); // eyes
+    px(-3,-9,2,3,"#eee"); px(2,-9,2,3,"#eee");              // fangs
+  } else if (e.type==="warrior"){
+    px(-8,-18,6,18,"#3a2a16"); px(2,-18,6,18,"#3a2a16"); px(-8,-18,6,3,"#4e3820"); px(2,-18,6,3,"#4e3820"); // legs + light
+    px(-9,-40,18,24,c); px(-9,-40,18,4,"#cf6a45"); px(-9,-22,18,4,"#7a3014"); // torso + lit chest + waist
+    px(-7,-54,14,14,"#d8a06a"); px(-7,-54,14,3,"#ecb486");  // face
+    px(-3,-49,3,3,"#221"); px(-7,-46,14,2,"#7a3014");       // eye + war-paint
+    px(-11,-60,22,8,"#caa14a"); px(-11,-60,22,2,"#e2c45e"); // headdress
+    px(-10,-65,3,6,"#1aa84a"); px(-2,-67,3,8,"#d83a2a"); px(6,-65,3,6,"#1aa84a"); // feathers
+    px(8,-46,22,3,"#8a8a90"); px(28,-49,6,7,"#dfe2ea");     // spear shaft + head
+    px(-14,-40,5,18,"#8a3a20"); px(-13,-36,3,10,"#caa14a"); // shield + boss
+  } else if (e.type==="panther"){
+    const sw=Math.sin(e.anim*1.4)*3, tail=Math.sin(e.anim*0.8)*5;
+    px(-26-tail,-17,9,4,c); px(-30-tail,-15,5,3,c);         // tail flick
+    px(-22,-18,40,12,c); px(-22,-18,40,3,"#e2c45e"); px(-22,-9,40,3,"#8a6a28"); // body sheen + belly shadow
+    px(12,-24,15,13,c); px(12,-24,15,3,"#e2c45e");          // head
+    px(11,-28,4,5,c); px(23,-28,4,5,c);                     // ears
+    px(-20,-6,5,6+sw,"#241a0e"); px(-7,-6,5,6-sw,"#241a0e"); px(7,-6,5,6+sw,"#241a0e"); px(19,-6,5,6-sw,"#241a0e"); // 4 legs
+    px(23,-21,3,2,"#ffec6a"); px(25,-18,3,2,"#000");        // eye + nose
+  } else if (e.type==="alligator"){
+    px(-34,-12,7,5,c);                                      // tail base
+    px(-30,-14,54,11,c); px(-30,-14,54,3,"#7a9a5a"); px(-30,-6,54,2,"#3a4a2a"); // body + light + belly
+    for(let i=-26;i<16;i+=7){ px(i,-18,5,5,"#4a6638"); px(i+1,-19,3,2,"#5e7e48"); } // back scutes
+    px(18,-16,20,9,c); px(18,-16,20,2,"#7a9a5a");           // snout
+    for(let i=20;i<36;i+=4){ px(i,-7,2,2,"#fff"); }         // teeth
+    px(30,-16,5,4,c); px(31,-15,3,2,"#000");                // eye ridge + eye
+    px(-22,-3,7,3,"#3a4a2a"); px(2,-3,7,3,"#3a4a2a"); px(14,-3,7,3,"#3a4a2a"); // legs
+  } else if (e.type==="priest"){
+    px(-11,-42,22,42,c); px(-11,-42,22,4,"#b58fc8");        // robe + lit shoulders
+    px(-2,-40,3,40,"#6f4d86"); px(-11,-6,22,3,"#5a3e70");   // central fold + hem shadow
+    px(-13,-44,26,8,"#3a2a4a"); px(-13,-44,26,2,"#4e3a60"); // hood
+    px(-7,-54,14,13,"#c8a878"); px(-7,-54,14,3,"#dcc090");  // face
+    px(-4,-49,3,2,"#221"); px(2,-49,3,2,"#221"); px(-5,-45,12,2,"#9a7650"); // eyes + mouth
+    px(-2,-39,4,4,"#ffe9a8");                               // pendant
+    px(10,-44,4,30,"#caa14a"); px(10,-44,4,3,"#e2c45e"); px(8,-47,8,6,"#ffd36e"); // staff + orb
+    px(7,-22,6,4,"#c8a878");                                // hand on staff
+  } else if (e.type==="hole"){
+    px(-14,-16,28,16,c); px(-14,-16,28,3,"#8a7aa0");        // body + rim light
+    px(-10,-20,20,6,c);
+    px(-7,-13,3,3,"#ff5050"); px(4,-13,3,3,"#ff5050"); px(-6,-12,1,1,"#ffd0d0"); px(5,-12,1,1,"#ffd0d0"); // eyes + glints
+    for(let i=-10;i<10;i+=4){ px(i,-3,2,3,"#170c17"); }     // jagged maw
+  }
+  ctx.globalAlpha=1; ctx.restore();
+  if (e.hp < ETYPE[e.type].hp){ px(sx-12, sy-e.h-8, 24,3,"#400"); px(sx-12, sy-e.h-8, 24*Math.max(0,e.hp)/ETYPE[e.type].hp,3,"#6c6"); }
+}
+
+/* ----------------------------- HUD --------------------------------- */
+function drawHUD(){
+  const y0 = SCREEN_H - HUD_H;
+  px(0,y0,SCREEN_W,HUD_H,"#1a130a");
+  px(0,y0,SCREEN_W,3,"#5b4521");
+  ctx.textAlign="left"; ctx.font="14px 'Courier New',monospace";
+  ctx.fillStyle="#caa"; ctx.fillText("HEALTH", 20, y0+24);
+  px(90,y0+13,160,14,"#3a1414"); px(90,y0+13,160*clamp(inv.hp/inv.hpMax,0,1),14, inv.hp>40?"#5fbf4f":inv.hp>20?"#d8b23a":"#cf3a2a");
+  ctx.fillStyle="#e9d8a6"; ctx.fillText(Math.max(0,Math.round(inv.hp))+"/"+inv.hpMax, 100, y0+24);
+  ctx.fillStyle="#e9d8a6";
+  ctx.fillText("BULLETS "+inv.bullets, 270, y0+24);
+  ctx.fillText("DYNAMITE "+inv.dynamite+"   FLARES "+inv.flares, 270, y0+46);
+  ctx.fillText("WEAPON "+["NONE","MACHETE","PISTOL"][inv.fightMode], 270, y0+68);
+  ctx.fillText("MACHETE "+(inv.machete?"YES":"--"), 470, y0+24);
+  ctx.fillText("PISTOL "+(inv.pistol?"YES":"--"), 470, y0+46);
+  ctx.fillStyle = inv.idol?"#7CFC9A":"#6a5a38";
+  ctx.fillText("IDOL "+(inv.idol?"CARRIED":"not found"), 470, y0+68);
+  ctx.fillStyle="#e9d8a6";
+  ctx.fillText("LEVEL "+(player.band+1)+"/"+LEVEL_COUNT+"  "+DIFF[DIFFICULTY].name, 650, y0+24);
+  const secs=Math.floor((performance.now()-game.startTime)/1000);
+  ctx.fillText("TIME "+secs+"s", 650, y0+46);
+  if (window.AztecMusic){ const ms=AztecMusic.status();
+    ctx.fillStyle = ms.muted?"#9a7a4a":(ms.playing?"#7CFC9A":"#b58a3a");
+    ctx.fillText(ms.muted?"MUSIC OFF":(ms.playing?"MUSIC ON":(ms.hasTrack?"MUSIC...":"MUSIC --")), 815, y0+46);
+    ctx.fillStyle="#e9d8a6"; }
+  if (godMode){ ctx.fillStyle="#7CFC9A"; ctx.fillText("GOD MODE", 815, y0+24); ctx.fillStyle="#e9d8a6"; }
+  if (trap.active){
+    const ts = Math.ceil(trap.timer/60);
+    ctx.fillStyle = (Math.floor(game.frame/8)%2) ? "#ff5040" : "#ffd060";
+    ctx.fillText("TRAPPED! "+ts+"s - press D", 650, y0+68);
+  }
+  if (inv.torch){ ctx.fillStyle="#ffcf6a"; ctx.fillText("TORCH lit", 815, y0+68); ctx.fillStyle="#e9d8a6"; }
+  if (game.msgTimer>0){ ctx.fillStyle="#ffe9a8"; ctx.textAlign="center";
+    ctx.fillText(game.msg, SCREEN_W/2, y0-10); ctx.textAlign="left"; }
+}
+
+/* --------------------------- Overlays ------------------------------ */
+function drawTransition(){
+  if (!game.transition.active) return;
+  const tr=game.transition; const a = tr.phase===0 ? tr.t/24 : 1-tr.t/24;
+  ctx.fillStyle="rgba(0,0,0,"+clamp(a,0,1)+")"; ctx.fillRect(PLAY_L,PLAY_TOP,PLAY_W,PLAY_H);
+}
+function centerText(lines, sub){
+  ctx.fillStyle="rgba(0,0,0,0.78)"; ctx.fillRect(PLAY_L,PLAY_TOP,PLAY_W,PLAY_H);
+  ctx.textAlign="center";
+  ctx.fillStyle="#e9d8a6"; ctx.font="34px 'Courier New',monospace";
+  lines.forEach((l,i)=>ctx.fillText(l, SCREEN_W/2, PLAY_TOP+150+i*42));
+  if (sub){ ctx.fillStyle="#caa24a"; ctx.font="16px 'Courier New',monospace";
+    sub.forEach((l,i)=>ctx.fillText(l, SCREEN_W/2, PLAY_TOP+150+lines.length*42+24+i*26)); }
+  ctx.textAlign="left";
+}
+// word-wrap a string to a pixel width using the current ctx.font
+function wrapText(text, maxW){
+  const words = text.split(" "), out = []; let cur = "";
+  for (const w of words){
+    const t = cur ? cur + " " + w : w;
+    if (cur && ctx.measureText(t).width > maxW){ out.push(cur); cur = w; }
+    else cur = t;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+function drawTitle(){
+  drawFrame();
+  ctx.fillStyle="#000"; ctx.fillRect(0,0,SCREEN_W,SCREEN_H);
+
+  // title
+  ctx.textAlign="center";
+  ctx.font="54px 'Courier New',monospace";
+  ctx.fillStyle="#1a0e02"; ctx.fillText("A Z T E C", SCREEN_W/2+3, 58);
+  ctx.fillStyle="#d9a441"; ctx.fillText("A Z T E C", SCREEN_W/2, 55);
+  ctx.fillStyle="#8a7340"; ctx.font="14px 'Courier New',monospace";
+  ctx.fillText("Tomb of Quetzalcoatl - an homage", SCREEN_W/2, 78);
+
+  // temple on the right
+  if (templeReady){
+    const tw=320, th=tw*520/800, tx=600, ty=104;
+    const gl=ctx.createRadialGradient(tx+tw/2, ty+th*0.55, 30, tx+tw/2, ty+th*0.55, tw*0.7);
+    gl.addColorStop(0,"rgba(0,255,90,0.10)"); gl.addColorStop(1,"rgba(0,40,20,0)");
+    ctx.fillStyle=gl; ctx.fillRect(tx-50, ty-20, tw+90, th+50);
+    ctx.drawImage(templeImg, tx, ty, tw, th);
+  }
+
+  // prologue on the left (word-wrapped)
+  ctx.textAlign="left";
+  ctx.fillStyle="#caa24a"; ctx.font="bold 12px 'Courier New',monospace";
+  ctx.fillText("THE EXPEDITION", 36, 108);
+  ctx.fillStyle="#cdbb8e"; ctx.font="italic 14px 'Courier New',monospace";
+  const prologue = "Rumour has surfaced that Professor G. von Forster - noted tomb robber and archaeologist - has found the entrance to the Tomb of Quetzalcoatl. Within lies a jade idol worth a fortune to whoever can find it and return alive. Its value is high now but falling steadily: the faster you escape, and the harder the difficulty you brave, the greater your reward. Beware - the tomb is guarded by awful monsters and men without mercy. And von Forster had a nasty streak; he may have left some deadly surprises behind...";
+  let py = 132;
+  for (const ln of wrapText(prologue, 548)){ ctx.fillText(ln, 36, py); py += 19; }
+
+  // controls (centered, below)
+  ctx.textAlign="center";
+  ctx.fillStyle="#e9d8a6"; ctx.font="13px 'Courier New',monospace";
+  const ctrl=[
+    "Arrows move    Shift run    Down crawl/descend    Up climb/ascend    Z jump",
+    "O search   D dynamite   T torch   L flare   F fight/weapon   Space attack   M music   Esc pause",
+    "Descend "+LEVEL_COUNT+" levels, find the jade idol, escape - dynamite digs through floors and can strand you.",
+  ];
+  const cy = 388;
+  ctrl.forEach((l,i)=>ctx.fillText(l, SCREEN_W/2, cy+i*21));
+  let best=null; try{ best=localStorage.getItem("aztec_best"); }catch(e){}
+  if (best){ ctx.fillStyle="#caa24a"; ctx.fillText("Best escape: "+best+"s", SCREEN_W/2, cy+ctrl.length*21+14); }
+  ctx.fillStyle="#d9a441"; ctx.font="20px 'Courier New',monospace";
+  ctx.fillText(((game.frame%50)<35)?"- Press ENTER to begin -":"", SCREEN_W/2, cy+ctrl.length*21+50);
+  ctx.textAlign="left";
+}
+
+/* ----------------------------- Loop -------------------------------- */
+function enterSetup(){
+  game.mode="setup";
+  const el=document.getElementById("setup"); if (el) el.style.display="flex";
+  if (window.AztecMusic) AztecMusic.playTitle();
+}
+function cancelSetup(){
+  game.mode="title";
+  const el=document.getElementById("setup"); if (el) el.style.display="none";
+}
+function hideSetup(){ const el=document.getElementById("setup"); if (el) el.style.display="none"; }
+function aztecStart(){
+  let diff=1; const r=document.querySelector('input[name="aztec-diff"]:checked'); if (r) diff=+r.value;
+  applyDifficulty(diff);
+  if (window.AztecMusic){
+    const bundled=document.getElementById("aztec-bundled");
+    const fEl=document.getElementById("aztec-files");
+    if (bundled && bundled.checked) AztecMusic.loadBundled(LEVEL_COUNT);
+    else if (fEl && fEl.files && fEl.files.length) AztecMusic.loadFiles(fEl.files, LEVEL_COUNT);
+    else AztecMusic.loadBundled(LEVEL_COUNT);
+  }
+  hideSetup();
+  startGame();
+}
+function startGame(){
+  generateTemple();
+  clearTrap();
+  inv.hp=inv.hpMax; inv.bullets=6; inv.dynamite=DIFF[DIFFICULTY].dynamite; inv.machete=true; inv.pistol=false;
+  inv.idol=false; inv.fightMode=1; inv.flares=2; inv.torch=false;
+  player.band=0; player.floor=0; player.x=90; player.y=floorWorldY(0,0);
+  player.vx=player.vy=0; player.state=ST.IDLE; player.facing=1; player.invuln=30; player.stairCD=0;
+  game.mode="play"; game.startTime=performance.now(); game.msgTimer=0;
+  if (window.AztecMusic) AztecMusic.playLevel(0);
+  message("Descend "+LEVEL_COUNT+" levels ("+DIFF[DIFFICULTY].name+") - find the jade idol - escape.", 200);
+}
+
+function update(){
+  game.frame++;
+  if (consume("music") && window.AztecMusic){ const m=AztecMusic.toggleMute(); message(m?"Music off":"Music on", 50); }
+  if (consume("god") && keys.run){ godMode=!godMode; message(godMode?"GOD MODE ON - invincible, full kit, path shown":"God mode off", 100); }
+  if (godMode && game.mode==="play"){ inv.hp=inv.hpMax; inv.machete=true; inv.pistol=true; inv.bullets=99; inv.dynamite=99; }
+  if (game.mode==="title"){ if (consume("start")){ AudioFX.resume(); enterSetup(); } return; }
+  if (game.mode==="setup"){ if (consume("start")) aztecStart(); else if (consume("pause")) cancelSetup(); return; }
+  if (game.mode==="win"){ if (consume("start")) game.mode="title"; return; }
+  if (game.mode==="pause"){ if (consume("pause")) game.mode="play"; return; }
+  if (game.mode==="play" && consume("pause")){ game.mode="pause"; return; }
+
+  if (game.msgTimer>0) game.msgTimer--;
+  updateTransition();
+  if (!game.transition.active){
+    updatePlayer();
+    updateEnemies();
+    updateProjectiles();
+    updateTrap();
+    checkTrapTriggers();
+  } else { updateProjectiles(); }
+  updateCamera();
+}
+
+function render(){
+  if (game.mode==="title" || game.mode==="setup"){ drawTitle(); return; }
+  drawFrame();
+  drawWorld();
+  drawTransition();
+  drawHUD();
+  if (game.mode==="pause") centerText(["PAUSED"], ["Press Esc to resume"]);
+  if (game.mode==="win") centerText(["YOU ESCAPED!"],
+    ["You carried the idol of Quetzalcoatl into daylight.",
+     "Escape time: "+game.winTime+"s    Best: "+game.best+"s",
+     "Press ENTER for the title screen"]);
+}
+
+let last=0;
+function loop(t){
+  requestAnimationFrame(loop);
+  if (t-last < 1000/60) return; last=t;
+  update(); render();
+}
+requestAnimationFrame(loop);
+</script>
+<script>
+  /* Author / licence - edit here to update the footer (matches sister apps RIGEL & SMART) */
+  var AUTHOR = "Michael Fenton";
+  var LICENCE = "CC BY-NC-SA 4.0";
+  var LICENCE_URL = "https://creativecommons.org/licenses/by-nc-sa/4.0/";
+  var PORTFOLIO_URL = "https://mikefentonnz.github.io/";
+  (function applyCredit(){
+    var l = document.getElementById('about-licence');
+    var f = document.getElementById('about-credit');
+    var pf = document.getElementById('about-portfolio');
+    if (pf){ pf.href = PORTFOLIO_URL; pf.textContent = PORTFOLIO_URL.replace(/^https?:\/\//,'').replace(/\/$/,''); }
+    if (l){ l.textContent = LICENCE; l.href = LICENCE_URL; }
+    if (f){ f.innerHTML = 'Author: ' + AUTHOR + ' \u00B7 \u00A9 2026'; }
+  })();
+</script>
+</body>
+</html>
