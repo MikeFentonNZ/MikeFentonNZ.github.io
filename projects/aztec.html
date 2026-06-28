@@ -380,7 +380,7 @@ templeImg.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(TEMPLE_
 const keys = {}, pressed = {};
 const KEYMAP = { ArrowLeft:"left", ArrowRight:"right", ArrowUp:"up", ArrowDown:"down",
   ShiftLeft:"run", ShiftRight:"run", KeyZ:"jump", KeyO:"open", KeyD:"dyn",
-  KeyC:"fight", KeyT:"torch", KeyF:"flare", KeyM:"music", KeyG:"god", Space:"attack", Escape:"pause", Enter:"start" };
+  KeyC:"fight", KeyT:"torch", KeyF:"flare", KeyM:"music", KeyG:"god", KeyR:"restart", Space:"attack", Escape:"pause", Enter:"start" };
 function typingInUI(e){ const t=e.target; return t && (t.tagName==="INPUT"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"); }
 addEventListener("keydown", e => {
   if (typingInUI(e)) return;                 // let focused sliders/file picker use keys normally
@@ -457,6 +457,9 @@ let piles = [];       // {band, x, floor, stage, gone, kind:"trash"|"bones"}
 let torches = [];     // {band, x, floor}
 let exitZone = null;  // {band, x, floor}
 let enemies = [], bullets = [], dynamites = [], grenades = [], explosions = [], particles = [], flares = [];
+let cobwebs = [], critters = [];   // ambient ceiling decor (cosmetic)
+let webs = [];                     // giant breakable floor-to-ceiling webs (gate)
+const WEB_TEAR = 28;               // frames of pushing to tear a web (~0.5s)
 
 function addFloorRow(band, idx, x0, x1, gaps){
   // gaps: array of [gx0,gx1] world ranges to leave empty
@@ -476,7 +479,7 @@ function addFloorRow(band, idx, x0, x1, gaps){
    Decoys, containers, traps and depth-scaled enemies fill the rest.
    ==================================================================== */
 let trapTriggers = [];
-const trap = { active:false, timer:0, max:0, wallL:null, wallR:null, band:0 };
+const trap = { active:false, kind:null, wallL:null, wallR:null, ceiling:null, band:0, closeSpeed:0, descendSpeed:0 };
 let godMode = false;   // Shift+G test mode: invincible, full kit, path shown
 
 function clearX(band, floor, x, margin){
@@ -532,7 +535,7 @@ function generateTemple(){
   let attempt=0, ok=false;
   do {
     attempt++;
-    segs=[]; walls=[]; stairs=[]; connectors=[]; chests=[]; piles=[]; torches=[];
+    segs=[]; walls=[]; stairs=[]; connectors=[]; chests=[]; piles=[]; torches=[]; cobwebs=[]; critters=[]; webs=[];
     enemies=[]; bullets=[]; dynamites=[]; grenades=[]; explosions=[]; particles=[]; trapTriggers=[]; flares=[];
     trap.active=false; trap.wallL=trap.wallR=null;
 
@@ -586,7 +589,15 @@ function generateTemple(){
       for (let i=0;i<ri(2,3);i++){ const f=ri(0,2), x=pickClearX(b,f,avoid[b],300,ROOM_W-200); if(x>0){ piles.push({band:b,x,floor:f,stage:0,gone:false,kind:Math.random()<0.5?"bones":"trash"}); avoid[b].push(x);} }
       if (b<idolBand){ const nd=ri(dc.decoy[0],dc.decoy[1]); for(let i=0;i<nd;i++){ const x=pickClearX(b,2,avoid[b],500,ROOM_W-300); if(x>0){ connectors.push({band:b,x,floor:2,up:false,valid:false,destBand:b+1,destFloor:0}); avoid[b].push(x);} } }
       for (let f=0;f<3;f++){ torches.push({band:b,x:ri(200,ROOM_W-200),floor:f}); }
-      if (b>=1){ const nt=ri(dc.trap[0],dc.trap[1]); for(let i=0;i<nt;i++){ const f=ri(0,2), x=pickClearX(b,f,avoid[b],400,ROOM_W-300); if(x>0){ trapTriggers.push({band:b,x,floor:f,used:false}); avoid[b].push(x);} } }
+      // ambient: corner cobwebs (density grows with depth) + a few ceiling critters
+      const ceilY = (fl)=> b*LEVEL_H + (fl===0 ? 2 : FLOOR_Y[fl-1] + FLOOR_THICK);
+      const nWeb = Math.min(4, Math.floor(b*0.6) + ri(0,1));
+      for (let i=0;i<nWeb;i++){ const wf=ri(0,2);
+        cobwebs.push({ band:b, x:ri(120,ROOM_W-120), y:ceilY(wf), sz:12+ri(0,6)+b, side:(Math.random()<0.5?-1:1), alpha:Math.min(0.42,0.16+b*0.04) }); }
+      if (Math.random() < 0.55 + b*0.06){ const nC=ri(1,2);
+        for (let i=0;i<nC;i++){ const cf=ri(0,2);
+          critters.push({ band:b, x:ri(150,ROOM_W-150), ceilY:ceilY(cf)+6, type:(Math.random()<0.5?"bat":"spider"), anim:Math.random()*6, vx:0, flyY:0, startled:false, sct:0, gone:false }); } }
+      if (b>=1 && DIFFICULTY!==1){ const nt=ri(dc.trap[0],dc.trap[1]); for(let i=0;i<nt;i++){ const f=ri(0,2), x=pickClearX(b,f,avoid[b],400,ROOM_W-300); if(x>0){ trapTriggers.push({band:b,x,floor:f,used:false,kind:Math.random()<0.5?"ceiling":"walls"}); avoid[b].push(x);} } }
       const nEn = dc.enemyBase + Math.floor(b*dc.enemyDepth) + ri(0,1);
       let holeHere = false;
       for (let i=0;i<nEn;i++){
@@ -600,6 +611,33 @@ function generateTemple(){
         let f=ri(0,2), x=pickClearX(b,f,[],250,ROOM_W-250); if(x<0) x=ri(300,ROOM_W-300);
         spawnEnemy("hole", b, x, f);
       }
+    }
+
+    // Easy: a gentle curated taste — exactly one of each trap kind (2 total),
+    // placed in the deeper half (levels 4-6 = bands 3..LEVEL_COUNT-1).
+    if (DIFFICULTY===1){
+      const deep = []; for (let b=3;b<LEVEL_COUNT;b++) deep.push(b);
+      for (const kind of ["walls","ceiling"]){
+        for (let tries=0;tries<12;tries++){
+          const b=deep[ri(0,deep.length-1)], f=ri(0,2);
+          const x=pickClearX(b,f,avoid[b],400,ROOM_W-300);
+          if (x>0){ trapTriggers.push({band:b,x,floor:f,used:false,kind}); avoid[b].push(x); break; }
+        }
+      }
+    }
+
+    // Giant webs on the lower levels (push-through on Easy/Normal; machete-gated on Hard).
+    for (let b=2;b<LEVEL_COUNT;b++){
+      if (Math.random() < 0.32){
+        const wf=ri(0,2), x=pickClearX(b,wf,avoid[b],300,ROOM_W-300);
+        if (x>0){ webs.push({band:b,x,floor:wf,broken:false,tear:0}); avoid[b].push(x); }
+      }
+    }
+    // Hard: guarantee one web on the critical path at a deep band's down-connector (the gate).
+    if (DIFFICULTY===3 && LEVEL_COUNT>=3){
+      const gb=LEVEL_COUNT-2;
+      const dc2=connectors.find(c=>c.band===gb && !c.up && c.valid);
+      if (dc2 && !webs.some(w=>w.band===gb && w.floor===2 && Math.abs(w.x-dc2.x)<30)) webs.push({band:gb,x:dc2.x,floor:2,broken:false,tear:0});
     }
 
     ok = verifyPath(idolBand);
@@ -649,14 +687,16 @@ function hurtPlayer(dmg){
 function killPlayer(){
   if (godMode){ inv.hp = inv.hpMax; clearTrap(); return; }
   player.state = ST.DEAD; player.vx = 0; player.vy = 0;
-  AudioFX.die(); message("You died. Returning to the temple mouth...", 150);
+  // Easy makes death a full restart (otherwise it's too forgiving); Normal/Hard respawn at the level entrance.
+  AudioFX.die(); message(DIFFICULTY===1 ? "You died. The temple resets — begin the descent anew..." : "You died. Dragged back to this level's entrance...", 150);
   setTimeout(respawn, 2100);
 }
 function respawn(){
-  if (game.mode === "win") return;
+  if (game.mode === "win" || game.mode === "title") return;   // player may have bailed via R-restart
   clearTrap();
+  if (DIFFICULTY === 1){ startGame(); return; }                // Easy: full regenerating restart, back to level 1
   inv.hp = inv.hpMax;
-  // resume at the entry of the current level (not all the way back to the surface)
+  // Normal/Hard: resume at the entry of the current level (not all the way back to the surface)
   player.x = 90; player.floor = 0; player.y = floorWorldY(player.band, 0); player.airStartY = player.y;
   player.vx = player.vy = 0; player.state = ST.IDLE; player.facing = 1; player.invuln = 60;
 }
@@ -843,6 +883,28 @@ function applyMotion(){
       else if (player.vx < 0) player.x = w.x + w.w + player.w/2 + 1;
     }
   }
+  // giant webs: block passage until torn. Easy/Normal tear by pushing; Hard needs a machete.
+  for (const wb of webs){
+    if (wb.broken || wb.band!==player.band || wb.floor!==player.floor) continue;
+    const half = 15;
+    if (player.x + player.w/2 > wb.x - half && player.x - player.w/2 < wb.x + half){
+      const cuttable = (DIFFICULTY < 3) || inv.machete;
+      if (cuttable){
+        if (Math.abs(player.vx) > 0.1){              // tearing while pushing into it
+          wb.tear++;
+          if ((wb.tear % 6)===0) burst(wb.x, player.y-22, "#e4e4ee", 3);
+          if (wb.tear >= WEB_TEAR){ wb.broken = true; AudioFX.machete(); burst(wb.x, player.y-24, "#e4e4ee", 16);
+            message(DIFFICULTY===3 ? "You cut through the web." : "You tear through the web.", 70); }
+        }
+      } else if (game.frame % 45 === 0 || !wb._told){
+        wb._told = true; message("The web is too thick — only a blade can cut it.", 100);
+      }
+      if (!wb.broken){                                // blocked to the near side
+        if (player.x < wb.x) player.x = Math.min(player.x, wb.x - half - player.w/2);
+        else player.x = Math.max(player.x, wb.x + half + player.w/2);
+      }
+    }
+  }
 }
 
 /* --------------------------- Connectors / exit --------------------- */
@@ -871,7 +933,7 @@ function tryExit(){
 const game = {
   mode:"title", // title, play, pause, dead, win
   transition:{ active:false, phase:0, t:0, destBand:0, destFloor:0 },
-  msg:"", msgTimer:0, frame:0, time:0, startTime:0,
+  msg:"", msgTimer:0, frame:0, time:0, startTime:0, restartT:0,
 };
 function beginTransition(destBand, destFloor){
   game.transition.active = true; game.transition.phase = 0; game.transition.t = 0;
@@ -1149,6 +1211,8 @@ function explode(band, x, y){
   walls = walls.filter(w => !(w.destructible && Math.hypot(w.x+w.w/2-x, w.y-y) < 70));
   // damage enemies
   for (const e of enemies){ if (!e.dead && e.band===band && Math.hypot(e.x-x, e.y-e.h/2-y) < 90) damageEnemy(e, 50); }
+  // a blast passes straight through a web's open weave — telegraph why it won't break
+  for (const wb of webs){ if (!wb.broken && wb.band===band && Math.abs(wb.x-x) < 80 && !wb._dynTold){ wb._dynTold=true; message("The blast tears through the web's open weave — only a blade cuts it.", 110); } }
   // damage player (the cruelty: you can blow yourself up)
   if (player.band===band){
     const dist = Math.hypot(player.x-x, player.y-24-y);
@@ -1169,37 +1233,88 @@ function activateTrap(t){
   if (trap.active) return;
   t.used = true;
   const fy = floorWorldY(player.band, player.floor);   // walls only span the player's floor
-  const wl = { x: player.x - 60, y: fy - 96, w: 14, h: 100, trap:true };
-  const wr = { x: player.x + 46, y: fy - 96, w: 14, h: 100, trap:true };
-  walls.push(wl, wr);
-  trap.active = true; trap.timer = 480; trap.max = 480; trap.wallL = wl; trap.wallR = wr; trap.band = player.band;
-  trap.minX = wl.x; trap.maxX = wr.x + wr.w;   // the boxed-in span; stepping outside = escaped
-  AudioFX.hit();
-  message("TRAPPED! Blast the walls with dynamite (D) before time runs out!", 180);
+  trap.active = true; trap.band = player.band; trap.kind = t.kind || "walls";
+  if (trap.kind === "ceiling"){
+    // stationary narrow box (original pre-animation width) + a spiked ceiling that descends
+    const wl = { x: player.x - 60, y: fy - 96, w: 14, h: 100, trap:true };
+    const wr = { x: player.x + 46, y: fy - 96, w: 14, h: 100, trap:true };
+    walls.push(wl, wr);
+    trap.wallL = wl; trap.wallR = wr;
+    const inL = wl.x + wl.w, inR = wr.x;                // ceiling spans the inner gap
+    // start at the ceiling of the player's CURRENT floor (underside of the floor above; band top for floor 0)
+    const ceilWY = player.band*LEVEL_H + (player.floor===0 ? 2 : FLOOR_Y[player.floor-1] + FLOOR_THICK);
+    trap.ceiling = { x: inL, w: inR - inL, y: ceilWY, topY: ceilWY, floorY: fy };  // y = descending spike-tip edge
+    trap.descendSpeed = 0.40 + 0.13*(DIFFICULTY-1);    // px/frame; ~4.3 / 3.3 / 2.7s over the floor's headroom
+    AudioFX.hit();
+    message("TRAPPED! The ceiling is coming down — blast a wall (D) and get out!", 180);
+  } else {
+    // animated closing-wall crusher: start wide, then grind inward (the closing IS the clock)
+    const wl = { x: player.x - 116, y: fy - 96, w: 14, h: 100, trap:true };
+    const wr = { x: player.x + 102, y: fy - 96, w: 14, h: 100, trap:true };
+    walls.push(wl, wr);
+    trap.wallL = wl; trap.wallR = wr;
+    trap.closeSpeed = 0.34 + 0.10*(DIFFICULTY-1);       // per-wall px/frame; tenser on harder tiers
+    AudioFX.hit();
+    message("TRAPPED! The walls are closing — blast one with dynamite (D)!", 180);
+  }
 }
 function useDynamiteInTrap(){
-  if (inv.dynamite <= 0){ message("Out of dynamite — claw at the walls!", 90); return; }
+  if (inv.dynamite <= 0){ message("Out of dynamite — the walls keep closing!", 90); return; }
   inv.dynamite--;
-  let target = walls.includes(trap.wallL) ? trap.wallL : (walls.includes(trap.wallR) ? trap.wallR : null);
-  if (target){
-    walls.splice(walls.indexOf(target), 1);
-    explosions.push({ band:trap.band, x:target.x+target.w/2, y:player.y-20, t:18 });
-    burst(target.x+target.w/2, player.y-20, "#ffb347", 16); AudioFX.boom();
-    message("Wall blasted away!", 60);
-  }
+  // blast the nearest standing wall, opening that side
+  const cand = [];
+  if (walls.includes(trap.wallL)) cand.push(trap.wallL);
+  if (walls.includes(trap.wallR)) cand.push(trap.wallR);
+  if (!cand.length) return;
+  cand.sort((a,b)=>Math.abs((a.x+a.w/2)-player.x)-Math.abs((b.x+b.w/2)-player.x));
+  const target = cand[0];
+  walls.splice(walls.indexOf(target), 1);
+  explosions.push({ band:trap.band, x:target.x+target.w/2, y:player.y-20, t:18 });
+  burst(target.x+target.w/2, player.y-20, "#ffb347", 16); AudioFX.boom();
+  message("Wall blasted away!", 60);
 }
 function updateTrap(){
   if (!trap.active || game.transition.active) return;
-  const lAlive = walls.includes(trap.wallL), rAlive = walls.includes(trap.wallR);
-  const steppedOut = (player.x < trap.minX) || (player.x > trap.maxX);
-  if ((!lAlive && !rAlive) || steppedOut){ clearTrap(); message("You broke free!", 90); return; }
-  trap.timer--;
-  if (trap.timer <= 0){ clearTrap(); message("The walls close in...", 120); killPlayer(); }
+  const L = walls.includes(trap.wallL), R = walls.includes(trap.wallR);
+
+  // a blasted side is an opening — escape once the player is past where that wall stood (both kinds)
+  if (!L && !R){ clearTrap(); message("You broke free!", 90); return; }
+  if (!L && player.x < trap.wallL.x){ clearTrap(); message("You broke free!", 90); return; }
+  if (!R && player.x > trap.wallR.x + trap.wallR.w){ clearTrap(); message("You broke free!", 90); return; }
+
+  if (trap.kind === "ceiling"){
+    const c = trap.ceiling, fy = c.floorY;
+    c.y += trap.descendSpeed;                                 // slab descends
+    if (c.y > fy) c.y = fy;
+    const underIt = player.x > c.x && player.x < c.x + c.w;
+    if (underIt){
+      if (c.y >= fy - PLAYER_H && player.onGround && player.state !== ST.DEAD) player.state = ST.CRAWL; // duck or die
+      if (c.y >= fy - CRAWL_H){                               // pressed to crawl-head height -> crush
+        clearTrap(); message("The ceiling crushes you!", 120); killPlayer(); return;
+      }
+    }
+    if (game.frame % 9 === 0) burst(c.x + c.w/2, c.y, "#8a1c1c", 2);
+    return;
+  }
+
+  // ---- horizontal closing-wall crusher ----
+  if (L && R){
+    trap.wallL.x += trap.closeSpeed;
+    trap.wallR.x -= trap.closeSpeed;
+    const lInner = trap.wallL.x + trap.wallL.w, rInner = trap.wallR.x;
+    if (player.x - player.w/2 < lInner) player.x = lInner + player.w/2;   // pushed right
+    if (player.x + player.w/2 > rInner) player.x = rInner - player.w/2;   // pushed left
+    if (rInner - lInner <= player.w){                                     // walls meet on the player
+      player.x = (lInner + rInner)/2;
+      clearTrap(); message("The walls crush you!", 120); killPlayer(); return;
+    }
+    if (game.frame % 9 === 0) burst((lInner+rInner)/2, floorWorldY(trap.band, player.floor)-6, "#8a1c1c", 3); // grinding grit
+  }
 }
 function clearTrap(){
   if (walls.includes(trap.wallL)) walls.splice(walls.indexOf(trap.wallL),1);
   if (walls.includes(trap.wallR)) walls.splice(walls.indexOf(trap.wallR),1);
-  trap.active = false; trap.timer = 0; trap.wallL = trap.wallR = null;
+  trap.active = false; trap.wallL = trap.wallR = null; trap.ceiling = null;
 }
 
 /* --------------------------- Chests / Piles ------------------------ */
@@ -1223,6 +1338,8 @@ function openChest(c){
   const dc = DIFF[DIFFICULTY];
   if (DIFFICULTY>=2 && Math.random() < 0.10){ message("It's a trap!", 80); grenades.push({band:c.band,x:c.x,y:c.y-8}); setTimeout(()=>explodeGrenade(c.band,c.x,c.y-8), 1200); return; }
   if (Math.random() < dc.emptyChest){ message("The chest is empty.", 70); return; }
+  // machete recovery — only matters if a priest stripped yours (re-arms the blade)
+  if (!inv.machete && Math.random() < 0.5){ inv.machete=true; if(inv.fightMode===0) inv.fightMode=1; message("A discarded MACHETE — your blade is back!", 100); return; }
   const k = Math.random();
   if (k < 0.28){ if(!inv.pistol){inv.pistol=true; inv.bullets+=6; message("Found a PISTOL! +6 bullets.", 90);} else {inv.bullets+=6; message("Bullets +6.",80);} return; }
   if (k < 0.50){ inv.dynamite += 2; message("Dynamite +2.", 80); return; }
@@ -1237,6 +1354,7 @@ function searchPile(p){
   const py = floorWorldY(p.band, p.floor);
   const r = Math.random();
   if (r < 0.15){ message("Booby trap!", 80); setTimeout(()=>explodeGrenade(p.band,p.x,py-8), 900); return; }
+  if (!inv.machete && Math.random() < 0.4){ inv.machete=true; if(inv.fightMode===0) inv.fightMode=1; message("A MACHETE, buried in the pile!", 90); return; }
   if (r < 0.32){ inv.bullets += 3; message("Bullets +3.", 70); return; }
   if (r < 0.48){ inv.dynamite += 1; message("Dynamite +1.", 70); return; }
   if (r < 0.64){ inv.flares += 1; message("Flare +1.", 70); return; }
@@ -1327,6 +1445,83 @@ function drawFrame(){
   ctx.fillRect(PLAY_L-4,PLAY_TOP-4,4,PLAY_H+8); ctx.fillRect(PLAY_R,PLAY_TOP-4,4,PLAY_H+8);
 }
 
+function updateCritters(){
+  for (const c of critters){
+    if (c.band!==player.band || c.gone) continue;
+    c.anim += 0.18;
+    if (!c.startled){
+      if (Math.abs(player.x - c.x) < 120){          // player wanders near -> startle
+        c.startled = true;
+        c.vx = (c.x >= player.x ? 1 : -1) * (c.type==="bat" ? rnd(2.6,3.6) : rnd(1.8,2.6));
+        c.sct = c.type==="bat" ? 0 : 36;            // spiders scuttle briefly then stop
+      }
+    } else if (c.type==="bat"){
+      c.x += c.vx; c.flyY -= 1.4 + Math.sin(c.anim)*0.6;   // flit away and up
+      const rel = c.x - cam.x;
+      if (rel < -60 || rel > PLAY_W+60 || c.flyY < -PLAY_H) c.gone = true;
+    } else if (c.sct > 0){ c.x += c.vx; c.sct--; }          // spider scuttles a short burst
+  }
+}
+function drawCobwebs(){
+  for (const w of cobwebs){
+    if (w.band!==player.band) continue;
+    const sx=worldToScreenX(w.x), sy=worldToScreenY(w.y);
+    if (sx<PLAY_L-30||sx>PLAY_R+30) continue;
+    ctx.strokeStyle="rgba(214,210,224,"+w.alpha+")"; ctx.lineWidth=1;
+    const s=w.sz, d=w.side;
+    ctx.beginPath();                                  // radial threads (quarter fan into the corner)
+    for (let a=0;a<=4;a++){ const ang=(a/4)*(Math.PI/2); ctx.moveTo(sx,sy); ctx.lineTo(sx+d*Math.cos(ang)*s, sy+Math.sin(ang)*s); }
+    ctx.stroke();
+    ctx.beginPath();                                  // concentric capture threads
+    for (let r=s*0.4; r<=s; r+=s*0.3){
+      for (let a=0;a<=4;a++){ const ang=(a/4)*(Math.PI/2), qx=sx+d*Math.cos(ang)*r, qy=sy+Math.sin(ang)*r; if(a===0)ctx.moveTo(qx,qy); else ctx.lineTo(qx,qy); }
+    }
+    ctx.stroke();
+  }
+}
+function drawCritters(){
+  for (const c of critters){
+    if (c.band!==player.band || c.gone) continue;
+    const sx=worldToScreenX(c.x), sy=worldToScreenY(c.ceilY) + (c.type==="bat"?c.flyY:0);
+    if (sx<PLAY_L-30||sx>PLAY_R+30) continue;
+    if (c.type==="bat"){
+      const flap = c.startled ? Math.sin(c.anim*1.6)*6 : Math.sin(c.anim*0.4)*1.5;
+      ctx.fillStyle="#4a4452";                         // dark slate — reads against the cave, not pure black
+      ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(sx-9,sy-flap-2); ctx.lineTo(sx-4,sy+2); ctx.closePath(); ctx.fill(); // left wing
+      ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(sx+9,sy-flap-2); ctx.lineTo(sx+4,sy+2); ctx.closePath(); ctx.fill(); // right wing
+      ctx.strokeStyle="#6a6478"; ctx.lineWidth=1;      // faint wing-edge highlight so the silhouette reads
+      ctx.beginPath(); ctx.moveTo(sx-9,sy-flap-2); ctx.lineTo(sx,sy); ctx.lineTo(sx+9,sy-flap-2); ctx.stroke();
+      px(sx-2,sy-2,4,7,"#363040");                     // body
+      px(sx-2,sy-2,4,2,"#565060");                     // lit shoulders
+      px(sx-2,sy-3,1,1,"#d85048"); px(sx+1,sy-3,1,1,"#d85048"); // eye glints
+    } else {
+      ctx.strokeStyle="#5a5462"; ctx.lineWidth=1;      // ceiling spider — dark grey, visible
+      const lw=Math.sin(c.anim)*1.5;
+      ctx.beginPath();
+      for (let i=-1;i<=1;i++){ ctx.moveTo(sx-3,sy+1); ctx.lineTo(sx-7,sy+1+i*2+lw); ctx.moveTo(sx+3,sy+1); ctx.lineTo(sx+7,sy+1+i*2-lw); }
+      ctx.stroke();
+      px(sx-3,sy-1,6,4,"#3c3644"); px(sx-3,sy-1,6,1,"#5a5462"); px(sx-1,sy-2,2,2,"#4a4452"); // body + sheen + head
+    }
+  }
+}
+function drawWebs(){   // drawn AFTER lighting so the gate stays faintly visible even in the dark
+  for (const wb of webs){
+    if (wb.broken || wb.band!==player.band || wb.floor!==player.floor) continue;
+    const sx=worldToScreenX(wb.x);
+    if (sx<PLAY_L-40||sx>PLAY_R+40) continue;
+    const topRel = wb.floor===0 ? 2 : FLOOR_Y[wb.floor-1]+FLOOR_THICK;
+    const topY = worldToScreenY(wb.band*LEVEL_H + topRel);
+    const botY = worldToScreenY(floorWorldY(wb.band, wb.floor));
+    const torn = Math.min(1, wb.tear/WEB_TEAR);
+    ctx.strokeStyle="rgba(228,228,238,"+Math.max(0.12, 0.5-torn*0.34)+")"; ctx.lineWidth=1;
+    const w=15, midY=(topY+botY)/2;
+    ctx.beginPath();
+    for (let i=-3;i<=3;i++){ ctx.moveTo(sx+i*5, topY); ctx.lineTo(sx+i*5, botY); }          // vertical anchor threads
+    for (let yy=topY+6; yy<botY; yy+=14){ ctx.moveTo(sx-w,yy); ctx.lineTo(sx,yy+3); ctx.lineTo(sx+w,yy); } // sagging cross threads
+    for (let r=5;r<=w;r+=5){ ctx.moveTo(sx+r,midY); ctx.lineTo(sx,midY-r*0.7); ctx.lineTo(sx-r,midY); ctx.lineTo(sx,midY+r*0.7); ctx.lineTo(sx+r,midY); } // central orb
+    ctx.stroke();
+  }
+}
 function drawWorld(){
   ctx.save();
   ctx.beginPath(); ctx.rect(PLAY_L, PLAY_TOP, PLAY_W, PLAY_H); ctx.clip();
@@ -1378,6 +1573,9 @@ function drawWorld(){
     ctx.fillStyle=inv.idol?"#7CFC9A":"#8a7340"; ctx.font="9px monospace"; ctx.textAlign="center"; ctx.fillText("EXIT",sx,sy-60);
   }
 
+  // ambient ceiling decor (drawn before lighting so it dims/reveals with the light)
+  drawCobwebs(); drawCritters();
+
   // floor segments
   for (const s of segs){ if (!s.alive || s.band!==player.band) continue;
     const sx=worldToScreenX(s.x), sy=worldToScreenY(s.y);
@@ -1399,14 +1597,40 @@ function drawWorld(){
     else if (w.destructible){ ctx.fillStyle="#aa6a3a"; for(let yy=0;yy<h;yy+=8) ctx.fillRect(sx,topY+yy,w.w,2); }
   }
 
-  // chests
+  // descending spiked ceiling (ceiling-kind trap)
+  if (trap.active && trap.kind==="ceiling" && trap.ceiling && trap.band===player.band){
+    const c = trap.ceiling;
+    const sx0 = worldToScreenX(c.x), sxR = worldToScreenX(c.x + c.w);
+    const edgeY = worldToScreenY(c.y);                 // spike-tip line
+    const slabTop = worldToScreenY(c.topY);            // slab descends from the CURRENT floor's ceiling, not the band top
+    ctx.fillStyle = "#7a1818";                         // stone slab body
+    ctx.fillRect(sx0, slabTop, sxR - sx0, edgeY - slabTop);
+    ctx.fillStyle = "#a83028";                         // hazard banding
+    for (let yy = slabTop; yy < edgeY-3; yy += 8) ctx.fillRect(sx0, yy, sxR - sx0, 3);
+    // downward spikes along the underside
+    ctx.fillStyle = "#c9c2b0";
+    for (let x = sx0+2; x + 10 <= sxR; x += 11){
+      ctx.beginPath(); ctx.moveTo(x, edgeY); ctx.lineTo(x+5, edgeY+9); ctx.lineTo(x+10, edgeY); ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = "#e8e0c4";                          // spike glints
+    for (let x = sx0+4; x + 10 <= sxR; x += 11){ ctx.fillRect(x+1, edgeY+1, 1, 3); }
+  }
+
+  // chests — large (same footprint as a full trash pile; roomy enough for a machete... or parts of von Forster)
   for (const c of chests){ if (c.band!==player.band) continue;
     const sx=worldToScreenX(c.x), sy=worldToScreenY(floorWorldY(c.band,c.floor));
-    if (sx<PLAY_L-30||sx>PLAY_R+30) continue;
-    px(sx-15,sy-22,30,22,"#5a3d1e"); px(sx-15,sy-22,30,6,"#7a5428");
-    ctx.fillStyle="#caa14a"; ctx.fillRect(sx-15,sy-14,30,2);
-    if (!c.opened){ px(sx-3,sy-14,6,6,"#e8c860"); }
-    else { px(sx-15,sy-22,30,4,"#2a1d0e"); }
+    if (sx<PLAY_L-40||sx>PLAY_R+40) continue;
+    const cw=44, ch=30;
+    px(sx-22,sy-2,44,3,"#2a1d0e");                       // ground shadow
+    px(sx-cw/2,sy-ch,cw,ch,"#5a3d1e"); px(sx-cw/2,sy-ch,cw,7,"#7a5428"); // body + lit lid
+    px(sx-cw/2,sy-4,cw,4,"#3a2712");                     // base shadow
+    px(sx-cw/2,sy-ch,2,ch,"#3a2712"); px(sx+cw/2-2,sy-ch,2,ch,"#3a2712"); // corner straps
+    ctx.fillStyle="#caa14a"; ctx.fillRect(sx-cw/2,sy-ch+9,cw,2); ctx.fillRect(sx-cw/2,sy-13,cw,2); // iron bands
+    if (!c.opened){ px(sx-5,sy-17,10,9,"#caa14a"); px(sx-2,sy-14,4,5,"#2a1d0e"); } // lock plate + keyhole
+    else {
+      px(sx-cw/2+2,sy-ch,cw-4,7,"#241608");             // open dark interior
+      px(sx+3,sy-ch-3,11,4,"#d6cdab"); px(sx+12,sy-ch-5,5,5,"#e8e0c4"); px(sx+13,sy-ch-4,1,1,"#2a2418"); // a grim bone poking out
+    }
   }
   // piles — two kinds (trash / bones); shrink as you dig (stage 0 big, 1 current, 2 small)
   for (const p of piles){ if (p.band!==player.band || p.gone) continue;
@@ -1522,6 +1746,8 @@ function drawWorld(){
   const dark = bandDarkness(player.band);
   if (dark > 0 && lightCtx) drawLighting(dark);
 
+  drawWebs();   // gate stays faintly visible through the dark
+
   ctx.restore();
 }
 
@@ -1573,11 +1799,15 @@ function drawPlayer(){
   }
   if (crawl){
     // approved proportions kept; shading layered on top (no silhouette change)
-    px(-6,-14,22,14,shirt); px(12,-14,10,8,skin); px(10,-18,12,5,hat);
+    px(-6,-14,22,14,shirt); px(12,-14,10,8,skin);
     const legf=Math.sin(player.anim)*4; px(-19,-3,15,4,pants); px(9+legf,-5,8,6,pants);
     px(-6,-14,22,3,shirtH);                 // lit back
     px(-6,-3,22,2,shirtD);                  // under-shadow
-    px(10,-18,12,2,hatH); px(11,-13,11,2,"#5a4220"); // hat sheen + band
+    // fedora kept on while crawling — forward brim + raised crown (matches the standing hat)
+    px(9,-17,16,3,hat); px(9,-17,16,1,hatH);     // brim (projects forward over the brow) + sheen
+    px(11,-21,9,5,hat); px(11,-21,9,2,hatH);     // crown + sheen
+    px(13,-21,2,2,"#5e441f");                    // crown dent
+    px(10,-14,11,1,"#5a4220");                   // hat band
     px(16,-11,3,3,"#22150a");               // eye (forward)
     px(12,-7,8,2,skinD);                    // jaw shadow
     px(-19,-3,15,2,pantsH);                 // leg highlight
@@ -1750,9 +1980,8 @@ function drawHUD(){
     ctx.fillStyle="#e9d8a6"; }
   if (godMode){ ctx.fillStyle="#7CFC9A"; ctx.fillText("GOD MODE", 815, y0+24); ctx.fillStyle="#e9d8a6"; }
   if (trap.active){
-    const ts = Math.ceil(trap.timer/60);
     ctx.fillStyle = (Math.floor(game.frame/8)%2) ? "#ff5040" : "#ffd060";
-    ctx.fillText("TRAPPED! "+ts+"s - press D", 650, y0+68);
+    ctx.fillText("TRAPPED! - blast a wall (D)", 650, y0+68);
   }
   if (inv.torch){ ctx.fillStyle="#ffcf6a"; ctx.fillText("TORCH lit", 815, y0+68); ctx.fillStyle="#e9d8a6"; }
   if (game.msgTimer>0){ ctx.fillStyle="#ffe9a8"; ctx.textAlign="center";
@@ -1820,7 +2049,8 @@ function drawTitle(){
   ctx.fillStyle="#e9d8a6"; ctx.font="13px 'Courier New',monospace";
   const ctrl=[
     "Arrows move    Shift run    Down crawl/descend    Up climb/ascend    Z jump",
-    "O search   D dynamite   T torch   C fight/weapon   F flare (Shift+F lob)   Space attack   M music   Esc pause",
+    "O open/search    D dynamite    T torch    C combat/weapon    F flare (Shift+F lob)",
+    "Space attack    M music    Esc pause    R restart",
     "Descend "+LEVEL_COUNT+" levels, find the jade idol, escape - dynamite digs through floors and can strand you.",
   ];
   const cy = 388;
@@ -1869,12 +2099,22 @@ function startGame(){
   if (window.AztecMusic) AztecMusic.playLevel(0);
   message("Descend "+LEVEL_COUNT+" levels ("+DIFF[DIFFICULTY].name+") - find the jade idol - escape.", 200);
 }
+function restartToTitle(){
+  game.restartT = 0; game.mode = "title"; clearTrap();
+  if (window.AztecMusic) AztecMusic.playTitle();
+}
 
 function update(){
   game.frame++;
   if (consume("music") && window.AztecMusic){ const m=AztecMusic.toggleMute(); message(m?"Music off":"Music on", 50); }
   if (consume("god") && keys.run){ godMode=!godMode; message(godMode?"GOD MODE ON - invincible, full kit, path shown":"God mode off", 100); }
   if (godMode && game.mode==="play"){ inv.hp=inv.hpMax; inv.machete=true; inv.pistol=true; inv.bullets=99; inv.dynamite=99; inv.flares=99; }
+  // R restart — double-press confirm (guards against accidental wipes), returns to the title
+  if (game.restartT>0) game.restartT--;
+  if (consume("restart") && (game.mode==="play"||game.mode==="pause")){
+    if (game.restartT>0){ restartToTitle(); return; }
+    game.restartT = 180; message("Press R again to restart, or play on.", 180);
+  }
   if (game.mode==="title"){ if (consume("start")){ AudioFX.resume(); enterSetup(); } return; }
   if (game.mode==="setup"){ if (consume("start")) aztecStart(); else if (consume("pause")) cancelSetup(); return; }
   if (game.mode==="win"){ if (consume("start")) game.mode="title"; return; }
@@ -1889,6 +2129,7 @@ function update(){
     updateProjectiles();
     updateTrap();
     checkTrapTriggers();
+    updateCritters();
   } else { updateProjectiles(); }
   updateCamera();
 }
