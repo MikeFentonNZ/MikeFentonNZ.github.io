@@ -21,6 +21,11 @@
   aside.credit-box b{ color:#e9d8a6; }
   aside.credit-box a{ color:#caa24a; text-decoration:underline; }
   aside.credit-box .tag{ font-style:italic; opacity:.9; }
+  aside.credit-box .gfx-head{ color:#d9a441; font-weight:700; letter-spacing:2px; margin-top:6px; }
+  aside.credit-box .gfx-row{ display:flex; align-items:center; gap:6px; }
+  aside.credit-box .gfx-row label{ width:54px; flex:0 0 auto; color:#caa24a; }
+  aside.credit-box .gfx-row input[type=range]{ flex:1 1 auto; min-width:0; accent-color:#d9a441; height:14px; }
+  aside.credit-box .gfx-row span{ width:40px; flex:0 0 auto; text-align:right; color:#e9d8a6; }
   #wrap{ flex:1 1 auto; min-width:0; display:flex; align-items:center; justify-content:center; min-height:0; }
   canvas{ image-rendering:pixelated; image-rendering:crisp-edges;
     background:#000; box-shadow:0 0 0 2px #000, 0 0 40px rgba(217,164,65,.15); max-width:100%; max-height:100%; }
@@ -48,12 +53,22 @@
   <aside class="credit-box" id="about-box">
     <div class="about-head">ABOUT</div>
     <div><b>AZTEC</b> &middot; Tomb of Quetzalcoatl</div>
-    <div class="tag">Original-art homage to the 1982 Datasoft game. Educational, non-commercial use.</div>
+    <div class="tag">Original-art homage to the 1982 Datamost game. Educational, non-commercial use.</div>
     <div>Licence: <a id="about-licence" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a></div>
     <div id="about-credit">Author: Michael Fenton &middot; &copy; 2026</div>
     <div>Portfolio: <a id="about-portfolio" href="https://mikefentonnz.github.io/" target="_blank" rel="noopener">mikefentonnz.github.io</a></div>
     <div>All bundled music &amp; lyrics &copy; Michael Fenton.</div>
-    <div>Not affiliated with or endorsed by Datasoft.</div>
+    <div class="gfx-head">DISPLAY</div>
+    <div class="gfx-row"><label for="gfx-dark">Cave dark</label>
+      <input type="range" id="gfx-dark"  min="0.5" max="1.1" step="0.05" value="1" oninput="gfxSlider('dark',this)" onchange="gfxCommit(this)">
+      <span id="gfx-dark-val">1.00&times;</span></div>
+    <div class="gfx-row"><label for="gfx-torch">Torch</label>
+      <input type="range" id="gfx-torch" min="0.7" max="1.5" step="0.05" value="1" oninput="gfxSlider('torch',this)" onchange="gfxCommit(this)">
+      <span id="gfx-torch-val">1.00&times;</span></div>
+    <div class="gfx-row"><label for="gfx-flare">Flare</label>
+      <input type="range" id="gfx-flare" min="0.7" max="1.5" step="0.05" value="1" oninput="gfxSlider('flare',this)" onchange="gfxCommit(this)">
+      <span id="gfx-flare-val">1.00&times;</span></div>
+    <div class="tag" style="opacity:.7">Calibrate brightness for your screen.</div>
   </aside>
   <div id="wrap"><canvas id="game" width="960" height="600"></canvas></div>
 </div>
@@ -69,7 +84,7 @@
       <label><input type="checkbox" id="aztec-bundled" checked onchange="document.getElementById('aztec-filewrap').style.display=this.checked?'none':'block'"> Use bundled tracks</label>
       <div id="aztec-filewrap" style="display:none">
         <input type="file" id="aztec-files" accept="audio/*" multiple>
-        <div class="shint">Pick your level tracks. Filenames starting 1- &hellip; 8- map to those levels.</div>
+        <div class="shint">Pick any audio files. Names starting 1- &hellip; 8- pin to those levels; the rest fill remaining levels at random. One file = it loops on every level. No usable files = bundled tracks.</div>
       </div>
     </div>
     <button class="sstart" onclick="aztecStart()">BEGIN DESCENT &#9656;</button>
@@ -85,8 +100,11 @@
    - Title theme on the title/setup screen.
    - One looping track per level, crossfaded on transitions.
    - "Use bundled tracks": uses the files named below in this folder.
-     Otherwise the player picks files; a leading number in the filename
-     (e.g. "1-explorers-warning.mp3") maps it to that level.
+     Otherwise the player picks files (loadFiles): a leading number pins a
+     file to that level (e.g. "3-boss.mp3" -> level 3); any other files form
+     a pool that randomly fills the remaining levels (reshuffled when emptied)
+     for per-run variety; one file alone loops on every level; and if no
+     usable files are picked the bundled tracks are reinstated.
    - M key toggles mute (handled in the game).
    - Robust against browser autoplay policy: if a play() is blocked, the
      desired track is retried on the next key press or click (a real user
@@ -113,6 +131,11 @@
   let lastError = "";
 
   function log(){ try{ console.log.apply(console, ["[AztecMusic]"].concat([].slice.call(arguments))); }catch(e){} }
+
+  function shuffle(arr){   // Fisher-Yates, in place
+    for (let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=arr[i]; arr[i]=arr[j]; arr[j]=t; }
+    return arr;
+  }
 
   function makeAudio(src){
     if (!src) return null;
@@ -176,17 +199,56 @@
       for (let i=0;i<levels;i++) levelAudio[i] = makeAudio(BUNDLED_LEVELS[i] || BUNDLED_LOOP);
       log("bundled tracks loaded for", levels, "levels");
     },
+    // Flexible mapping. Returns true if at least one level got a track,
+    // false if no usable files were supplied (caller then reinstates bundled).
+    //  1. Exactly one file  -> that file loops on EVERY level (single-track mode).
+    //  2. Leading number    -> pins to that level (1-based), if in range (override).
+    //  3. Everything else    (unnumbered OR out-of-range numbers) -> a pool that
+    //     randomly fills the remaining levels, reshuffling when the pool empties.
+    // One Audio object is made per file and reused across levels, so any levels
+    // that share a track don't crossfade-to-self on transition.
     loadFiles: function(fileList, levels){
       levelAudio = {};
       const files = Array.prototype.slice.call(fileList);
-      let mapped = 0;
+      if (!files.length) return false;
+
+      const cache = new Map();                 // file -> Audio (reused)
+      function au(f){
+        if (!cache.has(f)) cache.set(f, makeAudio(URL.createObjectURL(f)));
+        return cache.get(f);
+      }
+
+      // 1. Single-track loop mode.
+      if (files.length === 1){
+        const a = au(files[0]);
+        for (let i=0;i<levels;i++) levelAudio[i] = a;
+        log("single-track loop on all", levels, "levels");
+        return true;
+      }
+
+      // 2. Numbered-in-range pins; everything else goes to the pool.
+      const pool = [];
       for (const f of files){
         const m = f.name.match(/^\s*(\d+)/);   // leading number -> level (1-based)
-        if (!m) continue;
-        const lvl = parseInt(m[1],10) - 1;
-        if (lvl >= 0 && lvl < levels){ levelAudio[lvl] = makeAudio(URL.createObjectURL(f)); mapped++; }
+        if (m){
+          const lvl = parseInt(m[1],10) - 1;
+          if (lvl >= 0 && lvl < levels){ levelAudio[lvl] = au(f); continue; }
+        }
+        pool.push(f);                          // unnumbered OR out-of-range
       }
-      log("picked files mapped to", mapped, "levels");
+
+      // 3. Random-fill the empty levels from the pool (reshuffle when exhausted).
+      let bag = [];
+      for (let i=0;i<levels;i++){
+        if (levelAudio[i]) continue;
+        if (!pool.length) continue;            // numbered-only set: leave gaps silent
+        if (!bag.length) bag = shuffle(pool.slice());
+        levelAudio[i] = au(bag.pop());
+      }
+
+      const mapped = Object.keys(levelAudio).length;
+      log("picked", files.length, "files ->", mapped, "of", levels, "levels mapped");
+      return mapped > 0;
     },
     playLevel: function(idx){ switchTo(levelAudio[idx] || null); },
     stopAll: function(){ if (current) fade(current, 0, 300); current = desired = null; },
@@ -260,10 +322,18 @@ ctx.imageSmoothingEnabled = false;
 /* ---- offscreen layer for dynamic lighting ---- */
 const lightCv = document.createElement("canvas"); lightCv.width = PLAY_W; lightCv.height = PLAY_H;
 const lightCtx = lightCv.getContext("2d");
+
+/* ---- per-screen display calibration (live sliders in the ABOUT panel) ---- */
+const gfx = { darkMul:1.0, torchMul:1.0, flareMul:1.0 };   // conservative multipliers
+try{ const g = JSON.parse(localStorage.getItem("aztec_gfx")||"null");
+  if (g){ gfx.darkMul=+g.darkMul||1; gfx.torchMul=+g.torchMul||1; gfx.flareMul=+g.flareMul||1; }
+}catch(e){}
+
 function bandDarkness(b){
   if (godMode) return 0;                            // god mode sees all
   if (b <= 1) return 0;                             // levels 1-2 fully lit (ease-in)
-  return Math.min(0.82, 0.22 + (b - 1) * 0.13);     // ramps darker with depth
+  const base = Math.min(0.82, 0.22 + (b - 1) * 0.13);  // ramps darker with depth
+  return clamp(base * gfx.darkMul, 0, 0.9);            // calibrated, still meaningfully dark
 }
 
 /* --------------------- Title art (temple SVG) ---------------------- */
@@ -310,15 +380,35 @@ templeImg.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(TEMPLE_
 const keys = {}, pressed = {};
 const KEYMAP = { ArrowLeft:"left", ArrowRight:"right", ArrowUp:"up", ArrowDown:"down",
   ShiftLeft:"run", ShiftRight:"run", KeyZ:"jump", KeyO:"open", KeyD:"dyn",
-  KeyF:"fight", KeyT:"torch", KeyL:"flare", KeyM:"music", KeyG:"god", Space:"attack", Escape:"pause", Enter:"start" };
+  KeyC:"fight", KeyT:"torch", KeyF:"flare", KeyM:"music", KeyG:"god", Space:"attack", Escape:"pause", Enter:"start" };
+function typingInUI(e){ const t=e.target; return t && (t.tagName==="INPUT"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"); }
 addEventListener("keydown", e => {
+  if (typingInUI(e)) return;                 // let focused sliders/file picker use keys normally
   const k = KEYMAP[e.code]; if (!k) return;
   if (["left","right","up","down","jump","attack","pause","start"].includes(k)) e.preventDefault();
   if (!keys[k]) pressed[k] = true;
   keys[k] = true;
 });
-addEventListener("keyup", e => { const k = KEYMAP[e.code]; if (k) keys[k] = false; });
+addEventListener("keyup", e => { if (typingInUI(e)) return; const k = KEYMAP[e.code]; if (k) keys[k] = false; });
 function consume(k){ if (pressed[k]){ pressed[k] = false; return true; } return false; }
+
+/* ---- display-calibration sliders (ABOUT panel) ---- */
+function gfxSlider(which, el){                    // live update while dragging
+  const v = +el.value;
+  if (which==="dark") gfx.darkMul=v; else if (which==="torch") gfx.torchMul=v; else if (which==="flare") gfx.flareMul=v;
+  const lab=document.getElementById("gfx-"+which+"-val"); if (lab) lab.textContent=v.toFixed(2)+"×";
+}
+function gfxCommit(el){                           // on release: save + hand control back to the game
+  try{ localStorage.setItem("aztec_gfx", JSON.stringify(gfx)); }catch(e){}
+  if (el && el.blur) el.blur(); if (cv && cv.focus) cv.focus();
+}
+function gfxInitUI(){
+  [["dark",gfx.darkMul],["torch",gfx.torchMul],["flare",gfx.flareMul]].forEach(([id,val])=>{
+    const el=document.getElementById("gfx-"+id), lab=document.getElementById("gfx-"+id+"-val");
+    if (el) el.value=val; if (lab) lab.textContent=(+val).toFixed(2)+"×";
+  });
+}
+gfxInitUI();
 
 /* ----------------------------- Audio ------------------------------- */
 const AudioFX = (() => {
@@ -363,7 +453,7 @@ let walls = [];       // {x,y,w,h}  world rects (solid)
 let stairs = [];      // {band, x, hi, lo}  hi<lo floor indices
 let connectors = [];  // {band, x, floor, up, valid, destBand, destFloor}
 let chests = [];      // {band, x, floor, opened, idol}
-let piles = [];       // {band, x, floor, stage, gone}
+let piles = [];       // {band, x, floor, stage, gone, kind:"trash"|"bones"}
 let torches = [];     // {band, x, floor}
 let exitZone = null;  // {band, x, floor}
 let enemies = [], bullets = [], dynamites = [], grenades = [], explosions = [], particles = [], flares = [];
@@ -493,7 +583,7 @@ function generateTemple(){
     // ---- fill each band ----
     for (let b=0;b<LEVEL_COUNT;b++){
       for (let i=0;i<ri(1,2);i++){ const f=ri(0,2), x=pickClearX(b,f,avoid[b],300,ROOM_W-200); if(x>0){ chests.push({band:b,x,floor:f,opened:false,idol:false}); avoid[b].push(x);} }
-      for (let i=0;i<ri(2,3);i++){ const f=ri(0,2), x=pickClearX(b,f,avoid[b],300,ROOM_W-200); if(x>0){ piles.push({band:b,x,floor:f,stage:0,gone:false}); avoid[b].push(x);} }
+      for (let i=0;i<ri(2,3);i++){ const f=ri(0,2), x=pickClearX(b,f,avoid[b],300,ROOM_W-200); if(x>0){ piles.push({band:b,x,floor:f,stage:0,gone:false,kind:Math.random()<0.5?"bones":"trash"}); avoid[b].push(x);} }
       if (b<idolBand){ const nd=ri(dc.decoy[0],dc.decoy[1]); for(let i=0;i<nd;i++){ const x=pickClearX(b,2,avoid[b],500,ROOM_W-300); if(x>0){ connectors.push({band:b,x,floor:2,up:false,valid:false,destBand:b+1,destFloor:0}); avoid[b].push(x);} } }
       for (let f=0;f<3;f++){ torches.push({band:b,x:ri(200,ROOM_W-200),floor:f}); }
       if (b>=1){ const nt=ri(dc.trap[0],dc.trap[1]); for(let i=0;i<nt;i++){ const f=ri(0,2), x=pickClearX(b,f,avoid[b],400,ROOM_W-300); if(x>0){ trapTriggers.push({band:b,x,floor:f,used:false}); avoid[b].push(x);} } }
@@ -615,7 +705,7 @@ function updatePlayer(){
   // weapon cycle / light handling
   if (consume("fight")) cycleFight();
   if (consume("torch")) toggleTorch();
-  if (consume("flare")) dropFlare();
+  if (consume("flare")) dropFlare(keys.run);   // Shift held -> lob it further ahead
   // attack — if it puts us into the ATTACK state, stop here so locomotion
   // doesn't overwrite the state on the same frame (the swing resolves in the
   // ATTACK block on subsequent frames).
@@ -703,13 +793,22 @@ function playerLand(){
   if (inv.hp <= 0){ inv.hp = 0; killPlayer(); }
   else { player.state = ST.HIT; player.stateTimer = 20; }   // dazed, like a dynamite jolt
 }
+// A hole enemy temporarily makes the floor segment under it non-solid TO THE PLAYER.
+// The segment is never destroyed — it returns to solid the instant the hole drifts off.
+function holeUnderfoot(band, floor, wx){
+  for (const e of enemies){
+    if (e.dead || e.type!=="hole" || e.band!==band || e.floor!==floor) continue;
+    if (Math.floor(e.x/TILE) === Math.floor(wx/TILE)) return true;   // same floor tile
+  }
+  return false;
+}
 function applyMotion(){
   player.x = clamp(player.x + player.vx, 10, ROOM_W - 10);
 
   // gravity / ground test
   const relY = player.y - player.band * LEVEL_H;
   const onFloorExact = FLOOR_Y.includes(Math.round(relY));
-  const segHere = segAt(player.band, player.floor, player.x);
+  const segHere = segAt(player.band, player.floor, player.x) && !holeUnderfoot(player.band, player.floor, player.x);
 
   if (!player.onGround || player.state === ST.JUMP){
     player.vy = Math.min(player.vy + GRAV, MAXFALL);
@@ -719,7 +818,7 @@ function applyMotion(){
     const nrelY = player.y - player.band * LEVEL_H;
     for (let i = 0; i < FLOOR_COUNT; i++){
       const fy = FLOOR_Y[i];
-      if (player.vy >= 0 && nrelY >= fy - 2 && nrelY <= fy + 16 && segAt(player.band, i, player.x)){
+      if (player.vy >= 0 && nrelY >= fy - 2 && nrelY <= fy + 16 && segAt(player.band, i, player.x) && !holeUnderfoot(player.band, i, player.x)){
         player.y = floorWorldY(player.band, i); player.floor = i; player.vy = 0; player.onGround = true; landed = true;
         if (player.state === ST.JUMP) player.state = ST.IDLE;
         break;
@@ -809,7 +908,7 @@ function startAttack(){
       bullets.push({ band:player.band, x:player.x + player.facing*18, y:player.y - 16,
         vx:player.facing*9, w:8, h:8, life:60 });
     } else message("Out of bullets.", 50);
-  } else message("No weapon selected (F to cycle).", 50);
+  } else message("No weapon selected (C to cycle).", 50);
 }
 function resolveCombat(){
   // machete hitbox in front during attack
@@ -834,7 +933,7 @@ const ETYPE = {
   panther:  { hp:34, speed:2.2, dmg:14, w:48, h:24, col:"#caa24a" },
   alligator:{ hp:54, speed:0.6, dmg:20, w:60, h:20, col:"#5f7a4a" },
   priest:   { hp:60, speed:1.4, dmg:4,  w:24, h:48, col:"#9a6fb0" },
-  hole:     { hp:26, speed:1.0, dmg:8,  w:30, h:18, col:"#6a5a7a" },
+  hole:     { hp:26, speed:1.0, dmg:0,  w:40, h:16, col:"#6a5a7a" },  // w == one floor segment (TILE)
 };
 function spawnEnemy(type, band, x, floor){
   const t = ETYPE[type];
@@ -864,13 +963,15 @@ function updateEnemies(){
       case "spider":    aiSpider(e);    break;
       default:          patrol(e);
     }
-    // separation: enemies stop beside the player, never overlapping the centre
-    if (e.floor === player.floor && player.onGround && player.state !== ST.DEAD){
+    // separation: enemies stop beside the player, never overlapping the centre.
+    // The hole is exempt — it must be able to drift directly under the player's feet.
+    if (e.type !== "hole" && e.floor === player.floor && player.onGround && player.state !== ST.DEAD){
       const sep = e.w/2 + player.w/2 - 2;
       const dx = e.x - player.x;
       if (Math.abs(dx) < sep) e.x = player.x + (dx>=0 ? sep : -sep);
     }
-    if (aabb(enemyRect(e), playerRect())) hurtPlayer(e.dmg);
+    // hole deals no contact damage — its threat is the fall it opens beneath you
+    if (e.type !== "hole" && aabb(enemyRect(e), playerRect())) hurtPlayer(e.dmg);
   }
 }
 function patrol(e){
@@ -929,13 +1030,19 @@ function aiPriest(e){
   patrol(e);
 }
 function aiHole(e){
-  patrol(e);
-  e.corruptT++;
-  if (e.corruptT>=100){
-    e.corruptT=0;
-    const s = segAt(e.band, e.floor, e.x);
-    if (s){ s.alive=false; burst(s.x+TILE/2, s.y, "#6a5a7a", 8); }
+  // Floats horizontally across floors AND gaps (no gravity), reversing only at walls
+  // or the room edges. It covers — never destroys — the segment beneath it; the
+  // player falls through that tile (handled in holeUnderfoot / applyMotion).
+  const nx = e.x + e.vx;
+  let bump = (nx < 24 || nx > ROOM_W - 24);
+  if (!bump){
+    for (const w of walls){
+      if (!w.trap && w.x < nx + e.w/2 && w.x + w.w > nx - e.w/2 && Math.abs(w.y - e.y) < LEVEL_H){ bump = true; break; }
+    }
   }
+  if (bump) e.vx = -e.vx; else e.x = nx;
+  e.facing = Math.sign(e.vx) || 1;
+  e.y = floorWorldY(e.band, e.floor);     // never falls — drifts at its floor's surface
 }
 
 /* --------------------------- Bullets / Dynamite -------------------- */
@@ -968,8 +1075,40 @@ function updateProjectiles(){
     if (d.t <= 0){ explode(d.band, d.x, d.y); d.done = true; }
   }
   dynamites = dynamites.filter(d => !d.done);
-  // flares burn down
-  for (const fl of flares) fl.t--;
+  // flares burn down; a tossed/lobbed flare arcs, falls through holes, and wraps
+  // like dynamite. A lobbed flare also travels horizontally until a wall stops it
+  // (settling at the wall's base) or physics lands it.
+  for (const fl of flares){
+    fl.t--;
+    if (fl.falling){
+      // horizontal travel (lob): stop at the near edge of any obstructing wall
+      if (fl.vx){
+        const nx = fl.x + fl.vx;
+        let hit = null;
+        for (const w of walls){
+          if (nx < w.x || nx > w.x + w.w) continue;
+          const top = (w.h >= LEVEL_H) ? fl.band*LEVEL_H : w.y;
+          const bot = top + ((w.h >= LEVEL_H) ? LEVEL_H : w.h);
+          if (fl.y >= top && fl.y <= bot){ hit = w; break; }
+        }
+        if (hit){ fl.x = (fl.vx > 0) ? hit.x - 2 : hit.x + hit.w + 2; fl.vx = 0; }  // drops down the wall
+        else fl.x = clamp(nx, 6, ROOM_W - 6);
+      }
+      // gravity + floor landing
+      fl.vy = Math.min((fl.vy||0) + GRAV, MAXFALL);
+      fl.y += fl.vy;
+      const relY = fl.y - fl.band*LEVEL_H;
+      for (let i=0;i<FLOOR_COUNT;i++){
+        const fy = FLOOR_Y[i];
+        if (fl.vy >= 0 && relY >= fy - 6 && relY <= fy + 16 && segAt(fl.band, i, fl.x)){
+          fl.y = fl.band*LEVEL_H + fy - 4; fl.vy = 0; fl.vx = 0; fl.falling = false; fl.landedFloor = i; break;
+        }
+      }
+      if (fl.falling && relY > FLOOR_Y[2] + 60){          // fell off the bottom -> wrap to ceiling
+        fl.y = fl.band*LEVEL_H + FLOOR_Y[0] - 90; fl.vy = 1;
+      }
+    }
+  }
   flares = flares.filter(fl => fl.t > 0);
   // explosions visuals
   for (const ex of explosions){ ex.t--; }
@@ -1087,15 +1226,17 @@ function openChest(c){
   const k = Math.random();
   if (k < 0.28){ if(!inv.pistol){inv.pistol=true; inv.bullets+=6; message("Found a PISTOL! +6 bullets.", 90);} else {inv.bullets+=6; message("Bullets +6.",80);} return; }
   if (k < 0.50){ inv.dynamite += 2; message("Dynamite +2.", 80); return; }
-  if (k < 0.70){ inv.flares += 2; message("Flares +2 - drop with L to light dark rooms.", 100); return; }
+  if (k < 0.70){ inv.flares += 2; message("Flares +2 - F to drop, Shift+F to lob ahead.", 100); return; }
   inv.hp = Math.min(inv.hpMax, inv.hp+30); message("A healing draught. Health +30.", 80);
 }
 function searchPile(p){
   p.stage++;
-  if (p.stage === 1){ message("Searching the pile...", 60); return; }
+  if (p.stage === 1){ message("You dig into the pile...", 60); AudioFX.step(); return; }
+  if (p.stage === 2){ message("Searching deeper...", 60); AudioFX.step(); return; }
   p.gone = true; AudioFX.pickup();
+  const py = floorWorldY(p.band, p.floor);
   const r = Math.random();
-  if (r < 0.15){ message("Booby trap!", 80); setTimeout(()=>explodeGrenade(p.band,p.x,p.y-8), 900); return; }
+  if (r < 0.15){ message("Booby trap!", 80); setTimeout(()=>explodeGrenade(p.band,p.x,py-8), 900); return; }
   if (r < 0.32){ inv.bullets += 3; message("Bullets +3.", 70); return; }
   if (r < 0.48){ inv.dynamite += 1; message("Dynamite +1.", 70); return; }
   if (r < 0.64){ inv.flares += 1; message("Flare +1.", 70); return; }
@@ -1118,11 +1259,33 @@ function toggleTorch(){
     message("No torch within reach.", 60);
   }
 }
-function dropFlare(){
+const FLARE_LOB_VX = 7.5;   // forward throw speed (px/frame) for Shift+F
+const FLARE_LOB_VY = -6.5;  // upward kick so it arcs and travels further
+function dropFlare(lob){
   if (inv.flares <= 0){ message("No flares.", 60); return; }
   inv.flares--; AudioFX.pickup();
-  flares.push({ band:player.band, x:player.x, y:floorWorldY(player.band,player.floor)-4, t:600 });  // ~10s
-  message("Flare lit.", 60);
+  const ahead = player.x + player.facing * 22;            // a couple px past the head
+  const headY = player.y - 16;
+  if (wallAhead(ahead, headY) && !lob){
+    // facing a wall and not lobbing: set it down at the feet on the current floor
+    flares.push({ band:player.band, x:player.x, y:floorWorldY(player.band,player.floor)-4,
+                  t:600, falling:false, vx:0, vy:0, originFloor:player.floor });  // ~10s
+    message("Flare lit.", 60);
+  } else if (lob){
+    // lobbed: arcs forward with gravity; settles at the base of any wall it meets,
+    // otherwise lands where physics carries it (and falls through holes to light a
+    // lower level). Range is decided by the arc, not a fixed cap.
+    flares.push({ band:player.band, x:ahead, y:player.y - 26,
+                  t:600, falling:true, vx:player.facing*FLARE_LOB_VX, vy:FLARE_LOB_VY, originFloor:player.floor });
+    message("Flare lobbed ahead.", 60);
+  } else {
+    // tossed just ahead of the head; gravity carries it down through any hole to
+    // the floor below (light a lower level from a hole's edge), wrapping to the
+    // ceiling if it falls off the bottom — same toss/fall model as dynamite
+    flares.push({ band:player.band, x:ahead, y:player.y - 26,
+                  t:600, falling:true, vx:0, vy:0, originFloor:player.floor });
+    message("Flare lit.", 60);
+  }
 }
 
 /* ----------------------------- FX ---------------------------------- */
@@ -1245,12 +1408,53 @@ function drawWorld(){
     if (!c.opened){ px(sx-3,sy-14,6,6,"#e8c860"); }
     else { px(sx-15,sy-22,30,4,"#2a1d0e"); }
   }
-  // piles
+  // piles — two kinds (trash / bones); shrink as you dig (stage 0 big, 1 current, 2 small)
   for (const p of piles){ if (p.band!==player.band || p.gone) continue;
     const sx=worldToScreenX(p.x), sy=worldToScreenY(floorWorldY(p.band,p.floor));
-    if (sx<PLAY_L-30||sx>PLAY_R+30) continue;
-    const c = p.stage>0 ? "#6a5a48" : "#8a7a60";
-    px(sx-14,sy-10,28,10,c); px(sx-9,sy-15,18,6,c); px(sx-4,sy-18,8,4,c);
+    if (sx<PLAY_L-40||sx>PLAY_R+40) continue;
+    if (p.kind==="bones"){
+      if (p.stage===0){
+        // full size: a jumble of bones with a skull on top
+        px(sx-23,sy-2,46,3,"#2a2418");                                  // ground shadow
+        px(sx-21,sy-7,32,4,"#d6cdab"); px(sx-23,sy-9,5,7,"#e8e0c4"); px(sx+9,sy-9,5,7,"#e8e0c4");  // long bone + knobby ends
+        px(sx-7,sy-13,27,3,"#cabfa0"); px(sx-9,sy-15,5,6,"#e8e0c4"); px(sx+18,sy-15,5,6,"#e8e0c4"); // crossing bone
+        px(sx-15,sy-19,3,8,"#d6cdab"); px(sx-9,sy-21,3,9,"#d6cdab"); px(sx-3,sy-22,3,9,"#cabfa0");  // ribs
+        px(sx+2,sy-31,11,10,"#e8e0c4"); px(sx+3,sy-32,9,3,"#f2ecd6");   // skull dome + highlight
+        px(sx+4,sy-28,2,2,"#2a2418"); px(sx+8,sy-28,2,2,"#2a2418"); px(sx+6,sy-26,1,2,"#3a2e20"); // eyes + nasal
+        px(sx+3,sy-22,9,2,"#cabfa0"); px(sx+4,sy-22,1,2,"#2a2418"); px(sx+7,sy-22,1,2,"#2a2418");  // jaw + teeth gaps
+        px(sx-18,sy-4,4,3,"#9a9075"); px(sx+15,sy-4,4,3,"#9a9075");     // shadowed base bits
+      } else if (p.stage===1){
+        px(sx-13,sy-6,26,3,"#d6cdab"); px(sx-15,sy-8,5,6,"#e8e0c4"); px(sx+10,sy-8,5,6,"#e8e0c4");  // long bone
+        px(sx-9,sy-12,3,6,"#cabfa0");                                   // rib
+        px(sx-5,sy-16,10,9,"#e8e0c4"); px(sx-3,sy-13,2,2,"#2a2418"); px(sx+1,sy-13,2,2,"#2a2418");  // small skull + eyes
+      } else {
+        px(sx-8,sy-5,15,3,"#d6cdab"); px(sx-6,sy-4,5,4,"#e8e0c4"); px(sx+3,sy-8,5,5,"#cabfa0");      // bone fragments
+      }
+    } else if (p.stage===0){
+      // full size: layered rubble mound with highlight/shadow and a few buried oddments
+      px(sx-23,sy-2,46,3,"#2a2418");                                   // ground shadow
+      px(sx-22,sy-14,44,14,"#5f5142"); px(sx-22,sy-14,44,3,"#6f6150"); // base + top edge
+      px(sx-16,sy-22,32,9,"#6f6150"); px(sx-16,sy-22,32,2,"#7e6f59");
+      px(sx-9,sy-28,18,7,"#7e6f59");  px(sx-4,sy-32,8,5,"#8d7d64");    // upper mound
+      px(sx-19,sy-11,5,4,"#4a3e30"); px(sx+11,sy-19,5,4,"#4a3e30");    // shadow chunks
+      px(sx-13,sy-25,4,3,"#a08d6e"); px(sx-2,sy-30,3,2,"#a08d6e");     // lit pebbles
+      // protruding broken plank
+      px(sx+6,sy-25,15,3,"#5a4632"); px(sx+18,sy-27,4,3,"#3a2e20");
+      // pot shard (left)
+      px(sx-21,sy-13,7,8,"#7a5a3a"); px(sx-21,sy-14,7,2,"#9a7a4a"); px(sx-19,sy-11,3,4,"#3a2a1c");
+      // pale bone/skull bit (right)
+      px(sx+12,sy-12,6,6,"#d6cdab"); px(sx+13,sy-11,1,1,"#2a2418"); px(sx+16,sy-11,1,1,"#2a2418");
+      // base scatter
+      px(sx-25,sy-4,4,3,"#5a4e3c"); px(sx+21,sy-4,4,3,"#5a4e3c");
+    } else if (p.stage===1){
+      // current size
+      px(sx-14,sy-10,28,10,"#6a5a48"); px(sx-14,sy-10,28,2,"#7a6a55");
+      px(sx-9,sy-15,18,6,"#7a6a55"); px(sx-4,sy-18,8,4,"#897959");
+      px(sx-11,sy-8,4,3,"#4a3e30"); px(sx+5,sy-13,3,3,"#9a8a6c");      // shade + highlight
+    } else {
+      // small remnant
+      px(sx-8,sy-6,16,6,"#5f5142"); px(sx-5,sy-9,10,4,"#6f6150"); px(sx-2,sy-11,4,3,"#7e6f59");
+    }
   }
 
   // dynamite
@@ -1338,9 +1542,16 @@ function drawLighting(darkness){
     lx.fillStyle = g; lx.beginPath(); lx.arc(sx,sy,r,0,7); lx.fill();
   };
   addLight(player.x, player.y-22, 74, 0.62);                                  // faint player aura
-  if (inv.torch) addLight(player.x, player.y-30, 132, 1.0);                   // carried torch
-  for (const t of torches){ if (t.band===player.band) addLight(t.x, floorWorldY(t.band,t.floor)-30, 96, 0.92); }
-  for (const fl of flares){ if (fl.band===player.band){ const k=0.9+0.12*Math.sin(game.frame*0.4+fl.x); addLight(fl.x, fl.y-6, 140*k, 1.0); } }
+  if (inv.torch) addLight(player.x, player.y-30, 132*gfx.torchMul, 1.0);      // carried torch
+  for (const t of torches){ if (t.band===player.band) addLight(t.x, floorWorldY(t.band,t.floor)-30, 96*gfx.torchMul, 0.92); }
+  for (const fl of flares){ if (fl.band===player.band){
+    const k=0.9+0.12*Math.sin(game.frame*0.4+fl.x); addLight(fl.x, fl.y-6, 140*k*gfx.flareMul, 1.0);
+    // spill upward through the hole it fell through: a dimmer glow at the gap above
+    if (fl.landedFloor != null && fl.landedFloor > fl.originFloor){
+      const holeY = floorWorldY(fl.band, fl.landedFloor-1) - 6;
+      addLight(fl.x, holeY, 70*k*gfx.flareMul, 0.5);
+    }
+  } }
   lx.globalCompositeOperation = "source-over";
   ctx.drawImage(lightCv, PLAY_L, PLAY_TOP);
 }
@@ -1500,10 +1711,13 @@ function drawEnemy(e){
     px(10,-44,4,30,"#caa14a"); px(10,-44,4,3,"#e2c45e"); px(8,-47,8,6,"#ffd36e"); // staff + orb
     px(7,-22,6,4,"#c8a878");                                // hand on staff
   } else if (e.type==="hole"){
-    px(-14,-16,28,16,c); px(-14,-16,28,3,"#8a7aa0");        // body + rim light
-    px(-10,-20,20,6,c);
-    px(-7,-13,3,3,"#ff5050"); px(4,-13,3,3,"#ff5050"); px(-6,-12,1,1,"#ffd0d0"); px(5,-12,1,1,"#ffd0d0"); // eyes + glints
-    for(let i=-10;i<10;i+=4){ px(i,-3,2,3,"#170c17"); }     // jagged maw
+    // a flashing rectangle outline the size of a floor segment, sitting over the tile
+    const half=e.w/2, on=(Math.floor(game.frame/6)%2)===0;
+    ctx.fillStyle = on ? "rgba(18,6,24,0.62)" : "rgba(18,6,24,0.32)";
+    ctx.fillRect(-half+2, -1, e.w-4, e.h-2);               // dark void inside the segment
+    ctx.strokeStyle = on ? "#d24bff" : "#5e2f86";          // flashing outline
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-half+1, -2, e.w-2, e.h);
   }
   ctx.globalAlpha=1; ctx.restore();
   if (e.hp < ETYPE[e.type].hp){ px(sx-12, sy-e.h-8, 24,3,"#400"); px(sx-12, sy-e.h-8, 24*Math.max(0,e.hp)/ETYPE[e.type].hp,3,"#6c6"); }
@@ -1606,7 +1820,7 @@ function drawTitle(){
   ctx.fillStyle="#e9d8a6"; ctx.font="13px 'Courier New',monospace";
   const ctrl=[
     "Arrows move    Shift run    Down crawl/descend    Up climb/ascend    Z jump",
-    "O search   D dynamite   T torch   L flare   F fight/weapon   Space attack   M music   Esc pause",
+    "O search   D dynamite   T torch   C fight/weapon   F flare (Shift+F lob)   Space attack   M music   Esc pause",
     "Descend "+LEVEL_COUNT+" levels, find the jade idol, escape - dynamite digs through floors and can strand you.",
   ];
   const cy = 388;
@@ -1635,8 +1849,10 @@ function aztecStart(){
   if (window.AztecMusic){
     const bundled=document.getElementById("aztec-bundled");
     const fEl=document.getElementById("aztec-files");
+    // Bundled if chosen; else picked files; if no usable files, reinstate bundled
+    // (safety net for live demos where the file picker is left empty/unusable).
     if (bundled && bundled.checked) AztecMusic.loadBundled(LEVEL_COUNT);
-    else if (fEl && fEl.files && fEl.files.length) AztecMusic.loadFiles(fEl.files, LEVEL_COUNT);
+    else if (fEl && fEl.files && fEl.files.length && AztecMusic.loadFiles(fEl.files, LEVEL_COUNT)) { /* using picked files */ }
     else AztecMusic.loadBundled(LEVEL_COUNT);
   }
   hideSetup();
@@ -1658,7 +1874,7 @@ function update(){
   game.frame++;
   if (consume("music") && window.AztecMusic){ const m=AztecMusic.toggleMute(); message(m?"Music off":"Music on", 50); }
   if (consume("god") && keys.run){ godMode=!godMode; message(godMode?"GOD MODE ON - invincible, full kit, path shown":"God mode off", 100); }
-  if (godMode && game.mode==="play"){ inv.hp=inv.hpMax; inv.machete=true; inv.pistol=true; inv.bullets=99; inv.dynamite=99; }
+  if (godMode && game.mode==="play"){ inv.hp=inv.hpMax; inv.machete=true; inv.pistol=true; inv.bullets=99; inv.dynamite=99; inv.flares=99; }
   if (game.mode==="title"){ if (consume("start")){ AudioFX.resume(); enterSetup(); } return; }
   if (game.mode==="setup"){ if (consume("start")) aztecStart(); else if (consume("pause")) cancelSetup(); return; }
   if (game.mode==="win"){ if (consume("start")) game.mode="title"; return; }
