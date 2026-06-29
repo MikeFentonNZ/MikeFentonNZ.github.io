@@ -13,6 +13,7 @@ Michael Fenton has taught every science and mathematics subject, plus coding and
 - Nexus Research Group: https://mikefentonnz.github.io/nexus-research-group.html
 - Design by Subversion (working framework, not yet peer-reviewed): https://mikefentonnz.github.io/design-by-subversion-stem-framework.html
 - Curriculum Vitae: https://mikefentonnz.github.io/curriculum-vitae-michael-fenton.html
+- AZTEC, free browser game with an AI-in-education reflection (play, controls, original soundtrack, story, and "the gift of time" post): https://mikefentonnz.github.io/projects/aztec-story.html
 
 ## Key research outputs (Zenodo, permanent DOIs)
 - Casio Graphing Calculator Serial Interface, priority disclosure (2026): https://doi.org/10.5281/zenodo.19303911

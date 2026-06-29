@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AZTEC — Tomb of Quetzalcoatl (Homage)</title>
+<title>AZTEC — Tomb of Quetzalcoatl — Special Edition</title>
 <style>
   :root{ --bg:#0b0a08; --frame:#3a2c16; --frame2:#5b4521; --ink:#e9d8a6; --accent:#d9a441; }
   html,body{ margin:0; height:100%; background:#000; color:var(--ink);
@@ -47,7 +47,7 @@
 <body>
 <header class="appbar">
   <span class="ttl">AZTEC</span>
-  <span class="ver">Tomb of Quetzalcoatl &middot; v1.0 web homage</span>
+  <span class="ver">Tomb of Quetzalcoatl &middot; SPECIAL EDITION &middot; pocket rooms</span>
 </header>
 <div id="main">
   <aside class="credit-box" id="about-box">
@@ -86,6 +86,11 @@
         <input type="file" id="aztec-files" accept="audio/*" multiple>
         <div class="shint">Pick any audio files. Names starting 1- &hellip; 8- pin to those levels; the rest fill remaining levels at random. One file = it loops on every level. No usable files = bundled tracks.</div>
       </div>
+    </div>
+    <div class="srow"><span class="lbl">TEMPLE SEED</span>
+      <label><input type="checkbox" id="aztec-daily" onchange="if(this.checked){var s=document.getElementById('aztec-seed');s.value='';s.disabled=true;}else{document.getElementById('aztec-seed').disabled=false;}"> Daily Temple (same for everyone today)</label>
+      <input type="text" id="aztec-seed" placeholder="leave blank for a random temple, or type any word/code" style="width:100%;margin-top:4px;color:#e9d8a6;background:#0c0a06;border:1px solid #5b4521;font-family:inherit;font-size:12px;padding:3px;">
+      <div class="shint">Same seed = same temple &amp; loot. Share your seed to challenge others.</div>
     </div>
     <button class="sstart" onclick="aztecStart()">BEGIN DESCENT &#9656;</button>
     <div class="shint">Esc to go back &middot; M toggles music in-game</div>
@@ -302,13 +307,44 @@ const DIFF = {
 };
 function applyDifficulty(d){ DIFFICULTY=d; LEVEL_COUNT=DIFF[d].depth; inv.hpMax=DIFF[d].hpMax; }
 
+/* ----------- Time-pressure score (the idol's value falls as you dawdle) ----------- */
+const SCORE_BASE = 10000;      // idol's fresh value
+const SCORE_DECAY = 4;         // value lost per second before it tarnishes (gentle nudge, ~1/10 of the old rate)
+const SCORE_TARNISH_AT = 180;  // seconds (3 min): past here the idol tarnishes and decay steepens
+const SCORE_DECAY2 = 10;       // steeper value lost per second once tarnished
+const SCORE_SALVAGE = 1500;    // value never falls below this
+const SCORE_MULT = { 1:1.0, 2:1.5, 3:2.0 };   // braver difficulty multiplies the reward
+function rawIdolValue(secs){
+  let v = (secs <= SCORE_TARNISH_AT)
+        ? SCORE_BASE - SCORE_DECAY*secs
+        : SCORE_BASE - SCORE_DECAY*SCORE_TARNISH_AT - SCORE_DECAY2*(secs - SCORE_TARNISH_AT);
+  return Math.max(SCORE_SALVAGE, v);
+}
+function currentScore(){
+  const secs = (game.startTime ? (performance.now()-game.startTime)/1000 : 0);
+  return Math.round(rawIdolValue(secs) * (SCORE_MULT[DIFFICULTY]||1));
+}
+function bestScoreKey(){ return "aztecSE_bestscore_"+DIFFICULTY; }
+
 /* ----------------------------- Physics ----------------------------- */
 const WALK = 2.2, RUN = 4.0, CRAWL = 1.3, FASTCRAWL = 2.3;
 const JUMP_V = -7.6, GRAV = 0.42, MAXFALL = 11;
 const PLAYER_W = 26, PLAYER_H = 50, CRAWL_H = 26;
 
 /* ----------------------------- Helpers ----------------------------- */
-const rnd = (a, b) => a + Math.random() * (b - a);
+// Seeded RNG (mulberry32). rngSrc is swapped to the seeded stream during temple
+// generation so a given seed reproduces the same layout + loot, then restored to
+// Math.random for live combat/particles. rr() = one raw [0,1) draw from rngSrc.
+let rngSrc = Math.random;
+const rr = () => rngSrc();
+function mulberry32(seed){
+  let a = seed >>> 0;
+  return function(){ a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+function strToSeed(s){ let h = 2166136261 >>> 0; for (let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function seedToCode(seed){ return "AZ-" + (seed >>> 0).toString(36).toUpperCase(); }
+const rnd = (a, b) => a + rngSrc() * (b - a);
 const ri  = (a, b) => Math.floor(rnd(a, b + 1));
 const clamp = (v, lo, hi) => v < lo ? lo : v > hi ? hi : v;
 const aabb = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
@@ -331,8 +367,9 @@ try{ const g = JSON.parse(localStorage.getItem("aztec_gfx")||"null");
 
 function bandDarkness(b){
   if (godMode) return 0;                            // god mode sees all
-  if (b <= 1) return 0;                             // levels 1-2 fully lit (ease-in)
-  const base = Math.min(0.82, 0.22 + (b - 1) * 0.13);  // ramps darker with depth
+  const d = (bandEffDepth[b]!==undefined) ? bandEffDepth[b] : b;  // pockets use their origin depth
+  if (d <= 1) return 0;                             // levels 1-2 fully lit (ease-in)
+  const base = Math.min(0.82, 0.22 + (d - 1) * 0.13);  // ramps darker with depth
   return clamp(base * gfx.darkMul, 0, 0.9);            // calibrated, still meaningfully dark
 }
 
@@ -451,7 +488,9 @@ const AudioFX = (() => {
 let segs = [];        // {band, idx, x, y, w, alive}
 let walls = [];       // {x,y,w,h}  world rects (solid)
 let stairs = [];      // {band, x, hi, lo}  hi<lo floor indices
-let connectors = [];  // {band, x, floor, up, valid, destBand, destFloor}
+let connectors = [];  // {band, x, floor, up, valid, destBand, destFloor, side?, destX?}
+let bandEffDepth = {}; // band -> effective depth (pockets inherit their origin level's depth for dark/music)
+let collapseBands = {}; // pocket band -> return info; entering one caves in and auto-ejects (a cinematic dead end)
 let chests = [];      // {band, x, floor, opened, idol}
 let piles = [];       // {band, x, floor, stage, gone, kind:"trash"|"bones"}
 let torches = [];     // {band, x, floor}
@@ -479,7 +518,8 @@ function addFloorRow(band, idx, x0, x1, gaps){
    Decoys, containers, traps and depth-scaled enemies fill the rest.
    ==================================================================== */
 let trapTriggers = [];
-const trap = { active:false, kind:null, wallL:null, wallR:null, ceiling:null, band:0, closeSpeed:0, descendSpeed:0 };
+const trap = { active:false, kind:null, wallL:null, wallR:null, ceiling:null, band:0, closeSpeed:0, descendSpeed:0,
+               waterY:0, waterStart:0, waterCap:0, waterRate:0, waterPhase:"", waterHold:0 };
 let godMode = false;   // Shift+G test mode: invincible, full kit, path shown
 
 function clearX(band, floor, x, margin){
@@ -528,14 +568,15 @@ function verifyPath(idolBand){
     if (!stairs.some(s=>s.band===b && s.hi===0 && s.lo===1)) return false;
     if (!stairs.some(s=>s.band===b && s.hi===1 && s.lo===2)) return false;
   }
-  return chests.some(c=>c.idol);
+  return chests.some(c=>c.idol) || piles.some(p=>p.idol) || connectors.some(c=>c.idolDecoy);
 }
 
 function generateTemple(){
+  rngSrc = mulberry32(game.seed >>> 0);   // seeded: this temple + its loot are reproducible
   let attempt=0, ok=false;
   do {
     attempt++;
-    segs=[]; walls=[]; stairs=[]; connectors=[]; chests=[]; piles=[]; torches=[]; cobwebs=[]; critters=[]; webs=[];
+    segs=[]; walls=[]; stairs=[]; connectors=[]; chests=[]; piles=[]; torches=[]; cobwebs=[]; critters=[]; webs=[]; bandEffDepth={}; collapseBands={};
     enemies=[]; bullets=[]; dynamites=[]; grenades=[]; explosions=[]; particles=[]; trapTriggers=[]; flares=[];
     trap.active=false; trap.wallL=trap.wallR=null;
 
@@ -569,35 +610,46 @@ function generateTemple(){
     for (let b=0;b<LEVEL_COUNT;b++){
       if (placeStair(b,0,1,avoid[b])<0){ pathOK=false; break; }
       if (placeStair(b,1,2,avoid[b])<0){ pathOK=false; break; }
-      if (Math.random()<0.6){ const lo=ri(0,1); placeStair(b,lo,lo+1,avoid[b]); }
+      if (rr()<0.6){ const lo=ri(0,1); placeStair(b,lo,lo+1,avoid[b]); }
     }
     if (!pathOK) continue;
 
     exitZone = { band:0, x:70, floor:0 };
 
-    // ---- the idol ----
+    // ---- the idol: always on the deepest level, but hidden in a chest, a trash pile,
+    //      or inside a loot dead-end (pocket). The pocket is built later (buildPockets). ----
+    const idolRoll = rr();
+    let idolKind = idolRoll<0.40 ? "chest" : (idolRoll<0.75 ? "pile" : "pocket");
     let idolFloor = ri(0,2);
-    let ix = pickClearX(idolBand, idolFloor, avoid[idolBand], 400, ROOM_W-200);
-    if (ix<0){ idolFloor=2; ix = pickClearX(idolBand,2,avoid[idolBand],400,ROOM_W-200); }
-    if (ix<0) continue;
-    chests.push({ band:idolBand, x:ix, floor:idolFloor, opened:false, idol:true });
-    avoid[idolBand].push(ix);
+    if (idolKind === "pocket"){
+      const dx = pickClearX(idolBand, 2, avoid[idolBand], 500, ROOM_W-300);
+      if (dx>0){ connectors.push({band:idolBand, x:dx, floor:2, up:false, valid:false, destBand:idolBand, destFloor:0, idolDecoy:true}); avoid[idolBand].push(dx); }
+      else idolKind = "chest";        // no room for a dead-end here -> fall back to a chest
+    }
+    if (idolKind !== "pocket"){
+      let ix = pickClearX(idolBand, idolFloor, avoid[idolBand], 400, ROOM_W-200);
+      if (ix<0){ idolFloor=2; ix = pickClearX(idolBand,2,avoid[idolBand],400,ROOM_W-200); }
+      if (ix<0) continue;
+      if (idolKind === "chest") chests.push({ band:idolBand, x:ix, floor:idolFloor, opened:false, idol:true });
+      else piles.push({ band:idolBand, x:ix, floor:idolFloor, stage:0, gone:false, kind:rr()<0.5?"bones":"trash", idol:true, rR:rr(), rM:rr() });
+      avoid[idolBand].push(ix);
+    }
 
     // ---- fill each band ----
     for (let b=0;b<LEVEL_COUNT;b++){
-      for (let i=0;i<ri(1,2);i++){ const f=ri(0,2), x=pickClearX(b,f,avoid[b],300,ROOM_W-200); if(x>0){ chests.push({band:b,x,floor:f,opened:false,idol:false}); avoid[b].push(x);} }
-      for (let i=0;i<ri(2,3);i++){ const f=ri(0,2), x=pickClearX(b,f,avoid[b],300,ROOM_W-200); if(x>0){ piles.push({band:b,x,floor:f,stage:0,gone:false,kind:Math.random()<0.5?"bones":"trash"}); avoid[b].push(x);} }
+      for (let i=0;i<ri(1,2);i++){ const f=ri(0,2), x=pickClearX(b,f,avoid[b],300,ROOM_W-200); if(x>0){ chests.push({band:b,x,floor:f,opened:false,idol:false,rB:rr(),rE:rr(),rM:rr(),rK:rr()}); avoid[b].push(x);} }
+      for (let i=0;i<ri(2,3);i++){ const f=ri(0,2), x=pickClearX(b,f,avoid[b],300,ROOM_W-200); if(x>0){ piles.push({band:b,x,floor:f,stage:0,gone:false,kind:rr()<0.5?"bones":"trash",rR:rr(),rM:rr()}); avoid[b].push(x);} }
       if (b<idolBand){ const nd=ri(dc.decoy[0],dc.decoy[1]); for(let i=0;i<nd;i++){ const x=pickClearX(b,2,avoid[b],500,ROOM_W-300); if(x>0){ connectors.push({band:b,x,floor:2,up:false,valid:false,destBand:b+1,destFloor:0}); avoid[b].push(x);} } }
       for (let f=0;f<3;f++){ torches.push({band:b,x:ri(200,ROOM_W-200),floor:f}); }
       // ambient: corner cobwebs (density grows with depth) + a few ceiling critters
       const ceilY = (fl)=> b*LEVEL_H + (fl===0 ? 2 : FLOOR_Y[fl-1] + FLOOR_THICK);
       const nWeb = Math.min(4, Math.floor(b*0.6) + ri(0,1));
       for (let i=0;i<nWeb;i++){ const wf=ri(0,2);
-        cobwebs.push({ band:b, x:ri(120,ROOM_W-120), y:ceilY(wf), sz:12+ri(0,6)+b, side:(Math.random()<0.5?-1:1), alpha:Math.min(0.42,0.16+b*0.04) }); }
-      if (Math.random() < 0.55 + b*0.06){ const nC=ri(1,2);
+        cobwebs.push({ band:b, x:ri(120,ROOM_W-120), y:ceilY(wf), sz:12+ri(0,6)+b, side:(rr()<0.5?-1:1), alpha:Math.min(0.42,0.16+b*0.04) }); }
+      if (rr() < 0.55 + b*0.06){ const nC=ri(1,2);
         for (let i=0;i<nC;i++){ const cf=ri(0,2);
-          critters.push({ band:b, x:ri(150,ROOM_W-150), ceilY:ceilY(cf)+6, type:(Math.random()<0.5?"bat":"spider"), anim:Math.random()*6, vx:0, flyY:0, startled:false, sct:0, gone:false }); } }
-      if (b>=1 && DIFFICULTY!==1){ const nt=ri(dc.trap[0],dc.trap[1]); for(let i=0;i<nt;i++){ const f=ri(0,2), x=pickClearX(b,f,avoid[b],400,ROOM_W-300); if(x>0){ trapTriggers.push({band:b,x,floor:f,used:false,kind:Math.random()<0.5?"ceiling":"walls"}); avoid[b].push(x);} } }
+          critters.push({ band:b, x:ri(150,ROOM_W-150), ceilY:ceilY(cf)+6, type:(rr()<0.5?"bat":"spider"), anim:rr()*6, vx:0, flyY:0, startled:false, sct:0, gone:false }); } }
+      if (b>=1 && DIFFICULTY!==1){ const nt=ri(dc.trap[0],dc.trap[1]); for(let i=0;i<nt;i++){ const f=ri(0,2), x=pickClearX(b,f,avoid[b],400,ROOM_W-300); if(x>0){ trapTriggers.push({band:b,x,floor:f,used:false,kind:(f>0&&rr()<0.34)?"water":(rr()<0.5?"ceiling":"walls")}); avoid[b].push(x);} } }
       const nEn = dc.enemyBase + Math.floor(b*dc.enemyDepth) + ri(0,1);
       let holeHere = false;
       for (let i=0;i<nEn;i++){
@@ -628,7 +680,7 @@ function generateTemple(){
 
     // Giant webs on the lower levels (push-through on Easy/Normal; machete-gated on Hard).
     for (let b=2;b<LEVEL_COUNT;b++){
-      if (Math.random() < 0.32){
+      if (rr() < 0.32){
         const wf=ri(0,2), x=pickClearX(b,wf,avoid[b],300,ROOM_W-300);
         if (x>0){ webs.push({band:b,x,floor:wf,broken:false,tear:0}); avoid[b].push(x); }
       }
@@ -642,7 +694,65 @@ function generateTemple(){
 
     ok = verifyPath(idolBand);
   } while (!ok && attempt<14);
+  if (ok) buildPockets();           // SPECIAL EDITION: turn a few rubble decoys into explorable side rooms
+  rngSrc = Math.random;             // back to live randomness for combat/particles
   return ok;
+}
+
+/* ====================================================================
+   SPECIAL EDITION — pocket rooms.
+   A few dead-end decoys open into a single-floor side room (an extra band
+   beyond the main stack) with a giant pile to dig / loot / maybe a guardian,
+   and a return stair back to the level you came from. The floor is one flat,
+   gap-free row and holds no traps/webs, so it is ALWAYS escapable by walking
+   to the return stair. Decoys not chosen simply stay collapsed rubble.
+   ==================================================================== */
+function buildPockets(){
+  const rubble = connectors.filter(c => !c.up && !c.valid && !c.side);
+  let pb = LEVEL_COUNT;
+  // if the idol is hidden in a dead-end, make THAT decoy a guaranteed loot pocket holding the idol
+  const idolDec = rubble.find(c => c.idolDecoy);
+  if (idolDec) makePocket(idolDec, pb++, "loot", true);
+  const rest = rubble.filter(c => c !== idolDec);
+  rest.sort(()=>rr()-0.5);
+  const maxLoot     = (DIFFICULTY===1) ? 1 : 2;
+  const maxCollapse = (DIFFICULTY===1) ? 2 : (DIFFICULTY===2) ? 3 : 4;
+  let i = 0;
+  for (let n=0; n<maxLoot && i<rest.length; n++, i++) makePocket(rest[i], pb++, "loot");
+  // collapsing rooms — cinematic dead ends; always leave >=1 plain rubble decoy if any remain
+  const collapseN = Math.min(maxCollapse, Math.max(0, (rest.length - i) - 1));
+  for (let n=0; n<collapseN; n++, i++) makePocket(rest[i], pb++, "collapse");
+  // any remaining decoys stay text-only "crumbles... dead end"
+}
+function makePocket(dec, pb, kind, isIdol){
+  // flat, gap-free floor 0 (guarantees you can always reach the return stair) + boundary walls
+  addFloorRow(pb, 0, 0, ROOM_W, []);
+  walls.push({ x:-20, y:pb*LEVEL_H, w:20, h:LEVEL_H });
+  walls.push({ x:ROOM_W, y:pb*LEVEL_H, w:20, h:LEVEL_H });
+  bandEffDepth[pb] = dec.band;                    // looks/sounds like the level it branches off
+
+  const ENTRY = 160, RETURN = ROOM_W - 240;
+  // re-point the decoy: descending it now drops you into the pocket at the entry
+  dec.side = true; dec.valid = false; dec.destBand = pb; dec.destFloor = 0; dec.destX = ENTRY;
+  // the return stair: climb it to pop back out onto the origin level's bottom floor, at the decoy
+  connectors.push({ band:pb, x:RETURN, floor:0, up:true, valid:false, side:true, destBand:dec.band, destFloor:2, destX:dec.x });
+
+  if (kind === "collapse"){
+    // entering caves in on you and auto-ejects (handled in update); no loot, no guardian
+    collapseBands[pb] = { destBand:dec.band, destFloor:2, destX:dec.x };
+    return;
+  }
+
+  // ---- loot pocket contents (between entry and return), scaled by difficulty + origin depth ----
+  const lo = 420, hi = ROOM_W - 420;
+  if (isIdol) chests.push({ band:pb, x:ri(lo,hi), floor:0, opened:false, idol:true });   // the prize, hidden in this dead-end
+  const nPiles = 1 + (rr()<0.5?1:0);
+  for (let i=0;i<nPiles;i++) piles.push({ band:pb, x:ri(lo,hi), floor:0, stage:0, gone:false, kind:rr()<0.5?"bones":"trash", rR:rr(), rM:rr() });
+  const chestChance = (DIFFICULTY===1)?0.6:(DIFFICULTY===2)?0.45:0.35;
+  if (rr()<chestChance) chests.push({ band:pb, x:ri(lo,hi), floor:0, opened:false, idol:false, rB:rr(), rE:rr(), rM:rr(), rK:rr() });
+  const guardChance = 0.12 + dec.band*0.05 + (DIFFICULTY-1)*0.14;   // deeper/harder -> more likely a guardian
+  if (rr()<guardChance){ let gt=pickEnemyType(dec.band,0); if (gt==="hole") gt="spider"; // no floor-eater in a single-floor room
+    spawnEnemy(gt, pb, ri(lo,hi), 0); }
 }
 
 /* --------------------------- Collision ----------------------------- */
@@ -917,6 +1027,7 @@ function connectorAt(up){
   return null;
 }
 function tryConnector(c){
+  if (c.side){ beginTransition(c.destBand, c.destFloor, c.destX); return; }   // pocket entry / return
   if (!c.valid){ message("The stair crumbles into rubble — a dead end.", 90); return; }
   beginTransition(c.destBand, c.destFloor);
 }
@@ -933,24 +1044,37 @@ function tryExit(){
 const game = {
   mode:"title", // title, play, pause, dead, win
   transition:{ active:false, phase:0, t:0, destBand:0, destFloor:0 },
-  msg:"", msgTimer:0, frame:0, time:0, startTime:0, restartT:0,
+  msg:"", msgTimer:0, frame:0, time:0, startTime:0, restartT:0, collapseT:0, collapseRet:null, collapseCamX:0,
+  seed:0, seedCode:"", daily:false, score:0, best:0, tarnished:false,
 };
-function beginTransition(destBand, destFloor){
+function beginTransition(destBand, destFloor, destX){
   game.transition.active = true; game.transition.phase = 0; game.transition.t = 0;
   game.transition.destBand = destBand; game.transition.destFloor = destFloor;
-  message(destBand > player.band ? "Descending deeper..." : "Ascending...", 60);
+  game.transition.destX = (destX !== undefined ? destX : null);
+  const intoPocket = destBand >= LEVEL_COUNT, fromPocket = player.band >= LEVEL_COUNT;
+  message(intoPocket ? "You squeeze into a hidden alcove..." :
+          fromPocket ? "You climb back to the main shaft..." :
+          (destBand > player.band ? "Descending deeper..." : "Ascending..."), 60);
 }
 function updateTransition(){
   const tr = game.transition; if (!tr.active) return;
   tr.t++;
   if (tr.phase === 0 && tr.t >= 24){
+    if (trap.active) clearTrap();          // climbing out of a level ends any active trap (e.g. escaping a flood)
     player.band = tr.destBand; player.floor = tr.destFloor;
     player.y = floorWorldY(tr.destBand, tr.destFloor);
+    if (tr.destX != null) player.x = tr.destX;
     player.vx = player.vy = 0; player.onGround = true; player.state = ST.IDLE;
-    if (window.AztecMusic) AztecMusic.playLevel(player.band);
+    if (window.AztecMusic) AztecMusic.playLevel(bandEffDepth[player.band] !== undefined ? bandEffDepth[player.band] : player.band);
     tr.phase = 1; tr.t = 0;
   } else if (tr.phase === 1 && tr.t >= 24){
     tr.active = false; tr.phase = 0; tr.t = 0;
+    if (collapseBands[player.band] && game.collapseT<=0){     // arrived in a collapsing room -> cave-in
+      game.collapseT = 130; game.collapseRet = collapseBands[player.band];
+      game.collapseCamX = clamp(player.x - PLAY_W/2, 0, ROOM_W - PLAY_W);
+      AudioFX.boom(); burst(player.x, player.y-44, "#6a5030", 24);
+      message("The roof gives way — the passage caves in!", 130);
+    }
   }
 }
 
@@ -999,8 +1123,14 @@ const ETYPE = {
 };
 function spawnEnemy(type, band, x, floor){
   const t = ETYPE[type];
-  enemies.push({ type, band, x, y:floorWorldY(band,floor), floor, vx:t.speed, w:t.w, h:t.h,
-    hp:t.hp, dmg:t.dmg, speed:t.speed, facing:1, dead:false, hitTimer:0, anim:Math.random()*6,
+  let w=t.w, h=t.h, hp=t.hp, dmg=t.dmg, speed=t.speed, scale=1, large=false;
+  // GML-style big variants of the small animals: tougher, slower, bigger — likelier deeper/harder
+  if ((type==="snake"||type==="spider") && rr() < 0.16 + band*0.03 + (DIFFICULTY-1)*0.08){
+    large=true; scale=1.6;
+    w=Math.round(w*scale); h=Math.round(h*scale); hp=Math.round(hp*2.4); dmg=dmg+5; speed=speed*0.8;
+  }
+  enemies.push({ type, band, x, y:floorWorldY(band,floor), floor, vx:speed, w, h, scale, large, hpMax:hp,
+    hp, dmg, speed, facing:1, dead:false, hitTimer:0, anim:Math.random()*6,
     pauseT:0, lungeT:0, curseCD:0, corruptT:ri(0,60), chirped:false });
 }
 function enemyRect(e){ return { x:e.x - e.w/2, y:e.y - e.h, w:e.w, h:e.h }; }
@@ -1234,7 +1364,18 @@ function activateTrap(t){
   t.used = true;
   const fy = floorWorldY(player.band, player.floor);   // walls only span the player's floor
   trap.active = true; trap.band = player.band; trap.kind = t.kind || "walls";
-  if (trap.kind === "ceiling"){
+  if (trap.kind === "water"){
+    // rising flood: no walls. Water climbs from the band floor toward (but not reaching) floor 0.
+    // Escape is VERTICAL — climb the guaranteed stairs to the dry top floor (or up out of the level).
+    const top = player.band*LEVEL_H;
+    trap.waterStart = top + LEVEL_H - 6;                 // surface starts at the band bottom
+    trap.waterCap   = top + FLOOR_Y[0] + 34;             // caps just below floor 0 (top floor stays dry)
+    trap.waterY     = trap.waterStart;
+    trap.waterRate  = 0.55 + 0.25*(DIFFICULTY-1);        // px/frame the surface rises
+    trap.waterPhase = "rise"; trap.waterHold = 150;
+    AudioFX.hit();
+    message("FLOODING! Water is pouring in — climb to high ground!", 200);
+  } else if (trap.kind === "ceiling"){
     // stationary narrow box (original pre-animation width) + a spiked ceiling that descends
     const wl = { x: player.x - 60, y: fy - 96, w: 14, h: 100, trap:true };
     const wr = { x: player.x + 46, y: fy - 96, w: 14, h: 100, trap:true };
@@ -1259,6 +1400,7 @@ function activateTrap(t){
   }
 }
 function useDynamiteInTrap(){
+  if (trap.kind === "water"){ message("Dynamite can't stop the water — climb to high ground!", 80); return; }
   if (inv.dynamite <= 0){ message("Out of dynamite — the walls keep closing!", 90); return; }
   inv.dynamite--;
   // blast the nearest standing wall, opening that side
@@ -1275,6 +1417,30 @@ function useDynamiteInTrap(){
 }
 function updateTrap(){
   if (!trap.active || game.transition.active) return;
+
+  if (trap.kind === "water"){
+    if (trap.waterPhase === "rise"){
+      trap.waterY -= trap.waterRate;
+      if (trap.waterY <= trap.waterCap){ trap.waterY = trap.waterCap; trap.waterPhase = "hold"; }
+    } else if (trap.waterPhase === "hold"){
+      if (--trap.waterHold <= 0) trap.waterPhase = "recede";
+    } else {
+      trap.waterY += trap.waterRate*1.4;
+      if (trap.waterY >= trap.waterStart){ clearTrap(); message("The flood drains away.", 90); return; }
+    }
+    // drown while the player's head is under the surface (deeper on screen = larger y)
+    if (player.band === trap.band && player.state !== ST.DEAD){
+      const ph = (player.state===ST.CRAWL||player.state===ST.FASTCRAWL||player.state===ST.PLACEDYN)?CRAWL_H:PLAYER_H;
+      if (player.y - ph > trap.waterY){                                  // head submerged
+        if (game.frame % 18 === 0){ inv.hp -= 6; flash(player.x, player.y-22, "#4a90d0");
+          if (inv.hp <= 0){ inv.hp = 0; clearTrap(); message("You drown in the flooded chamber!", 120); killPlayer(); return; } }
+        if (game.frame % 32 === 0) message("Drowning! Get above the water!", 30);
+        if (game.frame % 6 === 0) burst(player.x+rnd(-8,8), player.y-rnd(8,30), "#a8d0f4", 2);   // bubbles
+      }
+    }
+    return;
+  }
+
   const L = walls.includes(trap.wallL), R = walls.includes(trap.wallR);
 
   // a blasted side is an opening — escape once the player is past where that wall stood (both kinds)
@@ -1336,11 +1502,12 @@ function openChest(c){
   c.opened = true; AudioFX.pickup();
   if (c.idol){ inv.idol = true; AudioFX.idol(); message("YOU HAVE FOUND THE JADE IDOL! Escape to the temple mouth!", 260); return; }
   const dc = DIFF[DIFFICULTY];
-  if (DIFFICULTY>=2 && Math.random() < 0.10){ message("It's a trap!", 80); grenades.push({band:c.band,x:c.x,y:c.y-8}); setTimeout(()=>explodeGrenade(c.band,c.x,c.y-8), 1200); return; }
-  if (Math.random() < dc.emptyChest){ message("The chest is empty.", 70); return; }
+  // pre-rolled at generation (seeded) so the same temple gives the same loot
+  if (DIFFICULTY>=2 && (c.rB!==undefined?c.rB:Math.random()) < 0.10){ message("It's a trap!", 80); grenades.push({band:c.band,x:c.x,y:c.y-8}); setTimeout(()=>explodeGrenade(c.band,c.x,c.y-8), 1200); return; }
+  if ((c.rE!==undefined?c.rE:Math.random()) < dc.emptyChest){ message("The chest is empty.", 70); return; }
   // machete recovery — only matters if a priest stripped yours (re-arms the blade)
-  if (!inv.machete && Math.random() < 0.5){ inv.machete=true; if(inv.fightMode===0) inv.fightMode=1; message("A discarded MACHETE — your blade is back!", 100); return; }
-  const k = Math.random();
+  if (!inv.machete && (c.rM!==undefined?c.rM:Math.random()) < 0.5){ inv.machete=true; if(inv.fightMode===0) inv.fightMode=1; message("A discarded MACHETE — your blade is back!", 100); return; }
+  const k = (c.rK!==undefined?c.rK:Math.random());
   if (k < 0.28){ if(!inv.pistol){inv.pistol=true; inv.bullets+=6; message("Found a PISTOL! +6 bullets.", 90);} else {inv.bullets+=6; message("Bullets +6.",80);} return; }
   if (k < 0.50){ inv.dynamite += 2; message("Dynamite +2.", 80); return; }
   if (k < 0.70){ inv.flares += 2; message("Flares +2 - F to drop, Shift+F to lob ahead.", 100); return; }
@@ -1351,10 +1518,11 @@ function searchPile(p){
   if (p.stage === 1){ message("You dig into the pile...", 60); AudioFX.step(); return; }
   if (p.stage === 2){ message("Searching deeper...", 60); AudioFX.step(); return; }
   p.gone = true; AudioFX.pickup();
+  if (p.idol){ inv.idol = true; AudioFX.idol(); message("THE JADE IDOL was buried in the pile! Escape to the temple mouth!", 260); return; }
   const py = floorWorldY(p.band, p.floor);
-  const r = Math.random();
+  const r = (p.rR!==undefined?p.rR:Math.random());     // pre-rolled at generation (seeded)
   if (r < 0.15){ message("Booby trap!", 80); setTimeout(()=>explodeGrenade(p.band,p.x,py-8), 900); return; }
-  if (!inv.machete && Math.random() < 0.4){ inv.machete=true; if(inv.fightMode===0) inv.fightMode=1; message("A MACHETE, buried in the pile!", 90); return; }
+  if (!inv.machete && (p.rM!==undefined?p.rM:Math.random()) < 0.4){ inv.machete=true; if(inv.fightMode===0) inv.fightMode=1; message("A MACHETE, buried in the pile!", 90); return; }
   if (r < 0.32){ inv.bullets += 3; message("Bullets +3.", 70); return; }
   if (r < 0.48){ inv.dynamite += 1; message("Dynamite +1.", 70); return; }
   if (r < 0.64){ inv.flares += 1; message("Flare +1.", 70); return; }
@@ -1416,10 +1584,11 @@ function winGame(){
   game.mode = "win"; AudioFX.win();
   const secs = Math.floor((performance.now() - game.startTime)/1000);
   game.winTime = secs;
-  try{ const best = JSON.parse(localStorage.getItem("aztec_best")||"null");
-    if (best===null || secs<best){ localStorage.setItem("aztec_best", String(secs)); game.best = secs; }
-    else game.best = best;
-  }catch(e){ game.best = secs; }
+  game.score = currentScore();                         // locked in at the moment of escape
+  try{ const prev = parseInt(localStorage.getItem(bestScoreKey())||"0",10) || 0;
+    if (game.score > prev){ localStorage.setItem(bestScoreKey(), String(game.score)); game.best = game.score; }
+    else game.best = prev;
+  }catch(e){ game.best = game.score; }
 }
 
 /* ============================ RENDERING ============================= */
@@ -1502,6 +1671,19 @@ function drawCritters(){
       ctx.stroke();
       px(sx-3,sy-1,6,4,"#3c3644"); px(sx-3,sy-1,6,1,"#5a5462"); px(sx-1,sy-2,2,2,"#4a4452"); // body + sheen + head
     }
+  }
+}
+function drawWater(){   // rising flood (water-trap) — a translucent body drawn over the scene
+  if (!trap.active || trap.kind!=="water" || trap.band!==player.band) return;
+  const surfY = worldToScreenY(trap.waterY), botY = PLAY_TOP + PLAY_H;
+  if (surfY >= botY) return;
+  const top = Math.max(PLAY_TOP, surfY);
+  ctx.fillStyle = "rgba(38,92,150,0.40)";
+  ctx.fillRect(PLAY_L, top, PLAY_W, botY - top);
+  if (surfY > PLAY_TOP){                                  // rippling surface line
+    ctx.strokeStyle = "rgba(150,205,255,0.7)"; ctx.lineWidth = 2; ctx.beginPath();
+    for (let sx=PLAY_L; sx<=PLAY_R; sx+=8){ const yy=surfY + Math.sin(game.frame*0.1 + sx*0.05)*2.2; if(sx===PLAY_L)ctx.moveTo(sx,yy); else ctx.lineTo(sx,yy); }
+    ctx.stroke();
   }
 }
 function drawWebs(){   // drawn AFTER lighting so the gate stays faintly visible even in the dark
@@ -1718,7 +1900,10 @@ function drawWorld(){
       const c = connectors.find(cc=>cc.band===player.band && !cc.up && cc.valid);
       if (c){ tx=c.x; ty=floorWorldY(c.band, c.floor); label="DOWN"; }
     } else {
-      const ic = chests.find(cc=>cc.idol);
+      // idol may be a chest, a pile, or hidden in a dead-end (point to its decoy entrance) — on the player's band
+      const ic = chests.find(cc=>cc.idol && cc.band===player.band) || piles.find(pp=>pp.idol && pp.band===player.band)
+               || connectors.find(cc=>cc.idolDecoy && cc.band===player.band)
+               || chests.find(cc=>cc.idol);   // (in the idol pocket itself)
       if (ic){ tx=ic.x; ty=floorWorldY(ic.band, ic.floor); label="IDOL"; }
     }
     if (tx!==null){
@@ -1747,6 +1932,7 @@ function drawWorld(){
   if (dark > 0 && lightCtx) drawLighting(dark);
 
   drawWebs();   // gate stays faintly visible through the dark
+  drawWater();  // flood overlay (water trap), drawn over the scene
 
   ctx.restore();
 }
@@ -1888,7 +2074,7 @@ function drawPlayer(){
 function drawEnemy(e){
   const sx=worldToScreenX(e.x), sy=worldToScreenY(e.y);
   if (sx<PLAY_L-40||sx>PLAY_R+40) return;
-  ctx.save(); ctx.translate(sx,sy); ctx.scale(e.facing,1);
+  ctx.save(); ctx.translate(sx,sy); ctx.scale(e.facing*(e.scale||1), (e.scale||1));   // large variants scale up
   const c = ETYPE[e.type].col;
   if (e.hitTimer>0) ctx.globalAlpha=0.6;
   if (e.type==="snake"){
@@ -1950,7 +2136,7 @@ function drawEnemy(e){
     ctx.strokeRect(-half+1, -2, e.w-2, e.h);
   }
   ctx.globalAlpha=1; ctx.restore();
-  if (e.hp < ETYPE[e.type].hp){ px(sx-12, sy-e.h-8, 24,3,"#400"); px(sx-12, sy-e.h-8, 24*Math.max(0,e.hp)/ETYPE[e.type].hp,3,"#6c6"); }
+  const hpm=e.hpMax||ETYPE[e.type].hp; if (e.hp < hpm){ const bw=e.large?32:24; px(sx-bw/2, sy-e.h-8, bw,3,"#400"); px(sx-bw/2, sy-e.h-8, bw*Math.max(0,e.hp)/hpm,3,"#6c6"); }
 }
 
 /* ----------------------------- HUD --------------------------------- */
@@ -1971,7 +2157,7 @@ function drawHUD(){
   ctx.fillStyle = inv.idol?"#7CFC9A":"#6a5a38";
   ctx.fillText("IDOL "+(inv.idol?"CARRIED":"not found"), 470, y0+68);
   ctx.fillStyle="#e9d8a6";
-  ctx.fillText("LEVEL "+(player.band+1)+"/"+LEVEL_COUNT+"  "+DIFF[DIFFICULTY].name, 650, y0+24);
+  ctx.fillText("LEVEL "+(player.band+1)+"/"+LEVEL_COUNT+"  "+DIFF[DIFFICULTY].name+"   "+game.seedCode+(game.daily?" (daily)":""), 650, y0+24);
   const secs=Math.floor((performance.now()-game.startTime)/1000);
   ctx.fillText("TIME "+secs+"s", 650, y0+46);
   if (window.AztecMusic){ const ms=AztecMusic.status();
@@ -1981,8 +2167,13 @@ function drawHUD(){
   if (godMode){ ctx.fillStyle="#7CFC9A"; ctx.fillText("GOD MODE", 815, y0+24); ctx.fillStyle="#e9d8a6"; }
   if (trap.active){
     ctx.fillStyle = (Math.floor(game.frame/8)%2) ? "#ff5040" : "#ffd060";
-    ctx.fillText("TRAPPED! - blast a wall (D)", 650, y0+68);
+    ctx.fillText(trap.kind==="water" ? "FLOODING! - climb to high ground" : "TRAPPED! - blast a wall (D)", 650, y0+68);
+  } else {
+    const sv=currentScore();
+    ctx.fillStyle = game.tarnished ? "#e07a3a" : "#ffd36e";
+    ctx.fillText("IDOL VALUE "+sv.toLocaleString()+(game.tarnished?"  (tarnished)":" ▼"), 650, y0+68);
   }
+  ctx.fillStyle="#e9d8a6";
   if (inv.torch){ ctx.fillStyle="#ffcf6a"; ctx.fillText("TORCH lit", 815, y0+68); ctx.fillStyle="#e9d8a6"; }
   if (game.msgTimer>0){ ctx.fillStyle="#ffe9a8"; ctx.textAlign="center";
     ctx.fillText(game.msg, SCREEN_W/2, y0-10); ctx.textAlign="left"; }
@@ -2025,6 +2216,8 @@ function drawTitle(){
   ctx.fillStyle="#d9a441"; ctx.fillText("A Z T E C", SCREEN_W/2, 55);
   ctx.fillStyle="#8a7340"; ctx.font="14px 'Courier New',monospace";
   ctx.fillText("Tomb of Quetzalcoatl - an homage", SCREEN_W/2, 78);
+  ctx.fillStyle="#7CFC9A"; ctx.font="bold 12px 'Courier New',monospace";
+  ctx.fillText("• SPECIAL EDITION • hidden pocket rooms", SCREEN_W/2, 94);
 
   // temple on the right
   if (templeReady){
@@ -2055,8 +2248,8 @@ function drawTitle(){
   ];
   const cy = 388;
   ctrl.forEach((l,i)=>ctx.fillText(l, SCREEN_W/2, cy+i*21));
-  let best=null; try{ best=localStorage.getItem("aztec_best"); }catch(e){}
-  if (best){ ctx.fillStyle="#caa24a"; ctx.fillText("Best escape: "+best+"s", SCREEN_W/2, cy+ctrl.length*21+14); }
+  let bestSc=0; try{ bestSc=parseInt(localStorage.getItem("aztecSE_bestscore_"+(DIFFICULTY||1))||"0",10)||0; }catch(e){}
+  if (bestSc>0){ ctx.fillStyle="#caa24a"; ctx.fillText("Best score ("+DIFF[DIFFICULTY||1].name+"): "+bestSc.toLocaleString(), SCREEN_W/2, cy+ctrl.length*21+14); }
   ctx.fillStyle="#d9a441"; ctx.font="20px 'Courier New',monospace";
   ctx.fillText(((game.frame%50)<35)?"- Press ENTER to begin -":"", SCREEN_W/2, cy+ctrl.length*21+50);
   ctx.textAlign="left";
@@ -2076,6 +2269,16 @@ function hideSetup(){ const el=document.getElementById("setup"); if (el) el.styl
 function aztecStart(){
   let diff=1; const r=document.querySelector('input[name="aztec-diff"]:checked'); if (r) diff=+r.value;
   applyDifficulty(diff);
+  // temple seed: Daily (date-based) > typed seed/word/code > random. "AZ-xxxx" codes round-trip exactly.
+  const dailyEl=document.getElementById("aztec-daily"), seedEl=document.getElementById("aztec-seed");
+  if (dailyEl && dailyEl.checked){
+    const d=new Date(); game.seed=strToSeed("AZTEC-"+d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()); game.daily=true;
+  } else {
+    const txt=((seedEl&&seedEl.value)||"").trim(); game.daily=false;
+    if (txt){ const m=txt.match(/^AZ-([0-9A-Za-z]+)$/); game.seed = m ? (parseInt(m[1],36)>>>0) : strToSeed(txt); }
+    else { game.seed = (Math.floor(Math.random()*4294967296))>>>0; }
+  }
+  game.seedCode = seedToCode(game.seed);
   if (window.AztecMusic){
     const bundled=document.getElementById("aztec-bundled");
     const fEl=document.getElementById("aztec-files");
@@ -2096,8 +2299,9 @@ function startGame(){
   player.band=0; player.floor=0; player.x=90; player.y=floorWorldY(0,0);
   player.vx=player.vy=0; player.state=ST.IDLE; player.facing=1; player.invuln=30; player.stairCD=0;
   game.mode="play"; game.startTime=performance.now(); game.msgTimer=0;
+  game.score=0; game.tarnished=false;
   if (window.AztecMusic) AztecMusic.playLevel(0);
-  message("Descend "+LEVEL_COUNT+" levels ("+DIFF[DIFFICULTY].name+") - find the jade idol - escape.", 200);
+  message("Descend "+LEVEL_COUNT+" levels ("+DIFF[DIFFICULTY].name+") - find the idol fast, before its value falls!", 220);
 }
 function restartToTitle(){
   game.restartT = 0; game.mode = "title"; clearTrap();
@@ -2122,6 +2326,24 @@ function update(){
   if (game.mode==="play" && consume("pause")){ game.mode="pause"; return; }
 
   if (game.msgTimer>0) game.msgTimer--;
+  // the idol tarnishes once you dawdle past the threshold (score decay steepens) — fire once
+  if (!game.tarnished && game.startTime && (performance.now()-game.startTime)/1000 > SCORE_TARNISH_AT){
+    game.tarnished = true; message("The idol is tarnishing — its worth is slipping away!", 170);
+  }
+  // cave-in cutscene for collapsing rooms: rubble rains, screen shakes, then auto-eject back out
+  if (game.collapseT > 0){
+    game.collapseT--;
+    if (game.frame%2===0) burst(rnd(player.x-130, player.x+130), player.band*LEVEL_H + FLOOR_Y[0] - rnd(20,96), "#6a5030", 3);
+    if (game.collapseT%24===0) AudioFX.boom();
+    updateProjectiles();                                  // animate the falling rubble/dust
+    cam.x = clamp(game.collapseCamX + rnd(-3.5,3.5), 0, ROOM_W - PLAY_W);   // shake
+    if (game.collapseT <= 0){
+      const r = game.collapseRet; game.collapseRet = null;
+      beginTransition(r.destBand, r.destFloor, r.destX);
+      message("...a dead end. You scramble back out.", 110);
+    }
+    return;
+  }
   updateTransition();
   if (!game.transition.active){
     updatePlayer();
@@ -2140,10 +2362,11 @@ function render(){
   drawWorld();
   drawTransition();
   drawHUD();
-  if (game.mode==="pause") centerText(["PAUSED"], ["Press Esc to resume"]);
+  if (game.mode==="pause") centerText(["PAUSED"], ["Seed: "+game.seedCode+(game.daily?" (daily temple)":""), "Press Esc to resume"]);
   if (game.mode==="win") centerText(["YOU ESCAPED!"],
     ["You carried the idol of Quetzalcoatl into daylight.",
-     "Escape time: "+game.winTime+"s    Best: "+game.best+"s",
+     "Escape time: "+game.winTime+"s    Score: "+game.score.toLocaleString()+(game.tarnished?" (idol tarnished)":"")+"    Best: "+game.best.toLocaleString(),
+     "Temple seed: "+game.seedCode+"  — share it to challenge a friend",
      "Press ENTER for the title screen"]);
 }
 
