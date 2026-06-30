@@ -1367,6 +1367,10 @@ Sister app to SMART. Educational, non-commercial use<br></div>
                 <a id="about-licence" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
                    target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>
             </div>
+            <div>Portfolio:
+                <a id="about-portfolio" href="https://mikefentonnz.github.io/"
+                   target="_blank" rel="noopener">mikefentonnz.github.io</a>
+            </div>
             <div class="credit-foot" id="about-foot">Author: Michael Fenton</div>
         </div>
 
@@ -1738,6 +1742,7 @@ Sister app to SMART. Educational, non-commercial use<br></div>
 const AUTHOR      = "Michael Fenton";
 const LICENCE     = "CC BY-NC-SA 4.0";
 const LICENCE_URL = "https://creativecommons.org/licenses/by-nc-sa/4.0/";
+const PORTFOLIO_URL = "https://mikefentonnz.github.io/";
 
 const SAVE_INTERVALS = [
     { label: 'Continuous', type: 'continuous', ms: 0      },
@@ -5782,6 +5787,8 @@ discoverPorts();
     const f = document.getElementById('about-foot');
     if (a) a.textContent = AUTHOR;
     if (l) { l.textContent = LICENCE; l.href = LICENCE_URL; }
+    const p = document.getElementById('about-portfolio');
+    if (p) { p.textContent = 'mikefentonnz.github.io'; p.href = PORTFOLIO_URL; }
     if (f) f.textContent = 'Author: ' + AUTHOR + ' \u00B7  ©  2026';
 })();
 

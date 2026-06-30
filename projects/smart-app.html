@@ -457,7 +457,8 @@
             SMART — Sound-to-Motion Analysis &amp; Recording Tool.<br>
             Sister app to RIGEL. Single-file, no-framework.<br>
             <span id="about-author"></span><br>
-            <span class="cc" id="about-licence"></span>
+            <span class="cc" id="about-licence"></span><br>
+            <span id="about-portfolio"></span>
         </div>
     </div>
 </div>
@@ -873,6 +874,7 @@
 const AUTHOR  = "Michael Fenton";                     // author
 const LICENCE = "CC BY-NC-SA 4.0";                 // <-- confirm the exact licence
 const LICENCE_URL = "https://creativecommons.org/licenses/by-nc-sa/4.0/";
+const PORTFOLIO_URL = "https://mikefentonnz.github.io/";
 
 /* ───────── Persisted settings (localStorage smart_*) ───────── */
 const LS = {
@@ -2444,8 +2446,10 @@ function init(){
     // credit text
     document.getElementById('about-author').textContent = '© ' + AUTHOR;
     document.getElementById('about-licence').innerHTML = 'Licence: <a href="'+LICENCE_URL+'" target="_blank" rel="noopener">'+LICENCE+'</a>';
+    document.getElementById('about-portfolio').innerHTML = 'Portfolio: <a href="'+PORTFOLIO_URL+'" target="_blank" rel="noopener">mikefentonnz.github.io</a>';
     document.getElementById('credit-box').innerHTML =
-        'Author: <b style="color:#8aa4be">'+AUTHOR+'</b> · Licence: <a href="'+LICENCE_URL+'" target="_blank" rel="noopener">'+LICENCE+'</a><br>'+
+        'Author: <b style="color:#8aa4be">'+AUTHOR+'</b> · Licence: <a href="'+LICENCE_URL+'" target="_blank" rel="noopener">'+LICENCE+'</a> · '+
+        'Portfolio: <a href="'+PORTFOLIO_URL+'" target="_blank" rel="noopener">mikefentonnz.github.io</a><br>'+
         'Educational, non-commercial use. Sister app to RIGEL.';
 
     // restore prefs
