@@ -204,7 +204,9 @@
             border: 1px solid #2a3a5a; position: relative; flex: 1;
         }
         .live-bar-col {
-            flex: 1; display: flex; flex-direction: column;
+            /* fixed width — as wide as the sensor-name legend beneath;
+               frees the rest of the row for the packet monitor */
+            flex: 0 0 96px; display: flex; flex-direction: column;
             align-items: center; gap: 3px; height: 80px;
         }
         .live-bar-track {
@@ -1025,6 +1027,74 @@
         }
         .ind-add-rule-btn:hover { background:#0891b2; }
 
+        /* ═══ SERIAL PACKET MONITOR (shared component) ══════════
+           An instrument display — stays dark in both themes, like
+           the game arena / flight sim / CPR waveform canvases.   */
+        .pmx {
+            background:#060d1a; border:1px solid #1e3a5a; border-radius:8px;
+            padding:8px 11px; display:flex; flex-direction:column; gap:4px;
+            min-width:0;
+        }
+        .pmx-head { display:flex; align-items:baseline; gap:10px; min-width:0; }
+        .pmx-title { font-size:9px; font-weight:800; letter-spacing:0.14em; color:#4a6a94; white-space:nowrap; }
+        .pmx-arrow { font-size:9px; color:#4a6a94; transition:transform 0.15s; }
+        .pmx-legend {
+            font-size:8.5px; font-family:var(--mono);
+            white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;
+        }
+        .pmx-row { display:flex; gap:8px; align-items:baseline; min-width:0; }
+        .pmx-dir { font-size:9px; font-weight:700; color:#6a90b4; min-width:52px; letter-spacing:0.04em; flex-shrink:0; }
+        .pmx-bytes {
+            font-family:var(--mono); font-size:12px; letter-spacing:0.04em;
+            color:#94a3b8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;
+        }
+        .pm-b-start { color:#06b6d4; font-weight:700; }
+        .pm-b-len   { color:#94a3b8; }
+        .pm-b-sens  { color:#10b981; }
+        .pm-b-out   { color:#f59e0b; }
+        .pm-b-end   { color:#06b6d4; font-weight:700; }
+
+        /* Collapsible footer strip (IMC + Robot screens) */
+        .pmx-strip {
+            flex-shrink:0; border-top:1px solid #1a2a4a; background:#0a1020;
+            padding:7px 14px; display:flex; flex-direction:column; gap:4px;
+        }
+        .pmx-strip .pmx-head { cursor:pointer; user-select:none; }
+        .pmx-strip.closed .pmx-body { display:none; }
+        .pmx-strip.closed .pmx-arrow { transform:rotate(-90deg); }
+        .pmx-body { display:flex; flex-direction:column; gap:4px; }
+
+        /* Diagnostic-page instance sits beside the (narrowed) live bars */
+        .pm-diag { flex:1; order:2; align-self:stretch; margin-bottom:6px; }
+
+        /* ═══ CONNECTING REAL HARDWARE SCREEN ═══════════════════ */
+        #screen-hardware { flex-direction:column; }
+        .hdw-toolbar-title { font-size:12px; font-weight:600; color:#38bdf8; letter-spacing:0.06em; }
+        .hwt { width:100%; border-collapse:collapse; font-size:10.5px; }
+        .hwt th, .hwt td {
+            border:1px solid #1e3a5a; padding:3.5px 7px; text-align:left;
+            color:#8fb0cc; font-family:var(--mono);
+        }
+        .hwt th { color:#6a90b4; background:#0a1428; font-family:'Segoe UI',sans-serif; letter-spacing:0.06em; }
+        .hw-note {
+            background:#0d1828; border:1px solid #1e3a5a; border-left:3px solid #f59e0b;
+            border-radius:6px; padding:8px 11px; font-size:11px; color:#8fb0cc; line-height:1.55;
+        }
+        .hw-note b { color:#b8d4ea; }
+        .hw-prose { font-size:11px; color:#8fb0cc; line-height:1.6; }
+        .hw-prose b { color:#b8d4ea; }
+        .hw-prose code {
+            font-family:var(--mono); font-size:10.5px; color:#67e8f9;
+            background:#060d1a; padding:1px 4px; border-radius:3px;
+        }
+        body.light-theme .hwt th { background:#e2e8f0; color:#475569; border-color:#c8d8e8; }
+        body.light-theme .hwt td { color:#475569; border-color:#c8d8e8; }
+        body.light-theme .hw-note { background:#f0f4fc; border-color:#c8d8e8; border-left-color:#d97706; color:#475569; }
+        body.light-theme .hw-note b { color:#1e293b; }
+        body.light-theme .hw-prose { color:#475569; }
+        body.light-theme .hw-prose b { color:#1e293b; }
+        body.light-theme .hw-prose code { color:#0e7490; background:#e2e8f0; }
+
         /* ── Theme toggle button ─────────────────────────────── */
         .tb-theme-btn { padding:4px 9px; font-size:14px; line-height:1; margin-left:4px; }
 
@@ -1314,6 +1384,17 @@
             <div class="live-placeholder" id="live-placeholder">
                 No data — connect a device or select Demo Mode
             </div>
+            <!-- Serial packet monitor (CSS order places it after the bars) -->
+            <div class="pmx pm-diag">
+                <div class="pmx-head">
+                    <span class="pmx-title">SERIAL PACKET MONITOR</span>
+                    <span class="pmx-legend"><span class="pm-b-start">82 start · 10 end</span> · <span class="pm-b-len">length</span> · <span class="pm-b-sens">sensor code,value</span> · <span class="pm-b-out">output type×10+state</span></span>
+                </div>
+                <div class="pmx-body">
+                    <div class="pmx-row"><span class="pmx-dir">PC → µC</span><span class="pmx-bytes pm-tx">—</span></div>
+                    <div class="pmx-row"><span class="pmx-dir">µC → PC</span><span class="pmx-bytes pm-rx">—</span></div>
+                </div>
+            </div>
         </div>
 
         <!-- RESET button -->
@@ -1356,6 +1437,10 @@
         <button class="module-btn" id="btn-security"
                 onclick="navigateToSecurity()">
             <span class="mi">🏠</span> Home Security
+        </button>
+        <button class="module-btn" id="btn-hardware"
+                onclick="navigateToHardware()">
+            <span class="mi">🔌</span> Connecting Real Hardware
         </button>
 
         <!-- Author / licence notice (constant-driven; see AUTHOR / LICENCE) -->
@@ -1674,6 +1759,19 @@ Sister app to SMART. Educational, non-commercial use<br></div>
         </div>
 
     </div>
+
+    <!-- Serial packet monitor strip (collapsible — shared open/closed state) -->
+    <div class="pmx-strip" id="pm-strip-robot">
+        <div class="pmx-head" onclick="togglePmStrips()">
+            <span class="pmx-title">SERIAL PACKET MONITOR</span>
+            <span class="pmx-arrow">▾</span>
+            <span class="pmx-legend"><span class="pm-b-start">82 start · 10 end</span> · <span class="pm-b-len">length</span> · <span class="pm-b-sens">sensor code,value</span> · <span class="pm-b-out">output type×10+state</span></span>
+        </div>
+        <div class="pmx-body">
+            <div class="pmx-row"><span class="pmx-dir">PC → µC</span><span class="pmx-bytes pm-tx">—</span></div>
+            <div class="pmx-row"><span class="pmx-dir">µC → PC</span><span class="pmx-bytes pm-rx">—</span></div>
+        </div>
+    </div>
 </div>
 
 <!-- ═══ INDUSTRIAL M&C SCREEN ══════════════════════════════════════════ -->
@@ -1726,6 +1824,166 @@ Sister app to SMART. Educational, non-commercial use<br></div>
                 </div>
                 <button class="ind-add-rule-btn" id="ind-add-btn">+ Add Rule</button>
             </div>
+        </div>
+
+    </div>
+
+    <!-- Serial packet monitor strip (collapsible — shared open/closed state) -->
+    <div class="pmx-strip" id="pm-strip-ind">
+        <div class="pmx-head" onclick="togglePmStrips()">
+            <span class="pmx-title">SERIAL PACKET MONITOR</span>
+            <span class="pmx-arrow">▾</span>
+            <span class="pmx-legend"><span class="pm-b-start">82 start · 10 end</span> · <span class="pm-b-len">length</span> · <span class="pm-b-sens">sensor code,value</span> · <span class="pm-b-out">output type×10+state</span></span>
+        </div>
+        <div class="pmx-body">
+            <div class="pmx-row"><span class="pmx-dir">PC → µC</span><span class="pmx-bytes pm-tx">—</span></div>
+            <div class="pmx-row"><span class="pmx-dir">µC → PC</span><span class="pmx-bytes pm-rx">—</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ CONNECTING REAL HARDWARE SCREEN ═════════════════════════════════ -->
+<div id="screen-hardware" class="screen">
+    <div class="game-toolbar">
+        <span class="hdw-toolbar-title">🔌 CONNECTING REAL HARDWARE</span>
+        <div class="tb-divider"></div>
+        <span style="font-size:10px;color:#4a8aaa;font-family:var(--mono)">
+            Live protocol reference — the packet monitor updates in demo mode too
+        </span>
+    </div>
+    <div class="robot-main">
+
+        <!-- Left: the packet, frame format, firmware contract, link settings -->
+        <div class="robot-panel robot-panel-left">
+            <div class="robot-heading">The Packet — Live</div>
+            <div class="pmx">
+                <div class="pmx-head">
+                    <span class="pmx-title">SERIAL PACKET MONITOR</span>
+                    <span class="pmx-legend"><span class="pm-b-start">82 start · 10 end</span> · <span class="pm-b-len">length</span> · <span class="pm-b-sens">sensor code,value</span> · <span class="pm-b-out">output type×10+state</span></span>
+                </div>
+                <div class="pmx-body">
+                    <div class="pmx-row"><span class="pmx-dir">PC → µC</span><span class="pmx-bytes pm-tx">—</span></div>
+                    <div class="pmx-row"><span class="pmx-dir">µC → PC</span><span class="pmx-bytes pm-rx">—</span></div>
+                </div>
+            </div>
+            <div class="hw-prose">
+                RIGEL and the microcontroller exchange these frames <b>4 times a
+                second</b>. The PC sends only its output states; the microcontroller
+                replies with every sensor reading <i>and</i> every output state. In
+                demonstration mode the monitor shows the frames this exchange would
+                use, so the protocol can be taught before any hardware is connected.
+            </div>
+
+            <div class="robot-heading" style="margin-top:8px">Frame Structure</div>
+            <table class="hwt">
+                <tr><th>Byte</th><th>Content</th></tr>
+                <tr><td>0</td><td>START — 'R' = 82</td></tr>
+                <tr><td>1</td><td>LENGTH — payload byte count</td></tr>
+                <tr><td>2…N+1</td><td>PAYLOAD — sensor pairs, then outputs</td></tr>
+                <tr><td>N+2</td><td>END — newline = 10</td></tr>
+            </table>
+            <div class="hw-prose">
+                In the payload, any byte <b>over 90</b> is a sensor type code
+                (lowercase ASCII — see the table opposite) and the byte after it is
+                that sensor's value. Any byte <b>under 90</b> is an output device,
+                encoded <code>type × 10 + state</code>: 41 is a fan (type 4) ON
+                (state 1); 80 is a valve (type 8) CLOSED (state 0).
+            </div>
+            <div class="hw-note">
+                <b>⚠ The 90 boundary.</b> Valve-open (type 8, state 1) encodes as 81 —
+                safely under 90. A type 9 would encode as 90+ and be misread as a
+                sensor, corrupting the parse. <b>Eight output types is the ceiling.</b>
+            </div>
+
+            <div class="robot-heading" style="margin-top:8px">Firmware Contract</div>
+            <div class="hw-note" style="border-left-color:#38bdf8">
+                <b>1.</b> Reply to the length-0 startup packet <code>[82, 0, 10]</code>
+                with a full sensor + output frame — rejecting it deadlocks the link,
+                because RIGEL can never learn your output set.<br>
+                <b>2.</b> Report each motor's idle state <i>inside its own range</i>
+                (a single motor idles at 20, a robot drive at 25) so the control
+                profile locks correctly from the first packet.<br>
+                <b>3.</b> Hold every output at its last commanded state until the PC
+                sends a change — all states latch.
+            </div>
+
+            <div class="robot-heading" style="margin-top:8px">Link Settings</div>
+            <table class="hwt">
+                <tr><th>Microcontroller</th><th>Baud rate</th></tr>
+                <tr><td>Picaxe 08M2 / 14M2</td><td>19200</td></tr>
+                <tr><td>ESP8266 / ESP32</td><td>38400</td></tr>
+            </table>
+            <div class="hw-prose">
+                A Chromium browser (Chrome or Edge) is required — the Web Serial API
+                is not available elsewhere. Requests are sent at 4 Hz with a 750 ms
+                watchdog, so one lost reply never stalls the link. On a first run the
+                browser lists <b>no</b> COM ports until you click Connect and grant
+                access in the picker — that is the permission model, not a fault.
+            </div>
+        </div>
+
+        <!-- Right: sensor codes, output devices, motor profiles -->
+        <div class="robot-panel robot-panel-right">
+            <div class="robot-heading">Sensor Codes (payload bytes &gt; 90)</div>
+            <table class="hwt">
+                <tr><th>Code</th><th>ASCII</th><th>Sensor</th><th>Value</th></tr>
+                <tr><td>97</td><td>a</td><td>Air pressure</td><td>value + 900 = hPa</td></tr>
+                <tr><td>98</td><td>b</td><td>Blue light</td><td>0–100</td></tr>
+                <tr><td>99</td><td>c</td><td>Contact</td><td>0 or 1</td></tr>
+                <tr><td>100</td><td>d</td><td>Distance</td><td>0–254 cm</td></tr>
+                <tr><td>101</td><td>e</td><td>Heading</td><td>1–16 → N…NNW</td></tr>
+                <tr><td>103</td><td>g</td><td>Green light</td><td>0–100</td></tr>
+                <tr><td>104</td><td>h</td><td>Humidity</td><td>0–100 %</td></tr>
+                <tr><td>105</td><td>i</td><td>IR light</td><td>0–100</td></tr>
+                <tr><td>108</td><td>l</td><td>Ambient light</td><td>0–100</td></tr>
+                <tr><td>109</td><td>m</td><td>Magnetic field</td><td>0–100</td></tr>
+                <tr><td>110</td><td>n</td><td>Alpha particles</td><td>0–100</td></tr>
+                <tr><td>111</td><td>o</td><td>Respiration</td><td>0–100</td></tr>
+                <tr><td>112</td><td>p</td><td>Heart rate</td><td>0–100</td></tr>
+                <tr><td>114</td><td>r</td><td>Red light</td><td>0–100</td></tr>
+                <tr><td>115</td><td>s</td><td>Sound</td><td>0–100</td></tr>
+                <tr><td>116</td><td>t</td><td>Temperature</td><td>0–100 °C; &gt;100 = negative (105 = −5 °C)</td></tr>
+                <tr><td>117</td><td>u</td><td>UV light</td><td>0–100</td></tr>
+                <tr><td>120</td><td>x</td><td>Timer start</td><td>—</td></tr>
+                <tr><td>121</td><td>y</td><td>Yellow light</td><td>0–100</td></tr>
+                <tr><td>122</td><td>z</td><td>Timer stop</td><td>—</td></tr>
+            </table>
+            <div class="hw-prose">Codes without a table entry still work — they
+                render with a generic <code>Sensor [code]</code> label.</div>
+
+            <div class="robot-heading" style="margin-top:8px">Output Devices (payload bytes &lt; 90)</div>
+            <table class="hwt">
+                <tr><th>Type</th><th>Device</th><th>States (encoded)</th></tr>
+                <tr><td>1</td><td>Switch</td><td>0 off · 1 on (10, 11)</td></tr>
+                <tr><td>2</td><td>Motor</td><td>see profiles below (20–29)</td></tr>
+                <tr><td>3</td><td>LED / RGB</td><td>0 off · 4 red · 5 green · 6 blue · 7 yellow · 8 white (30–38)</td></tr>
+                <tr><td>4</td><td>Fan</td><td>0 off · 1 on (40, 41)</td></tr>
+                <tr><td>5</td><td>Heater</td><td>0 off · 1 on (50, 51)</td></tr>
+                <tr><td>6</td><td>Vent</td><td>0 closed · 1 open (60, 61)</td></tr>
+                <tr><td>7</td><td>Pump</td><td>0 off · 1 on (70, 71)</td></tr>
+                <tr><td>8</td><td>Valve</td><td>0 closed · 1 open (80, 81)</td></tr>
+            </table>
+
+            <div class="robot-heading" style="margin-top:8px">Motor Control Profiles</div>
+            <div class="hw-prose">
+                The state range declares, from the first packet alone, whether a
+                motor is a plain single motor or a two-motor robot drive — RIGEL then
+                shows the matching control surface with no configuration.
+            </div>
+            <table class="hwt">
+                <tr><th>Encoded</th><th>Profile</th><th>Action</th></tr>
+                <tr><td>20</td><td>Single motor</td><td>Stop</td></tr>
+                <tr><td>22</td><td>Single motor</td><td>Forward</td></tr>
+                <tr><td>23</td><td>Single motor</td><td>Reverse</td></tr>
+                <tr><td>25</td><td>Robot drive</td><td>Stop</td></tr>
+                <tr><td>26</td><td>Robot drive</td><td>Forward</td></tr>
+                <tr><td>27</td><td>Robot drive</td><td>Reverse</td></tr>
+                <tr><td>28</td><td>Robot drive</td><td>Turn left</td></tr>
+                <tr><td>29</td><td>Robot drive</td><td>Turn right</td></tr>
+            </table>
+            <div class="hw-prose">21 and 24 are <b>reserved</b> (24 is the buffer
+                between the two ranges). The profile locks for the session once
+                detected.</div>
         </div>
 
     </div>
@@ -1863,7 +2121,8 @@ function showScreen(name) {
     // Highlight active module button
     document.querySelectorAll('.module-btn').forEach(b => b.classList.remove('active'));
     const map = { science:'btn-science', cpr:'btn-cpr', '2d':'btn-2d',
-                  '3d':'btn-3d', robot:'btn-robot', industrial:'btn-industrial', security:'btn-security' };
+                  '3d':'btn-3d', robot:'btn-robot', industrial:'btn-industrial',
+                  security:'btn-security', hardware:'btn-hardware' };
     if (map[name]) {
         const btn = document.getElementById(map[name]);
         if (btn) btn.classList.add('active');
@@ -1890,6 +2149,7 @@ const ROOM_SPEECH = {
     '3d':       '3D Flight Simulator',
     robot:      'Robot Remote Control',
     industrial: 'Industrial Measurement and Control',
+    hardware:   'Connecting Real Hardware',
 };
 
 // Track whether auto-created windows have been built for this connection session.
@@ -2146,6 +2406,8 @@ function processPacket(payload) {
     waitingForResp = false;
     if (!payload.length) return;
 
+    showPacketAll('rx', [82, payload.length, ...payload, 10]);
+
     const sensors = [], outputs = [];
     let pos = 0;
 
@@ -2296,6 +2558,7 @@ async function sendRequest() {
     lastSendTs = Date.now();
     const outputBytes = globalOutputs.map(o => o.encoded);
     const packet = new Uint8Array([82, outputBytes.length, ...outputBytes, 10]);
+    showPacketAll('tx', Array.from(packet));
     try {
         await serialWriter.write(packet);
     } catch(e) {
@@ -2601,6 +2864,9 @@ function startSimulation() {
         SIM_SENSORS[2].value = Math.round(40 + 35 * Math.sin(simPhase * 1.3 + 2));
         SIM_SENSORS[3].value = Math.round(30 + 30 * Math.abs(Math.sin(simPhase * 2.1 + 1)));
         updateLiveBars(SIM_SENSORS);
+
+        // Packet monitor: show the frames this exchange WOULD use (teaching aid)
+        pmDemoSynth();
 
         // Keep globalSensors current in demo mode so robot dashboard can read them
         if (isDemoMode) SIM_SENSORS.forEach((s, i) => {
@@ -5794,6 +6060,81 @@ discoverPorts();
 
 // Start in demo mode — discoverPorts() will override if ports found
 startSimulation();
+
+// ══════════════════════════════════════════════════════════════════════════
+//  SERIAL PACKET MONITOR  (shared component — diagnostic, IMC, Robot,
+//  Connecting Real Hardware. Real frames come from sendRequest/processPacket;
+//  in demo mode pmDemoSynth() shows the frames the exchange WOULD use.)
+// ══════════════════════════════════════════════════════════════════════════
+
+// Colour-code one frame: start / length / sensor pairs (>90) / outputs / end
+function pmRender(bytes) {
+    const n = bytes.length;
+    if (n < 3) return '—';
+    const parts = [
+        '<span class="pm-b-start">' + bytes[0] + '</span>',
+        '<span class="pm-b-len">'   + bytes[1] + '</span>',
+    ];
+    let i = 2;
+    while (i < n - 1 && bytes[i] > 90) {
+        parts.push('<span class="pm-b-sens">' + bytes[i] + ' ' +
+                   (bytes[i + 1] !== undefined ? bytes[i + 1] : '') + '</span>');
+        i += 2;
+    }
+    while (i < n - 1) {
+        parts.push('<span class="pm-b-out">' + bytes[i] + '</span>');
+        i++;
+    }
+    parts.push('<span class="pm-b-end">' + bytes[n - 1] + '</span>');
+    return parts.join(' ');
+}
+
+// Update every monitor instance (only the active screen's is visible)
+function showPacketAll(kind, bytes) {
+    const html = pmRender(bytes);
+    document.querySelectorAll(kind === 'tx' ? '.pm-tx' : '.pm-rx')
+        .forEach(el => { el.innerHTML = html; });
+}
+
+// Demo-mode synthesis: bytes always match what the active screen displays —
+// the IMC screen runs its own closed-loop model; everywhere else shows the
+// shared simulation feed plus the current global output set.
+function pmDemoSynth() {
+    if (!isDemoMode) return;
+    let sensors, outs;
+    if (currentScreen === 'industrial' && typeof imcDemo !== 'undefined') {
+        sensors = imcDemo.sensors; outs = imcDemo.outputs;
+    } else {
+        sensors = SIM_SENSORS; outs = globalOutputs;
+    }
+    const pairs = [];
+    sensors.forEach(s => {
+        let v = Math.round(s.value);
+        if (s.typeCode === 116 && v < 0) v = 100 - v;            // −5°C → 105
+        if (s.typeCode === 97  && v >= 900) v = v - 900;         // hPa → raw
+        pairs.push(s.typeCode, Math.max(0, Math.min(255, v)));
+    });
+    const outputBytes = outs.map(o => o.encoded);
+    showPacketAll('tx', [82, outputBytes.length, ...outputBytes, 10]);
+    showPacketAll('rx', [82, pairs.length + outputBytes.length, ...pairs, ...outputBytes, 10]);
+}
+
+// Collapsible strips (IMC + Robot) share one persisted open/closed state
+function togglePmStrips() {
+    const anyOpen = [...document.querySelectorAll('.pmx-strip')]
+        .some(s => !s.classList.contains('closed'));
+    document.querySelectorAll('.pmx-strip')
+        .forEach(s => s.classList.toggle('closed', anyOpen));
+    localStorage.setItem('rigel_pm_open', anyOpen ? '0' : '1');
+}
+if (localStorage.getItem('rigel_pm_open') === '0')
+    document.querySelectorAll('.pmx-strip').forEach(s => s.classList.add('closed'));
+
+// ── Connecting Real Hardware screen ─────────────────────────────────────────
+
+function navigateToHardware() {
+    showScreen('hardware');
+}
 
 // ══════════════════════════════════════════════════════════════════════════
 //  THEME TOGGLE
