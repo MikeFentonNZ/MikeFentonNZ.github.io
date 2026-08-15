@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" data-page="projects">
 <head>
-  <title>Updated hack discovery; Casio calculator data logger and remote control</title>
+  <title>Casio calculator data logger - timed sensor logging on FX-9750 and FX-9860</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Michael Fenton's Casio calculator data logger discovery: timed sensor logging on FX-9750 and FX-9860 calculators with Picaxe, Micro:bit or ESP32." />
+  <meta name="description" content="Timed sensor data logging on Casio FX-9750 and FX-9860 graphing calculators using host-wait windows in the Casio serial protocol, with Picaxe, micro:bit, ESP8266 or ESP32. Open source, CC BY-NC-SA 4.0." />
 
   <meta name="author" content="Michael Fenton" />
   <meta name="theme-color" content="#151a2f" />
@@ -24,7 +24,7 @@
     "name": "Michael Fenton, MRSNZ",
     "jobTitle": "Scientist, STEM Education lecturer, Education innovator, Consultant, Writer",
     "url": "https://MikeFentonNZ.github.io/",
-    "keywords": "Casio fx-9750G, Casio fx-98060, casio calculator data logger, Picaxe, ESP8266, ESP32, micro:bit, Microbit, pause mid receive, casio serial protocol, RECEIVE hack",
+    "keywords": "Casio fx-9750GIII, Casio fx-9860GIII, casio calculator data logger, host-wait window, READY-gated timing tolerance, Picaxe, ESP8266, ESP32, micro:bit, pause mid RECEIVE, casio serial protocol, SB-62, industrial measurement and control",
     "image": "https://MikeFentonNZ.github.io/assets/img/profile.png",
     "sameAs": [
       "https://nz.linkedin.com/in/mikefentonnz",
@@ -81,91 +81,45 @@
     </aside>
     <main id="content" class="content" role="main" tabindex="-1">
       <section class="intro" aria-labelledby="intro-heading">
-        <h2 id="intro-heading">Next-Generation Calculator Data Logger $10 upgrade</h2>
-	<h3>Providing equity and accessibility in STEM education</h3>
-	<p>Michael Fenton has improved his original Picaxe Casio calculator data logger developed in the mid-2000s. Michael discovered a READY-gated pause window in the Casio serial protocol to permit time interval data logging using Casio FX-9750G calculators connected to Picaxe microcontrollers. He discovered a second READY-gated pause window in 2025 that also works on new FX-9750GIII and FX-9860 calculators, enabling time interval data logging using Picaxe, Micro:bit, ESP8266 or ESP32 microcontrollers. The open-source design encourages teacher customisation and student innovation while providing robust, classroom-tested reliability.</p>
+        <h2 id="intro-heading">Casio calculator data logger, remote control, and IMC simulator - the $10 upgrade</h2>
+	<h3>Timed sensor logging and more on a calculator students already own</h3>
 
-<p>Michael has identified READY-gated pause windows (practical reliability confrmed at up to 300 seconds / 5 minutes) that allows the Casio FX 9750 series and FX 9860 series calculators to pause during a RECEIVE() operation without triggering a COM ERROR. This works for older legacy and new models of Casio graphing calculators. This permits external sensor units to send data at preset intervals (e.g., every 10 seconds, every minute) without requiring specialized hardware such as the EA-200 (last sold in New Zealand in 2008), CLAB or E-CON application. Michael's system realises a hundred-fold decrease in cost.</p>
+	<p>A memory of a forgotten opportunity, triggered by the new curriculum. What if there were a low-cost way to do real, hands-on, creative maths and science using a calculator many students already own? What if it were cross-curricular; a tool that learners and schools already have for physical education, health, technology, and robotics / instrumentation?</p>
 
-<p>This represents a paradigm shift from "data loggers are for senior students only" to "every student deserves tools to investigate their world." The system has proven particularly powerful for engaging learners who traditionally see science as abstract and inaccessible, transforming them into confident, curious investigators.</p>
+	<p>The forgotten feature in the 2.5 mm port of a Casio FX-9750 and FX-9860 is now available on my GitHub, open-source and free. It takes the burden off the teacher, because the learners become the experts - constructing, coding and repairing their own smart data logger that also acts as a remote control and automation control interface.</p>
 
-<p>This groundbreaking update to classroom-proven data logger technology transforms standard FX-9750 and FX-9860 graphic calculators into powerful IoT scientific instruments connecting to cheap DIY sensors. This enhanced system addresses critical equity gaps in STEM education by making authentic experimental learning accessible to junior year levels and low socio-economic communities traditionally excluded from using "expensive" laboratory equipment.</p>
-<img src="../assets/img/michael-fenton-picaxe-casio.jpg" alt="'Portable data logger units - wireless remote control mode" />
-<blockquote><span lang="en">"<strong>'Wireless remote control'</strong> - older Casio calculators with black box sensor units connected. Portable and battery powered.</span></blockquote>
-        <h3 id="key-ideas">Key ideas</h3>
-          <ul>
-        <li><strong>Entirely portable and affordable on a budget:</strong> Take to the fields, the gym, on a walk, on  holiday.</li>    
-<li><strong>Single simple Casio BASIC program:</strong> One master program connects to any microcontroller; Picaxe, Arduino, Microbit, ESP8266, ESP32.</li>
-	<li><strong>Multi-sensor input:</strong> Connect up to 3 sensors simultaneously to a single calculator for data logging, live graphing, and statistical analysis.</li>
-	<li><strong>Optional wireless bi-directional communication:</strong> Over 200-metre range for remote data collection and remote equipment control. Drive a robot using your calculator!</li>
-	<li><strong>Web-based data sharing option:</strong> Live data served as webpages with graphs accessible on smartphones, tablets, and laptops.</li>
-	<li><strong>Collaborative learning:</strong> Master calculator collects data while entire groups view live results on their own devices.</li>
-	<li><strong>Global connectivity:</strong> WiFi enables worldwide data sharing for international collaborative projects.</li>
-            <li><strong>Ultra-low-cost sensors: </strong>Works with cheap low-cost DIY / home-made and low-cost sensors; measure range (distance), water vapour, temperature, pressure, alpha radiation, visible light, ultra violet (UV) light, infra red (IR) light, water hardness, salinity, static electric fields, mobile phone signals, angles, magnetic fields, and more.</li>
-	    <li><strong>Democratising STEM Education:</strong> This system fundamentally challenges the traditional model where "fragile" and "expensive" equipment is reserved for senior students.</li>
-    </ul>
+	<p>This is an extension of my 2008 research, which carried classroom validation and student feedback, now with a modern facelift and cross-platform compatibility. Learners can record heart rate, temperature, sound level, and other readings using sensors they build themselves, for cents or a few dollars.</p>
+
+	<p>The simplest build is a Casio FX-9750 or FX-9860 graphing calculator, a microcontroller costing a few dollars, and a cross-over cable. Sensor readings arrive at a set interval and land in the calculator's own lists, where the graphing and statistics tools students already know are waiting for them.</p>
+
+<p>For a few dollars more, the Casio can log data from remote sensors wirelessly and serve a web page with data to smart devices including phones, tablets, and laptops.</p>
+
+	<p>The calculator needs no modification or firmware change. It does not need to know what is on the other end of the cross-over cable.</p>
+
+	<p><strong>What made this possible.</strong> The legacy Casio serial protocol has positions in its RECEIVE() exchange where the calculator waits for the attached device without any deadline; there is never a COM ERROR no matter how long the wait. Four such positions were found by inserting a pause at every point in the flow, line by line, and recording what happened. Two of them are useful. A microcontroller can hold the calculator at one of those points while it counts out a sampling interval, so the device keeps time and the calculator simply receives.</p>
+
+	<p>These are called <strong>host-wait windows</strong>. The first two were found in 2007 on an FX-9750G Plus, and data logging demonstrated in 2008 classroom trials (the prior work is here: <a href="#prior-work">published</a>). The remainder were found in October 2025. The third window is what makes reasonably precise unattended interval logging possible.</p>
+
+	<h3 id="who">More than data logging: a new tool for a new need</h3>
+
+	<p>I teach and develop STEM subjects at both the compulsory secondary education and adult tertiary levels, and I am also a research active scientist.</p>
+
+	<p>Recent work includes developing a Gateway Level 2 Electrical course - the programme of vocational learning delivered in schools. I also wrote Level 4 Industrial Measurement and Control assessments, and learning and assessment materials for a Level 4 4204 Electrical programme.</p>
+
+	<p>Writing Level 4 IMC assessments means I know exactly what that qualification demands, and what equipment it quietly assumes a provider already owns. Having taught Level 1 and Level 2 Applied mathematics in schools means I know exactly what can be put in front of a sixteen-year-old, and what a school can afford to put there. Standing in both places at once is what made the gap visible, and it is the subject of the <a href="#imc">Industrial Measurement and Control</a> section further down this page. As far as I am aware, I am the first to use a FX-9750 caclulator in this configuration as an IMC simulator as an ultra-low-cost teaching tool.</p>
+
+	<p><strong>The New Zealand school curriculum updates</strong> In August 2026 the Ministry of Education approved <a href="https://www.education.govt.nz/news/new-industry-led-subjects-announced-senior-secondary-students" target="_blank" rel="noopener">nine new industry-led subjects</a> for development for senior secondary students, among them Applied Intelligent Systems, Engineering Technology, Energy and Infrastructure, and Next-Gen Manufacturing. Measurement, instrumentation and control sit underneath all four of them, and schools resourcing this teaching will go looking for equipment. This work arrives at about the right moment, at a price a school can actually meet. One half of the equipment is likely already owned by a learner. If a learner purchases a calculator, they will get far more hands-on real-world use across multiple subjects. This reframes the cost as an investment in more engaging and concrete learning. They will answer their own question - "when am I ever going to use that in the real world?"</p>
+
+	<blockquote><span lang="en"><strong>Priority disclosure:</strong> Fenton, M. (2026). Casio Graphing Calculator Serial Interface: Priority Disclosure of Timing Discoveries, Encoding Invention, and Operational Modes (FX-9750 and FX-9860 Series). Zenodo. <a href="https://doi.org/10.5281/zenodo.19303911" target="_blank" rel="noopener">https://doi.org/10.5281/zenodo.19303911</a><br>
+	The disclosure uses the earlier term "READY-gated timing tolerance". It was renamed <strong>host-wait window</strong> in August 2026, before peer-reviewed publication. The finding is unchanged.</span></blockquote>
+
+	<img src="../assets/img/michael-fenton-picaxe-casio.jpg" alt="Portable data logger units - wireless remote control mode" />
+	<blockquote><span lang="en">Portable data logger units in wireless remote control mode. Battery powered. The classroom research is published: Fenton, M. (2008). "Authentic Learning Using Mobile Sensor Technology". New Zealand Ministry of Education E-Learning Fellowship report. Zenodo. <a href="https://doi.org/10.5281/zenodo.19302276" target="_blank" rel="noopener">https://doi.org/10.5281/zenodo.19302276</a></span></blockquote>
+
   </section>
-<p>Imagine how much more you can engage and inspire Years 9-10 general science classes! no more having students being told to wait to use "the good" equipment, only to loose interest and be turned off science.</p>
 
-<p>Where money and resourcing is a barrier to learning, a $6 USD investment provide access to science equipment normally costing $600 or more. In low-decile and resource-limited schools, as well as rural and isolated communities, this is a game changer.</p>
-
-<p>This also opens up opprotunities for data logging equipment and authentic science investigations suitable for home-based and distance learners. Imagine how this could transform Science Fair investigations, with quality data from real world explorations.</p>
-
-<p>Cross-curricular applications across all of the sciences, mathematics, technology, and physical education. Collect data in a PE lesson, anaylse the data in Biology or Statistics classes. Wonder if that school shade sail REALLY cuts down UV exposure? Record data over lunch, then analyse it in Physics. Explore seasonal changes saving daily recordings and looking for patterns over time in Technology class. How could the shade sail be improved?</p> 
-
-<p>Use Michael's proven pedagogical framework: The "Build It, Test It, Use It" approach. By constructing their own sensors learners better understand measurement principles. Calibrating equipment teaches the appreciate of data quality considerations.</p>
-
-<p>Learners design authentic investigations relevant to their own questions and contexts. Learners can readily achieve Relational and Extended abstract levels on the SOLO taxonomy.</p>
-
-	<h3 id="build-it">Build it</h3>
-	<p>Picaxe microcontrollers are low cost. The 08M2 being small, very robust, and easily capable of communicating with the Casio graphic calculator at T9600 baud. Two (2) sensors maximum can be send data to the FX-9750GIII. Constructing a bi-directional cable is simple and low-cost, using two 2.5mm 3-pin plugs</p>
-<p>Alternatively, you can connect Micro:bit, ESP8266 or ESP32 developent boards (higher cost but more functionality, e.g., remotely located sensors).</p>
-<p>A single master Picaxe BASIC programme works with 08M2 and 14M2 chips.</p>
-<p>A single Casio BASIC program works with all connected microcontrollers; Picaxe, Arduino, Microbit, ESP8266, ESP32.</p>
-<p>The cable used for this demonstration photo and video is the Casio SB-62, which is a 3-pin to 3-pin crossover cable. The underlying communication is a TTL (Transistor-Transistor Logic) asynchronous serial protocol.</p>
-<div class="warning-box">
-  <p><strong>Warning: The Casio FX-9750 3-pin port uses a 3V TTL logic level.</strong> </p>
- <p>A Picaxe 08M2 or 14M2 running on 2 x AA (3V) can be safely connected to the calculator.</p>
- <p><strong>DO NOT </strong>be connect 5V logic lines UNLESS a bidirectional logic level converter (or shifter) is used.</p>
- <p>It IS safe to power an ESP8266 Wemos D1 mini using 4 x AAA (6V) connected to the 5V input pin, because the onboard regulator converts this to 3.3V logic at pins D6 and D5 which connect to the SB-62 plug. See the image below.</p>
-</div>
-<img src="../assets/img/michael-fenton-casio-FX9750GIII-ESP8266.jpg" alt="'Build It' activity - receiving sensor data from a Wemos D1 mini ESP8266 sensor unit." />
-<p> </p>
-<blockquote><span lang="en">"<strong>'Build it'</strong> - receiving sensor data from a Wemos D1 mini ESP8266 sensor unit.</span></blockquote>
-<div style="display: flex; justify-content: center; padding: 20px;">
-  <img src="../assets/img/michael-fenton-casio-calculator-receive-pause.png" style="max-width: 900px; width: 100%; height: auto;" alt="Michael Fenton pause RECEIVE() Protocol">
-</div>
-	<h3 id="test-it">Test it</h3>
-	<p>Experience shows students were familiar with many standard calculator functions, but learners had no experience of Casio BASIC to code their own programmes. Teacher-guided simple activities pre-tested and guaranteed to work will build learner confidence and wonderings. The new Casio BASIC code supplied to learners permits universal connection to microcontrollers and simple menu selections to begin data collection. Temperature and light intensity make good first experiences. Michael would use an introductory worksheet with three stages;
-</p>
-          <ul>
-            <li><strong>Build your data logger</strong> - a ‘howto’ description for connecting Casio FX-9750 to the microcontroller sensor unit. A "universal" Casio BASIC program is provided for learners to install on their own Casio calculator.</li>
-            <li><strong>Test your data logger</strong> - an activity already tested by the teacher to demonstrate the datalooger has been assembled correctly and the Casio program is performing as expected. With senior classes in maths or science, it is expected some sensors would need calibrating, a useful additional skill. You could leave this for a later class activity.</li>
-	    <li><strong>Use your data logger</strong> - introductory investigations should be teacher-led so technical problems or misunderstandings are identfied and addressed. Later, once learners are confident users, learners can design and carry out their own investigations. The Casio BASIC program can be modfied and learners are encouraged to do so. Different sensors can be used or new ones designed and tested. Again, learners and teachers are encouraged to do so.</li>
-          </ul>
-<p></p>
-<div class="warning-box">
- <p><strong>Warning: DO NOT let students test boiling water or live electrical outlets!</strong> </p>
-</div>
-<p>There is no need to calibrate temperature sensors using boiling water. Where in the real world would a student expect to record that temperature? For some reason teachers default to using ice and boiling water to calibrate sensors. If you are investigating cooling curves, YOU should safely get sensor readings at 100 &degC and PROVIDE THIS to learners.</p>
-	<h3 id="use-it">Use it</h3>
-<p>Always remind learners that scientists work carefully and safely, no matter what they see in movies or TV!</p>
-<p>Casi II - a remake of the original Casio calculator remote controlled robot, replacing the Picaxe with a Microbit. A second Micro:bit is connected to the Casio FX-9750, which sends calculator key presses by radio to the Microbit on the robot to operate it.</p> 
-<br>
-<img src="../assets/img/microbit-robot.jpg" alt="'Use It' Microbit robot controlled by Casio FX-9750 using radio." width="500" />
-<p> </p>
-<img src="../assets/img/michael-fenton-casio-receive-pause.png" alt="Comparison of Michael's hack." />
-<br>
-<h3 id="downloads">'How-to' downloads and code</h3>
-	<blockquote><span lang="en"><strong>Downloads available 2026 - check back soon!</strong> [ Casio FX-9750 code, Picaxe BASIC code, ESP8266 / ESP32 C++ code ]</span></blockquote>
-<img src="../assets/img/picaxe-code.jpg" alt="'Picaxe basic code example'; Picaxe BASIC code will be provided" />
-<br>
-	<blockquote><span lang="en"><strong>Downloads available 2026 - check back soon!</strong> [ Wiring diagram, RECEIVE() and SEND() protocols, code explanations and experiment lab manual ]</span></blockquote>
-<img src="../assets/img/casio-calculator-picaxe-esp32-microbit-manual.jpg" alt="'Michael Fenton's experiment manual'; Casio calculator data logger manual." />
-<br>
-	<p><a href="casio-calculator-picaxe-data-logger.html" class="button" aria-label="See the original Casio - Picaxe data logger by Michael Fenton">Go to original Casio-Picaxe data logger</a></p>
-	<h3 id="presentations">YouTube videos</h3>
-	<p>Michael has documented many of his do-it-yourself, low-cost sensors and science equipment in YouTube videos. He is working on more material for this page. For now you can see a demonstration of the "Universal" Casio BASIC program that communicates with Picaxe or ESP8266 or ESP32 sensor units.</p>
+	<h3 id="see-it">YouTube videos - see it</h3>
+	<p>An updated video will be available soon. For now you can see a demonstration of the "Universal" Casio BASIC program that communicates with Picaxe or ESP8266 or ESP32 sensor units.</p>
 <div class="video-container">
 <iframe 
         src="https://www.youtube.com/embed/GLPgoy_6pYA"
@@ -174,12 +128,181 @@
         allowfullscreen>
 </iframe>
 </div>
-      <h3>A renewed justification</h3>
-<p>The original case for this work was equity: timed data logging for a few dollars instead of hundreds. There is now a second reason it matters. As generative AI is trained on a scientific literature increasingly polluted by fabricated paper mill studies (<a href="https://doi.org/10.1073/pnas.2420092122" target="_blank" rel="noopener">Richardson and Amaral, 2025, PNAS</a>), simulated datasets can no longer be assumed to reflect physical reality. Subverting the Casio serial protocol so learners can gather their own first-hand measurements gives them data whose provenance is transparent and which can still surprise. The exploit is no longer only about cost; it is about preserving access to real, trustworthy observation.</p>
-      <h3>Back to Projects/Research</h3>
+	<h3 id="safety">Safety - read before wiring anything</h3>
+
+	<div class="warning-box">
+  <p><strong>WARNING - TAKE CARE!</strong></p>
+  <p><strong>NEVER connect mains electricity (240 V / 110 V)</strong> to the calculator, to the microcontroller, or to any sensor wiring.</p>
+ <p><strong>NEVER use mains-connected equipment near water.</strong></p>
+  <p><strong>Keep every sensor signal within 0 V to 3.3 V.</strong> The ESP32 and ESP8266 are <strong>not</strong> 5 V tolerant. A bare ESP8266 A0 pin reads 0 to 1.0 V only; 3.3 V will destroy it. However, popular development boards like NodeMCU and Wemos D1 Mini include an onboard resistor voltage divider, which safely extends their external board tolerance to 0 to 3.2V–3.3V</p>
+  <p><strong>Special Warning: DO NOT let students test boiling water.</strong></p>
+ <p>There is no need to calibrate temperature sensors using boiling water. Where in the real world would a student expect to record that temperature? If you are investigating cooling curves, YOU should safely get sensor readings at 100 &degC and PROVIDE THIS to learners.</p>
+</div>
+
+	<h3 id="capabilities-limitations">Features and capabilities</h3>
+
+	<ul>
+	  <li><strong>Sampling interval 1 to 300 seconds: </strong> 300 seconds is a chosen working limit with margin, not a ceiling. A pause of three hours has been held, and no pause has ever failed for being too long. Battery voltage is the limiting factor. The Casio auto-power-off (APO) is disabled.</li>
+	  <li><strong>999 readings per session in a single list:</strong> The calculator's list capacity, confirmed on hardware. MORE readings can be made if readings are spread across lists. Casio data storage capacity is the limiting factor.</li>
+	  <li><strong>Non-volitile memory:</strong> The calculator's logged data is retained in the event of a power loss.</li>
+	  <li><strong>Nothing is timestamped in the demonstration code:</strong> The calculator computes elapsed time as interval x (reading number - 1). If the device runs slightly slow no error appears and no reading is dropped; the time axis is simply stretched. On a Picaxe that stretch is about 4.4 to 5.0 % at a 1-second interval and 2.5 to 3.1 % at 2 seconds. The shape of a curve survives this. A rate does not. Timestamps CAN be provided by a suitable microcontroller to permit accurate rate calculations with reasonable precision.</li>
+	  <li><strong>Both ESP boards keep exact time at 1 Hz:</strong> Verified in trials against an external timer.</li>
+	  <li><strong>A DS18B20 temperature sensor costs a Picaxe 750 ms per reading:</strong> The picaxe chip's clock stopped throughout. That is a 16 % time-axis error at a 5-second interval. Use 30 seconds or longer for a rate, or use an ESP board, which does not have this problem.</li>
+	  <li><strong>The calculator must stay connected:</strong> For a Picaxe run. The ESP builds can log alone and hand the record over afterwards.</li>
+	</ul>
+
+	<p>Full figures, how each was measured, and a four-minute method for checking the time axis yourself are in the teacher's guide.</p>
+
+	<h3 id="downloads">Downloads and code</h3>
+
+	<blockquote><span lang="en"><strong>Casio calculator, Picaxe, ESP8266, ESP32, Microbit code and resources repository:</strong><br>
+        Files are being released in stages.  <strong>License: CC BY-NC-SA 4.0 </strong><br> 
+	Link:  <a href="https://github.com/MikeFentonNZ/Casio-calculator-datalogger-picaxe-esp-microbit-arduino" target="_blank" rel="noopener">https://github.com/MikeFentonNZ/Casio-calculator-datalogger-picaxe-esp-microbit-arduino</a></span></blockquote>
+
+	<ul>
+	  <li><strong>Available now:</strong> the Casio BASIC calculator program in both .txt format - readable, keyable and archivable - and .g1m format, which transfers straight to a calculator with no typing, together with the multiple-sensor Picaxe firmware, teacher Picaxe proof-of-concept firmware, and version 1 teaching guide.</li>
+	  <li><strong>Next release, ESP8266 and ESP32 package:</strong> C++ code, updated teacher's guides.</li>
+	  <li><strong>To follow, Microbit package:</strong> Microbit V1 and V2 firmware, wiring diagrams, protocol notes, updated teacher's guide, and the experiment manual.</li>
+	</ul>
+
+	<p>A multi-sensor encoding that carries several readings in a single transmission is in preparation for peer-reviewed publication. Its method is not published here.</p>
+
+	<img src="../assets/img/picaxe-code.jpg" alt="'Picaxe basic code example'; Picaxe BASIC code will be provided" />
+	<br>
+
+<img src="../assets/img/casio-calculator-picaxe-esp32-microbit-manual.jpg" alt="Michael Fenton's Casio build and experiment manual. Casio calculator build and experiment manual." width="500" />
+
+	<h3 id="build-it">Build it</h3>
+        
+        <p>You have a choice of tools to build; Start with the data logger. When you are confident with the coding and connections, try the remote control, security keypad lesson, survey logger, or IMC simulator.</p>
+<p>For the data logger:</p> 
+	<ul>
+	  <li><strong>A calculator:</strong> FX-9750 or FX-9860 series. Every figure on this page was measured on an FX-9750GIII. Casio issues one firmware image for the FX-9750GIII and FX-9860GIII, so the protocol behaves the same on both.</li>
+	  <li><strong>A microcontroller:</strong> Picaxe 08M2 or 14M2 - cheapest, one chip, no board. Alternatively use a ESP8266 or ESP32 development board, which cost more but adds WiFi capability and timestamping. Arduino or BBC micro:bit V2 are also suitable.</li>
+	  <li><strong>A cable:</strong> a Casio SB-62, or two 2.5 mm 3-pin plugs and some wire.</li>
+	  <li><strong>Resistor:</strong> a 4.7 k pull-up from the calculator's transmit line to +3.3 V</li>
+	  <li><strong>1N4148 diode:</strong> in series on the calculators receive line.</li>
+	  <li><strong>A sensor:</strong> a thermistor or an LDR makes a good first one. Both read in about a millisecond.</li>
+	</ul>
+
+	<img src="../assets/img/michael-fenton-casio-FX9750GIII-ESP8266.jpg" alt="'Build It' activity - receiving sensor data from a Wemos D1 mini ESP8266 sensor unit." />
+
+	<blockquote><span lang="en"><strong>Casio FX-9750GIII runs a single master program that works with any microcontroller connected to it; </strong>shown is a Wemos D1 mini, ESP32, BBC Micro:bit, Picaxe 08M2 - all code is tested and proven, to be released in stages.</span></blockquote>
+
+	<p>The Picaxe 08M2 is small, robust, costs very little, and talks to the calculator at 9600 baud without difficulty. The 14M2 has more pins if you want more sensors. A single Picaxe BASIC program serves both chips.</p>
+
+	<p>The ESP8266 and ESP32 cost more and do more. They keep exact time at one reading per second, can provide accurate time stamps, log data without the calculator attached, and serve a live web page.</p>
+
+	<p><strong>One Casio BASIC program works with every one of them.</strong> The calculator never learns which device is on the other end of the cable. That is a property of Casio's own protocol layer, and it is why a sixth platform would need no calculator-side change at all.</p>
+
+	<div style="display: flex; justify-content: center; padding: 20px;">
+  <img src="../assets/img/michael-fenton-casio-receive-host-wait-windows.png" style="max-width: 900px; width: 100%; height: auto;" alt="Michael Fenton pause RECEIVE() Protocol">
+	</div>
+
+	<blockquote><span lang="en">The legacy Casio serial protocol with all <strong>host-wait wondows</strong> (Gaps 1- 4). Full details of packet sizes and byte structures are provided in code comments and notes in the Github repository.</span></blockquote>
+
+	<h3 id="test-it">Test it</h3>
+
+	<p>Students know their calculators but have usually never written Casio BASIC. Teacher-guided activities that are pre-tested and guaranteed to work build confidence before anything open-ended is attempted. Temperature and light intensity make good first experiences.</p>
+
+<p>Students should run an activity the teacher has already tested, so that a wiring fault is found before it can be mistaken for a result. Senior classes in maths or science can calibrate their sensors, which is a useful skill in itself. For IMC simulations this should be compulsory.</p>
+
+	<h3 id="use-it">Use it</h3>
+
+	<p><strong>Always remind learners that scientists and engineers work carefully and safely,</strong> no matter what they see in movies or TV.</p>
+
+	<p><strong>Casi II</strong>: A remake of the original Casio calculator-controlled robot, with a micro:bit in place of the Picaxe. A second micro:bit connected to the Casio sends calculator key presses by radio to the robot (see the 2008 E-Learning report <a href="https://doi.org/10.5281/zenodo.19302276" target="_blank" rel="noopener">https://doi.org/10.5281/zenodo.19302276</a>).</p>
+
+<p><strong>Mars surface surveyor:</strong> Attach a low-cost ultrasonic rangefinder module (Aliexpress) and map a simulated Martian surface from the air (see the 2008 E-Learning report <a href="https://doi.org/10.5281/zenodo.19302276" target="_blank" rel="noopener">https://doi.org/10.5281/zenodo.19302276</a>).</p>
+
+<p><strong>A user-triggered field survey logger:</strong> Combining microcontroller-maintained elapsed-time recording and user-entered categorical observation. For example, using single numeric keys 0–9 provide 10 categories; alpha keys A–Z provide more categories for applications requiring finer classification. Examples: geological substrate (1 = scoria, 2 = sand, 3 = basalt), vegetation type, land use class, or surface condition.</p>
+
+<p><strong>Human-machine-interface:</strong> The calculator transmits user-entered numerical values to the microcontroller via the serial interface. The calculator’s tamper-evident keypad and display provide a secure input mechanism for applications requiring user-generated discrete values. One group sets up a model door lock with a 4-digit PIN and no lockout. A second group is asked to open it without being told the code. Teaches coding, cyber security, building systems safety, and the rule 'the secret belongs with the thing being protected, not with the thing a user is holding.</p>
+
+<p><strong>IMC simulator:</strong> The Casio calculator and connected microcontroller form a closed-loop measurement and control system. The microcontroller reads one or more sensors, transmits them to the calculator for display. The student observes the live readings, makes a control decision, and transmits a control value back to the microcontroller via the calculator keypad. The microcontroller receives that value and adjusts a physical output accordingly; motor speed, heater power, valve position, or light intensity. The student then observes the effect of their intervention in the next sensor reading.</p>
+
+	<p><strong>Over distance.</strong> On ESP32 hardware an ESP-NOW radio link has been proven through a house, across twenty metres, and into a metal three-bay shed. That matters more than a clear-air figure, because a shed is the sort of place a measurement actually has to come from. In open air the range is 200-plus metres, measured repeatedly.</p>
+
+	<p><strong>Sharing live data.</strong> Both ESP builds run their own WiFi access point and serve a status page and a CSV download to phones and laptops while logging continues, with no reading lost. Two clients at once has been tested.</p>
+
+	<img src="../assets/img/microbit-robot.jpg" alt="'Use It' Microbit robot controlled by Casio FX-9750 using radio." width="500" />
+	
+	<blockquote><span lang="en">Casio calculator controlled robot - Casi II.</span></blockquote>
+
+	<h3 id="across-subjects">Use it - Across subjects</h3>
+
+	<p>A graphing calculator is bought for one reason: mathematics requires it. It is a significant purchase for a family, it is carried for three to five years, and for most of that time it does one thing. This gives the same device further uses, in further subjects, without altering it in any way.</p>
+
+	<ul>
+	  <li><strong>Mathematics</strong> - what it was bought for. Tradional uses cases involving calculations and data analysis (usually simulated or pre-recorded / published data). Now learners can gather authentic data at home, on farms, on marae, on holiday. </li>
+	  <li><strong>Science</strong> - a data logger, with the analysis happening in the environment students were taught in, on the device they were taught on. New data collection includes field studies recording categorical data and observations, not just numerical data. Anywhere at any time.</li>
+	  <li><strong>Physical education</strong> - heart-rate recovery measured after exercise and repeated over days or weeks. That wants a logger which belongs to the student and goes home with them, which is exactly what shared laboratory equipment cannot be.</li>
+	  <li><strong>Digital technology and computing</strong> - the calculator as a human-machine interface, the operator's panel for a process the student has built and programmed.</li>
+	</ul>
+
+	<p><strong>The economics run the opposite way to the usual low-cost argument.</strong> Normally a cheap option is a poorer substitute for a better thing. Here the expensive item has already been bought, by the family, for a different subject. What this adds costs a few dollars, so the marginal cost of the second and third uses is close to nothing.</p>
+
+	<h3 id="across-year-groups">Use it - Across year groups / levels</h3>
+
+	<p>Younger learners at Year 9 are no longer excluded from authentic investigations because science equipment is limited to senior classes. When commercial equipment is expensive, complicated or easliy damaged, it is often reserved for senior student use. When equipment is low-cost and built and coded by the learner, they see themselves as real investigators, with low floor, high ceiling opportunities available as the default state, not a special case.</p>
+
+	<h3 id="out-of-field-teaching">Use it - Supporting novice or out-of-field teachers</h3>
+
+	<p>Due to ongoing secondary teacher shortages in New Zealand, many schools are forced to have teachers work "out-of-field" or "out-of-subject"—teaching classes outside their primary area of specialist qualification. This practice is most common in high-demand subjects like science, mathematics, technology. Teachers can learn with students. Students become the technology experts with devices that enable increase learner agency for STEM investigations involving personal interest and real-world applications. This is of special relevance to the new industry-led subjects in the New Zelaand cirriculum. One example follows.</p>
+
+	<h3 id="imc">Use it - Industrial Measurement and Control</h3>
+
+	<p>Instrumentation technicians install, calibrate, maintain and repair the equipment that measures and controls industrial processes - dairy manufacturing, water and wastewater treatment, pulp and paper, food and beverage, metal refining, power generation. Wintec, the only New Zealand provider of the theory qualifications, describes it as "one of those careers that most people do not know exists, but is vital for industries worldwide", with technicians in high demand.</p>
+
+	<p><strong>In New Zealand it begins at Level 4</strong>, and the normal route in is to qualify and work as an industrial electrician first. Dual trade - Electrical Engineering Level 4 with Industrial Measurement and Control Level 4 - is the common minimum an employer looks for. <strong>There is nothing at Level 2.</strong> The absence is structural rather than accidental: the discipline is a post-trade specialisation, and Level 4 assumes real industrial PLC and instrumentation hardware.</p>
+
+	<p>Which means a secondary student cannot encounter this career through the education system at all. They cannot meet it, try it, or find out whether it suits them, until after they have already committed to a different trade.</p>
+
+	<p><strong>What a calculator and a microcontroller can actually demonstrate.</strong> Every core idea in measurement and control is present, at a scale a student can hold:</p>
+
+	<ul>
+	  <li><strong>Measurement</strong> - a sensor turns a physical quantity into a signal, and the signal is not the quantity. Range, resolution, drift and calibration all become visible when the student built the sensor.</li>
+	  <li><strong>Set points and limits</strong> - a value is not simply high or low, it is inside or outside a band somebody chose, and choosing that band is an engineering decision with consequences.</li>
+	  <li><strong>Control</strong> - the microcontroller switches a heater, a fan or a vent. On and off first; proportional control once that is understood.</li>
+	  <li><strong>The closed loop</strong> - sense, compare against the set point, act, then sense again. The loop is the whole subject, and a student can watch it run.</li>
+	  <li><strong>Alarm and fault management</strong> - a status field reports which channel is out of range, or that the instrument itself has failed. Distinguishing "the process is wrong" from "the instrument is wrong" is what an instrumentation technician is paid for.</li>
+	  <li><strong>The human-machine interface</strong> - the calculator becomes the operator's panel, showing live values, status and alarms, and accepting commands from the keypad.</li>
+	  <li><strong>Fail-safe design</strong> - what should the system do when it loses contact, or loses power? A fault must never look like a normal result. That principle runs through every source file in this project, and it is the one an industry assessor will ask about.</li>
+	  <li><strong>Data logging as process monitoring</strong> - the same record that serves a science investigation is, in an industrial context, the evidence that a process stayed within specification.</li>
+	</ul>
+
+	<p><strong>What that costs.</strong> A purpose-built PLC education kit runs from NZ$615 for a Siemens LOGO! starter kit to NZ$1,023 for the Arduino Education PLC starter kit, both ex GST from RS Components New Zealand, August 2026. Arduino state that their kit is "suitable for students aged 18 to 25 at schools and technical institutes with professional training offer" - which is to say, not secondary students. Those are also shared stations: a class of thirty works in groups around a handful of them.</p>
+
+	<p>This is one per student, because the expensive part is already in the school bag. That is the argument. The cost comparison is the smaller half of it.</p>
+
+	<h3 id="prior-work">Prior work</h3>
+
+	<p>This builds on one other persons work.</p>
+
+	<ul>
+	  <li><strong>Erik Grindheim (2001)</strong> published the Casio CFX-9950G communications protocol - packet encoding, handshaking and the communication sequence. It was written from a personal computer, which explains what it does not contain: one timeout, and no host-wait window.</li>
+	  <li><strong>Michael Fenton (2004 to 2008)</strong> adapted that work after correspondence with Andrew Hornblow, and published Picaxe-to-Casio example code and protocol notes on the Revolution Education forum. The classroom research is published: Fenton, M. (2008). "Authentic Learning Using Mobile Sensor Technology". New Zealand Ministry of Education E-Learning Fellowship report. Zenodo. <a href="https://doi.org/10.5281/zenodo.19302276" target="_blank" rel="noopener">https://doi.org/10.5281/zenodo.19302276</a></li>
+	  <li><strong>Michael Fenton (2009)</strong> presented the work internationally: Fenton, M. (2009). "RIGEL - Learning From Life: Communities of Learning via a Connected Curriculum". Microsoft Partners in Learning Regional Innovative Teachers Conference, Kuala Lumpur, 27 to 29 May 2009. Zenodo. <a href="https://doi.org/10.5281/zenodo.19334228" target="_blank" rel="noopener">https://doi.org/10.5281/zenodo.19334228</a> - one of five teachers selected to represent New Zealand. The slide deck shows the Casio FX-9750G Plus in classroom use as a data logger and remote control device, which is the earliest dated public record of the arrangement this page describes.</li>
+	  <li><strong>Anobium (2012)</strong> and <strong>nsg21 (2018)</strong> both built on that published code and both credited it.</li>
+	  <li><strong>MiniExperimenter (shabaz123, 2020)</strong> is the most technically sophisticated independent prior work found. It uses the EA-200 hardware protocol at a different baud rate, does not address interval timing, and does not encode multiple sensors within a single transmission.</li>
+	</ul>
+
+	<p>Casio's own EA-100 and EA-200 data acquisition units are discontinued. The Casio New Zealand office confirmed in 2026 that the last unit was sold in this market in 2008.</p>
+
+	<h3 id="justification">A renewed justification in a post AI-era.</h3>
+<p><strong>When technology cost and availability is no longer a consideration, the use of simulated data for STEM learning is a decision that now requires justification, rather than being the default.</strong></p> 
+
+	<p>The original case for this work was equity: timed data logging for a few dollars instead of hundreds. There is now a second reason it matters. As generative AI is trained on a scientific literature increasingly polluted by fabricated paper mill studies (<a href="https://doi.org/10.1073/pnas.2420092122" target="_blank" rel="noopener">Richardson and Amaral, 2025, PNAS</a>), simulated datasets can no longer be assumed to reflect physical reality. Subverting the Casio serial protocol so learners can gather their own first-hand measurements gives them data whose provenance is transparent and which can still surprise. The exploit is no longer only about cost; it is about preserving access to real, trustworthy observation.</p>
+
+	<h3 id="original">The original project</h3>
+	<p><a href="casio-calculator-picaxe-data-logger.html" class="button" aria-label="See the original Casio - Picaxe data logger by Michael Fenton">Go to original Casio-Picaxe data logger</a></p>
+
+	<h3>Back to Projects/Research</h3>
 	<p><a href="../projects-stem-inventions.html" class="button" aria-label="See projects and research by Michael Fenton">Back to Projects</a></p>
-    </main>
-  </div>
+    
+</main>
+</div>
+
   <footer class="footer" role="contentinfo" aria-label="Site footer">
   <p>© <span id="year"></span> Michael Fenton.</p>
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license">
@@ -187,7 +310,7 @@
   </a>
   <p>This work may be copied, shared, remixed, and adapted for non-commercial purposes under the terms of the license.</p>
   <p>Requirements: give appropriate credit, provide a link to the license, and indicate if changes were made. Derivatives must be licensed under identical terms.</p>
-  <p><small>Attribution example: <strong>Casio Calculator Data Logger Limitation Removed: Timed sensor sampling using a novel RECEIVE() algorithm - Michael Fenton</strong> - CC BY-NC-SA 4.0 - https://creativecommons.org/licenses/by-nc-sa/4.0/</small></p>
+  <p><small>Attribution example: <strong>Casio Calculator Data Logger: timed sensor sampling using host-wait windows in the Casio serial protocol - Michael Fenton</strong> - CC BY-NC-SA 4.0 - https://creativecommons.org/licenses/by-nc-sa/4.0/</small></p>
   </footer>
 
   <script src="../assets/js/main.js"></script>
