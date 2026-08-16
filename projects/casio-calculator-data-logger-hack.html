@@ -147,6 +147,7 @@
 	  <li><strong>Non-volitile memory:</strong> The calculator's logged data is retained in the event of a power loss.</li>
 	  <li><strong>Nothing is timestamped in the demonstration code:</strong> The calculator computes elapsed time as interval x (reading number - 1). If the device runs slightly slow no error appears and no reading is dropped; the time axis is simply stretched. On a Picaxe that stretch is about 4.4 to 5.0 % at a 1-second interval and 2.5 to 3.1 % at 2 seconds. The shape of a curve survives this. A rate does not. Timestamps CAN be provided by a suitable microcontroller to permit accurate rate calculations with reasonable precision.</li>
 	  <li><strong>Both ESP boards keep exact time at 1 Hz:</strong> Verified in trials against an external timer.</li>
+	  <li> <strong>Web-based data sharing:</strong> Both ESP builds run their own WiFi access point and serve a live status page and CSV download to phones and laptops <b>while logging continues</b>, with no reading lost. Two clients at once has been tested.</li>
 	  <li><strong>A DS18B20 temperature sensor costs a Picaxe 750 ms per reading:</strong> The picaxe chip's clock stopped throughout. That is a 16 % time-axis error at a 5-second interval. Use 30 seconds or longer for a rate, or use an ESP board, which does not have this problem.</li>
 	  <li><strong>The calculator must stay connected:</strong> For a Picaxe run. The ESP builds can log alone and hand the record over afterwards.</li>
 	</ul>
@@ -160,8 +161,9 @@
 	Link:  <a href="https://github.com/MikeFentonNZ/Casio-calculator-datalogger-picaxe-esp-microbit-arduino" target="_blank" rel="noopener">https://github.com/MikeFentonNZ/Casio-calculator-datalogger-picaxe-esp-microbit-arduino</a></span></blockquote>
 
 	<ul>
-	  <li><strong>Available now:</strong> the Casio BASIC calculator program in both .txt format - readable, keyable and archivable - and .g1m format, which transfers straight to a calculator with no typing, together with the multiple-sensor Picaxe firmware, teacher Picaxe proof-of-concept firmware, and version 1 teaching guide.</li>
-	  <li><strong>Next release, ESP8266 and ESP32 package:</strong> C++ code, updated teacher's guides.</li>
+	  <li><strong>Available now:</strong> the universal Casio BASIC calculator program in both .txt format - readable, keyable and archivable - and .g1m format, which transfers straight to a calculator with no typing. Also multiple-sensor Picaxe firmware, teacher Picaxe proof-of-concept firmware, and version 1 teaching guide for Picaxe codes.</li>
+	  <li><strong>Avialable now:</strong> C++ code for Casio calculator ESP32 single sensor data logger demonstration with webserver - 192.168.4.1.  This uses the same universal Casio BASIC program as the Picaxe Casio datalogger.</li>
+	  <li><strong>Next release, ESP8266 package:</strong> C++ code, updated teacher's guides.</li>
 	  <li><strong>To follow, Microbit package:</strong> Microbit V1 and V2 firmware, wiring diagrams, protocol notes, updated teacher's guide, and the experiment manual.</li>
 	</ul>
 
