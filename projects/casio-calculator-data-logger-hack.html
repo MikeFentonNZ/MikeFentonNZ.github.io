@@ -182,8 +182,8 @@
 	  <li><strong>A calculator:</strong> FX-9750 or FX-9860 series. Every figure on this page was measured on an FX-9750GIII. Casio issues one firmware image for the FX-9750GIII and FX-9860GIII, so the protocol behaves the same on both.</li>
 	  <li><strong>A microcontroller:</strong> Picaxe 08M2 or 14M2 - cheapest, one chip, no board. Alternatively use a ESP8266 or ESP32 development board, which cost more but adds WiFi capability and timestamping. Arduino or BBC micro:bit V2 are also suitable.</li>
 	  <li><strong>A cable:</strong> a Casio SB-62, or two 2.5 mm 3-pin plugs and some wire.</li>
-	  <li><strong>Resistor:</strong> a 4.7 k pull-up from the calculator's transmit line to +3.3 V</li>
-	  <li><strong>1N4148 diode:</strong> in series on the calculators receive line.</li>
+	  <li><strong>Resistor:</strong> a 4.7 k pull-up from the calculator's transmit line to +3.3 V. When the calculator's port is not in use it goes high impedance and the line floats to 0 V. Serial lines idle <strong>high</strong>, so a microcontroller already listening would read that as a permanent break and log junk until the calculator wakes its port. The pull-up supplies the idle state the calculator does not.</li>
+	  <li><strong>1N4148 diode:</strong> in series on the calculator's receive line, <strong>bar (cathode) toward the microcontroller</strong>. Reversed, nothing works. The diode makes the output open-drain - the microcontroller only ever pulls the line low, and the calculator raises it with its own internal pull-up. That is why no series resistor is fitted alongside it, and why the same wiring suits a 3.3 V calculator and a 5 V one. A 1N914 is equivalent; a Schottky is not needed. Verified on Picaxe with an FX-9750GIII; ESP and micro:bit still to be tested.</li>
 	  <li><strong>A sensor:</strong> a thermistor or an LDR makes a good first one. Both read in about a millisecond.</li>
 	</ul>
 
