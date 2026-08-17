@@ -24,7 +24,7 @@
     "name": "Michael Fenton, MRSNZ",
     "jobTitle": "Scientist, STEM Education lecturer, Education innovator, Consultant, Writer",
     "url": "https://MikeFentonNZ.github.io/",
-    "keywords": "Casio fx-9750GIII, Casio fx-9860GIII, casio calculator data logger, host-wait window, READY-gated timing tolerance, Picaxe, ESP8266, ESP32, micro:bit, pause mid RECEIVE, casio serial protocol, SB-62, industrial measurement and control",
+    "keywords": "Casio fx-9750GIII, Casio fx-9860GIII, casio calculator data logger, host-wait window, READY-gated timing tolerance, Picaxe, ESP8266, ESP32, micro:bit, arduino, pause mid RECEIVE, casio serial protocol, SB-62, industrial measurement and control",
     "image": "https://MikeFentonNZ.github.io/assets/img/profile.png",
     "sameAs": [
       "https://nz.linkedin.com/in/mikefentonnz",
@@ -123,7 +123,7 @@
 <div class="video-container">
 <iframe 
         src="https://www.youtube.com/embed/GLPgoy_6pYA"
-        title="Next generation Casio 9750GIII upgrade using Picaxe and ESP8266 / ESP32 microcontrollers to serve sensor data"
+        title="Next generation Casio 9750GIII upgrade using Picaxe, ESP8266, ESP32, Microbit, and Arduino microcontrollers to serve sensor data"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen>
 </iframe>
@@ -180,16 +180,16 @@
 <p>For the data logger:</p> 
 	<ul>
 	  <li><strong>A calculator:</strong> FX-9750 or FX-9860 series. Every figure on this page was measured on an FX-9750GIII. Casio issues one firmware image for the FX-9750GIII and FX-9860GIII, so the protocol behaves the same on both.</li>
-	  <li><strong>A microcontroller:</strong> Picaxe 08M2 or 14M2 - cheapest, one chip, no board. Alternatively use a ESP8266 or ESP32 development board, which cost more but adds WiFi capability and timestamping. Arduino or BBC micro:bit V2 are also suitable.</li>
+	  <li><strong>A microcontroller:</strong> Picaxe 08M2 or 14M2 - cheapest, one chip, no board. An ESP8266 or ESP32 development board costs more but adds WiFi and timestamping. A BBC micro:bit needs no sensors at all to get started, because two of its three channels are inside the board. An <strong>Arduino Uno R3</strong> works too and is the board most likely to be in a school cupboard already - though it is the least proven here: it has answered the handshake correctly against an FX-9750G Plus, but interval logging on it has not yet been demonstrated, and all three of its channels need a wire.</li>
 	  <li><strong>A cable:</strong> a Casio SB-62, or two 2.5 mm 3-pin plugs and some wire.</li>
 	  <li><strong>Resistor:</strong> a 4.7 k pull-up from the calculator's transmit line to +3.3 V. When the calculator's port is not in use it goes high impedance and the line floats to 0 V. Serial lines idle <strong>high</strong>, so a microcontroller already listening would read that as a permanent break and log junk until the calculator wakes its port. The pull-up supplies the idle state the calculator does not.</li>
 	  <li><strong>1N4148 diode:</strong> in series on the calculator's receive line, <strong>bar (cathode) toward the microcontroller</strong>. Reversed, nothing works. The diode makes the output open-drain - the microcontroller only ever pulls the line low, and the calculator raises it with its own internal pull-up. That is why no series resistor is fitted alongside it, and why the same wiring suits a 3.3 V calculator and a 5 V one. A 1N914 is equivalent; a Schottky is not needed. Verified with FX-9750G Plus and FX-9750GIII; all platforms, including Picaxe, ESP8266, ESP32, Microbit V1 and Microbit V2.</li>
 	  <li><strong>A sensor:</strong> a thermistor or an LDR makes a good first one. Both read in about a millisecond.</li>
 	</ul>
 
-	<img src="../assets/img/michael-fenton-casio-FX9750GIII-ESP8266.jpg" alt="'Build It' activity - receiving sensor data from a Wemos D1 mini ESP8266 sensor unit." />
+	<img src="../assets/img/michael-fenton-casio-all-platforms.jpg" alt="'Build It' activity - receiving sensor data from a Wemos D1 mini ESP8266 sensor unit." />
 
-	<blockquote><span lang="en"><strong>Casio FX-9750GIII runs a single master program that works with any microcontroller connected to it; </strong>shown is a Wemos D1 mini, ESP32, BBC Micro:bit, Picaxe 08M2 - all code is tested and proven, to be released in stages.</span></blockquote>
+	<blockquote><span lang="en"><strong>Casio FX-9750GIII runs a single master program that works with any microcontroller connected to it; </strong>shown is a Wemos D1 mini, ESP32, Arduino Uno, BBC Micro:bit, Picaxe 08M2 - all code is tested and proven, and avilable for download.</span></blockquote>
 
 	<p>The Picaxe 08M2 is small, robust, costs very little, and talks to the calculator at 9600 baud without difficulty. The 14M2 has more pins if you want more sensors. A single Picaxe BASIC program serves both chips.</p>
 
