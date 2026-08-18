@@ -4,19 +4,19 @@
   <title>Casio calculator data logger - timed sensor logging on FX-9750 and FX-9860</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Timed sensor data logging on Casio FX-9750 and FX-9860 graphing calculators using host-wait windows in the Casio serial protocol, with Picaxe, micro:bit, ESP8266 or ESP32. Open source, CC BY-NC-SA 4.0." />
+  <meta name="description" content="Timed sensor data logging on Casio FX-9750 and FX-9860 graphing calculators using host-wait windows in the Casio serial protocol, with Picaxe, micro:bit, ESP8266, ESP32, or Arduino. Open source, CC BY-NC-SA 4.0." />
 
   <meta name="author" content="Michael Fenton" />
   <meta name="theme-color" content="#151a2f" />
   <link rel="canonical" href="https://mikefentonnz.github.io/projects/casio-calculator-data-logger-hack.html" />
   <meta property="og:title" content="Casio calculator data logger, remote control, human machine interface and IMC simulator research" />
-  <meta property="og:description" content="Michael Fenton upgrades his Picaxe Casio calculator data logger developed and published in the mid-2000s. Michael's Casio serial protocol hack uses Casio FX-9750 and FX-9860 calculators for data logging at ultra low cost.  Attach sensors to connect Casio calculators to Picaxe, Microbit, ESP8266 or ESP32. The open-source design encourages teacher customisation and student innovation while providing robust, classroom-tested reliability." />
+  <meta property="og:description" content="Michael Fenton upgrades his Picaxe Casio calculator data logger developed and published in the mid-2000s. Michael's Casio serial protocol hack uses Casio FX-9750 and FX-9860 calculators for data logging at ultra low cost.  Attach sensors to connect Casio calculators to Picaxe, Microbit, ESP8266, ESP32, or Arduino. The open-source design encourages teacher customisation and student innovation while providing robust, classroom-tested reliability." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://MikeFentonNZ.github.io/assets/img/profile.png" />
   <meta property="og:url" content="https://mikefentonnz.github.io/projects/casio-calculator-data-logger-hack.html" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Updated hack discovery; Casio calculator data logger and remote control" />
-  <meta name="twitter:description" content="Michael Fenton upgrades his Picaxe Casio calculator data logger developed and published in the mid-2000s. Michael's Casio serial protocol hack uses Casio FX-9750 and FX-9860 calculators for data logging at ultra low cost.  Attach sensors to connect Casio calculators to Picaxe, Microbit, ESP8266 or ESP32. The open-source design encourages teacher customisation and student innovation while providing robust, classroom-tested reliability." />
+  <meta name="twitter:description" content="Michael Fenton upgrades his Picaxe Casio calculator data logger developed and published in the mid-2000s. Michael's Casio serial protocol hack uses Casio FX-9750 and FX-9860 calculators for data logging at ultra low cost.  Attach sensors to connect Casio calculators to Picaxe, Microbit, ESP8266, ESP32, or Arduino. The open-source design encourages teacher customisation and student innovation while providing robust, classroom-tested reliability." />
   <meta name="twitter:image" content="https://MikeFentonNZ.github.io/assets/img/profile.png" />
   <script type="application/ld+json">{
     "@context": "https://schema.org",
@@ -24,7 +24,7 @@
     "name": "Michael Fenton, MRSNZ",
     "jobTitle": "Scientist, STEM Education lecturer, Education innovator, Consultant, Writer",
     "url": "https://MikeFentonNZ.github.io/",
-    "keywords": "Casio fx-9750GIII, Casio fx-9860GIII, casio calculator data logger, host-wait window, READY-gated timing tolerance, Picaxe, ESP8266, ESP32, micro:bit, arduino, pause mid RECEIVE, casio serial protocol, SB-62, industrial measurement and control",
+    "keywords": "Casio fx-9750GIII, Casio fx-9860GIII, casio calculator data logger, host-wait window, READY-gated timing tolerance, Picaxe, ESP8266, ESP32, micro:bit, Arduino, pause mid RECEIVE, host wait window, casio serial protocol, SB-62, industrial measurement and control",
     "image": "https://MikeFentonNZ.github.io/assets/img/profile.png",
     "sameAs": [
       "https://nz.linkedin.com/in/mikefentonnz",
@@ -156,15 +156,16 @@
 
 	<h3 id="downloads">Downloads and code</h3>
 
-	<blockquote><span lang="en"><strong>Casio calculator, Picaxe, ESP8266, ESP32, Microbit code and resources repository:</strong><br>
-        Files are being released in stages.  <strong>License: CC BY-NC-SA 4.0 </strong><br> 
+	<blockquote><span lang="en"><strong>Casio calculator, Picaxe, ESP8266, ESP32, Microbit, and Arduino code and resources repository:</strong><br>
+          <strong>License: CC BY-NC-SA 4.0 </strong><br>
 	Link:  <a href="https://github.com/MikeFentonNZ/Casio-calculator-datalogger-picaxe-esp-microbit-arduino" target="_blank" rel="noopener">https://github.com/MikeFentonNZ/Casio-calculator-datalogger-picaxe-esp-microbit-arduino</a></span></blockquote>
 
 	<ul>
-	  <li><strong>Available now:</strong> the universal Casio BASIC calculator program in both .txt format - readable, keyable and archivable - and .g1m format, which transfers straight to a calculator with no typing. Also multiple-sensor Picaxe firmware, teacher Picaxe proof-of-concept firmware, and version 1 teaching guide for Picaxe codes.</li>
-	  <li><strong>Avialable now:</strong> C++ code for Casio calculator ESP32 single sensor data logger demonstration with webserver - 192.168.4.1.  This uses the same universal Casio BASIC program as the Picaxe Casio datalogger.</li>
-	  <li><strong>Next release, ESP8266 package:</strong> C++ code, updated teacher's guides.</li>
-	  <li><strong>To follow, Microbit package:</strong> Microbit V1 and V2 firmware, wiring diagrams, protocol notes, updated teacher's guide, and the experiment manual.</li>
+	  <li><strong>A single universal Casio BASIC calculator program</strong> in both .txt format - readable, keyable and archivable - and .g1m format, which transfers straight to a calculator with no typing.</li>
+ 	  <li><strong>Multi-sensor firmware</strong> as a proof-of-concept for Picaxe, ESP8266, ESP32, Microbit V1, Microbit V2, Arduino Uno.</li>
+	  <li><strong>Casio serial protocol technical manual:</strong> 3-pin port serial cable wiring, SEND() and RECEIVE() protocol, all packet structures, checksums, free programming editors for all platforms</li>
+	  <li><strong>Learner / Teacher guide:</strong> Part of the Technical Manual - cross-curriculum investigation topics, sensor unit construction, DIY homemade sensors, <strong>"Build it, Test it, Use it"</strong> teaching sequences, suggested experiments.
+	  <li><strong>Diagrams and photos:</strong> Casio data logging in the classroom, kit sets, wiring and protocol diagrams, Casio-to-microcontroller images.</li>
 	</ul>
 
 	<p>A multi-sensor encoding that carries several readings in a single transmission is in preparation for peer-reviewed publication. Its method is not published here.</p>
