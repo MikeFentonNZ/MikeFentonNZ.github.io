@@ -106,7 +106,7 @@
 
 	<p>Recent work includes developing a Gateway Level 2 Electrical course - the programme of vocational learning delivered in schools. I also wrote Level 4 Industrial Measurement and Control assessments, and learning and assessment materials for a Level 4 4204 Electrical programme.</p>
 
-	<p>Writing Level 4 IMC assessments means I know exactly what that qualification demands, and what equipment it quietly assumes a provider already owns. Having taught Level 1 and Level 2 Applied mathematics in schools means I know exactly what can be put in front of a sixteen-year-old, and what a school can afford to put there. Standing in both places at once is what made the gap visible, and it is the subject of the <a href="#imc">Industrial Measurement and Control</a> section further down this page. As far as I am aware, I am the first to use a FX-9750 caclulator in this configuration as an IMC simulator as an ultra-low-cost teaching tool.</p>
+	<p>Writing Level 4 IMC assessments means I know exactly what that qualification demands, and what equipment it quietly assumes a provider already owns. Having taught Level 1 and Level 2 Applied mathematics in schools means I know exactly what can be put in front of a sixteen-year-old, and what a school can afford to put there. Standing in both places at once is what made the gap visible, and it is the subject of the <a href="#imc">Industrial Measurement and Control</a> section further down this page. As far as I am aware, I am the first to use a FX-9750 calculator in this configuration as an IMC simulator as an ultra-low-cost teaching tool.</p>
 
 	<p><strong>The New Zealand school curriculum updates</strong> In August 2026 the Ministry of Education approved <a href="https://www.education.govt.nz/news/new-industry-led-subjects-announced-senior-secondary-students" target="_blank" rel="noopener">nine new industry-led subjects</a> for development for senior secondary students, among them Applied Intelligent Systems, Engineering Technology, Energy and Infrastructure, and Next-Gen Manufacturing. Measurement, instrumentation and control sit underneath all four of them, and schools resourcing this teaching will go looking for equipment. This work arrives at about the right moment, at a price a school can actually meet. One half of the equipment is likely already owned by a learner. If a learner purchases a calculator, they will get far more hands-on real-world use across multiple subjects. This reframes the cost as an investment in more engaging and concrete learning. They will answer their own question - "when am I ever going to use that in the real world?"</p>
 
@@ -137,13 +137,14 @@
   <p><strong>Keep every sensor signal within 0 V to 3.3 V.</strong> The ESP32 and ESP8266 are <strong>not</strong> 5 V tolerant. A bare ESP8266 A0 pin reads 0 to 1.0 V only; 3.3 V will destroy it. However, popular development boards like NodeMCU and Wemos D1 Mini include an onboard resistor voltage divider, which safely extends their external board tolerance to 0 to 3.2V–3.3V</p>
   <p><strong>Special Warning: DO NOT let students test boiling water.</strong></p>
  <p>There is no need to calibrate temperature sensors using boiling water. Where in the real world would a student expect to record that temperature? If you are investigating cooling curves, YOU should safely get sensor readings at 100 &degC and PROVIDE THIS to learners.</p>
+<p><strong>READ THE DISCLAIMER in the Technical manual</strong> - No responsibility is taken for how you use this information! This is a research project provided open-source to educators.</p>
 </div>
 
 	<h3 id="capabilities-limitations">Features and capabilities</h3>
 
 	<ul>
-	  <li><strong>Sampling interval 1 to 300 seconds: </strong> 300 seconds is a chosen working limit with margin, not a ceiling. A pause of three hours has been held, and no pause has ever failed for being too long. Battery voltage is the limiting factor. The Casio auto-power-off (APO) is disabled.</li>
-	  <li><strong>999 readings per session in a single list:</strong> The calculator's list capacity, confirmed on hardware. MORE readings can be made if readings are spread across lists. Casio data storage capacity is the limiting factor.</li>
+	  <li><strong>Sampling interval 1 to 300 seconds: </strong> 300 seconds is a chosen working limit with margin, not a ceiling. A pause of three hours has been held, and no pause has ever failed for being too long. Battery voltage is the limiting factor. The Casio auto-power-off (APO) is disabled. <strong>On an FX-9750G Plus the shortest honest interval is 2 seconds.</strong> Ask it for 1 second and it collects every sample, but each lands on the following send time, so the true spacing is 2 seconds while the calculator writes its elapsed-time column as though it were 1 - complete data with a time axis wrong by a factor of two, and nothing on the calculator able to detect it. An FX-9750GIII honours 1 second.</li>
+	  <li><strong>999 readings per session in a single list on an FX-9750GIII, 255 on an FX-9750G Plus:</strong> the calculators' list capacities, confirmed on hardware. MORE readings can be made if readings are spread across lists. Casio data storage capacity is the limiting factor.</li>
 	  <li><strong>Non-volitile memory:</strong> The calculator's logged data is retained in the event of a power loss.</li>
 	  <li><strong>Nothing is timestamped in the demonstration code:</strong> The calculator computes elapsed time as interval x (reading number - 1). If the device runs slightly slow no error appears and no reading is dropped; the time axis is simply stretched. On a Picaxe that stretch is about 4.4 to 5.0 % at a 1-second interval and 2.5 to 3.1 % at 2 seconds. The shape of a curve survives this. A rate does not. Timestamps CAN be provided by a suitable microcontroller to permit accurate rate calculations with reasonable precision.</li>
 	  <li><strong>Both ESP boards keep exact time at 1 Hz:</strong> Verified in trials against an external timer.</li>
@@ -159,7 +160,8 @@
 	<blockquote><span lang="en"><strong>Casio calculator, Picaxe, ESP8266, ESP32, Microbit, and Arduino code and resources repository:</strong><br>
           <strong>License: CC BY-NC-SA 4.0 </strong><br>
 	Github Link: Includes Teachnical manual <a href="https://github.com/MikeFentonNZ/Casio-calculator-datalogger-picaxe-esp-microbit-arduino" target="_blank" rel="noopener">https://github.com/MikeFentonNZ/Casio-calculator-datalogger-picaxe-esp-microbit-arduino</a><br>
-	Technical manual Zenodo link: <a href="https://doi.org/10.5281/zenodo.22003134" target="_blank" rel="noopener">  https://doi.org/10.5281/zenodo.22003134</a><br>
+	Technical manual Zenodo link: <a href="https://doi.org/10.5281/zenodo.22095227" target="_blank" rel="noopener">  https://doi.org/10.5281/zenodo.22095227</a><br><br>
+READ THE DISCLAIMER in the Technical Manual - No responsibility is taken for how you use this information! This is a research project provided open-source to educators.
 	</span></blockquote>
 
 	<ul>
@@ -179,16 +181,21 @@
 
 	<h3 id="build-it">Build it</h3>
         
-        <p>You have a choice of tools to build; Start with the data logger. When you are confident with the coding and connections, try the remote control, security keypad lesson, survey logger, or IMC simulator.</p>
+        <p>You have a choice of tools to build; Start with the data logger. When you are confident with the coding and connections, try the remote control, security keypad lesson, survey logger, or IMC simulator. <strong>Build guides for each platform in the table further down...</strong></p>
 <p>For the data logger:</p> 
 	<ul>
-	  <li><strong>A calculator:</strong> FX-9750 or FX-9860 series. Every figure on this page was measured on an FX-9750GIII. Casio issues one firmware image for the FX-9750GIII and FX-9860GIII, so the protocol behaves the same on both.</li>
-	  <li><strong>A microcontroller:</strong> Picaxe 08M2 or 14M2 - cheapest, one chip, no board. An ESP8266 or ESP32 development board costs more but adds WiFi and timestamping. A BBC micro:bit needs no sensors at all to get started, because two of its three channels are inside the board. An <strong>Arduino Uno R3</strong> works too and is the board most likely to be in a school cupboard already - though it is the least proven here: it has answered the handshake correctly against an FX-9750G Plus, but interval logging on it has not yet been demonstrated, and all three of its channels need a wire.</li>
+	  <li><strong>A calculator:</strong> FX-9750 or FX-9860 series. Every platform here has been tested on <strong>both an FX-9750G Plus and an FX-9750GIII</strong> - calculator generations twenty years apart - using one interface circuit and one Casio BASIC program. Casio issues one firmware image for the FX-9750GIII and FX-9860GIII, so results established on the 9750GIII should transfer to the 9860GIII; that has not been verified on hardware.</li>
+	  <li><strong>A microcontroller:</strong> Picaxe 08M2 or 14M2 - cheapest, one chip, no board. An ESP8266 or ESP32 development board costs more but adds WiFi and timestamping. A BBC micro:bit needs no sensors at all to get started: a V1 has three channels inside the board - die temperature, button A and the accelerometer - and a V2 has internal channels plus an analogue input on P0. An <strong>Arduino Uno R3</strong> works too, is the board most likely to be in a school cupboard already, and is the only 5 V platform here - which is why the pull-up below is not optional on it. All three of its sensor channels need a wire.</li>
 	  <li><strong>A cable:</strong> a Casio SB-62, or two 2.5 mm 3-pin plugs and some wire.</li>
-	  <li><strong>Resistor:</strong> a 4.7 k pull-up from the calculator's transmit line to +3.3 V. When the calculator's port is not in use it goes high impedance and the line floats to 0 V. Serial lines idle <strong>high</strong>, so a microcontroller already listening would read that as a permanent break and log junk until the calculator wakes its port. The pull-up supplies the idle state the calculator does not.</li>
-	  <li><strong>1N4148 diode:</strong> in series on the calculator's receive line, <strong>bar (cathode) toward the microcontroller</strong>. Reversed, nothing works. The diode makes the output open-drain - the microcontroller only ever pulls the line low, and the calculator raises it with its own internal pull-up. That is why no series resistor is fitted alongside it, and why the same wiring suits a 3.3 V calculator and a 5 V one. A 1N914 is equivalent; a Schottky is not needed. Verified with FX-9750G Plus and FX-9750GIII; all platforms, including Picaxe, ESP8266, ESP32, Microbit V1 and Microbit V2.</li>
+	  <li><strong>4.7 k pull-up:</strong> from the calculator's transmit line to <strong>the board's own supply</strong> - 3.3 V on an ESP or a micro:bit, +5 V on an Arduino Uno, and 3.3 V or 5 V on a Picaxe depending on how you power it. Not to a fixed rail. When the calculator's port is not in use it goes high impedance and the line reads 0 V. Serial lines idle <strong>high</strong>, so a microcontroller already listening would read that as a permanent break and log junk until the calculator wakes its port. The pull-up supplies the idle state the calculator does not. On a 5 V board it does more than that: an FX-9750GIII holds its transmit line at only 2.75 V, below the 3.0 V an Uno needs to read a logic high, and the pull-up to +5 V lifts it to about 3.9 V. Without it a bare Uno cannot read a GIII at all.</li>
+	  <li><strong>1N4148 diode:</strong> in series on the calculator's receive line, <strong>bar (cathode) toward the microcontroller</strong>. Reversed, nothing works. The diode makes the output open-drain - the microcontroller only ever pulls the line low, and the calculator raises it with its own internal pull-up. That is why the board's supply voltage never reaches the calculator, and why one cable serves a 5 V Picaxe and a 3.3 V ESP32 without alteration. A 1N914 is equivalent. <strong>Do not fit a series resistor in this line as well</strong> - they share one current path, and the resistor lifts the LOW level until the calculator can no longer read it. Verified with FX-9750G Plus and FX-9750GIII; all platforms, including Picaxe, ESP8266, ESP32, Microbit V1 and Microbit V2.</li>
+	  <li><strong>10 k resistor and a 1N5711 Schottky diode:</strong> these two matter only when a <strong>3.3 V board meets an FX-9750G Plus</strong>, which holds its transmit line at 4.75 V - above the board's own supply. The 10 k goes <strong>in series</strong> with the receive pin and the Schottky from that pin to the board's supply, band toward the supply. The resistor limits the current to about 110 &micro;A and the Schottky, dropping about 0.3 V, conducts before the board's own protection diode at 0.6 V. On every other combination of board and calculator the Schottky sits idle and costs nothing, which is why it is simplest to fit it once and stop thinking about it. It must be a small-signal Schottky - a BAT85 or BAT43 will do, a 1N5817 will not, because power Schottkys leak enough to lift the low level. <em>Earlier versions of this page said a Schottky was not needed. That was true of the FX-9750GIII, on which all the 2026 testing had been done, and it is not true of the FX-9750G Plus.</em></li>
+	  <li><strong>Nothing connects the receive pin to ground.</strong> The 10 k is in series only. Add a resistor to ground and it becomes a voltage divider, which drops a GIII's 2.75 V mark to about 1.8 V - below a 5 V board's threshold entirely, and below a 3.3 V board's specified threshold too.</li>
 	  <li><strong>A sensor:</strong> a thermistor or an LDR makes a good first one. Both read in about a millisecond.</li>
 	</ul>
+	<p>Four components in total, and one circuit for every board and both calculator generations:</p>
+	<img src="../assets/img/casio-universal-interface.png" alt="The universal Casio serial interface circuit: 1N4148 on the transmit line, 4.7k pull-up to the board's own supply, and a 10k series resistor with a 1N5711 Schottky clamp on the receive line." width="700" />
+	<p><strong>Check the wiring of every conductor with a multimeter first.</strong> The wire colours inside a bought SB-62 cable may not match the colours in any diagram, including this one. Check the tip, ring and sleeve against your own cable before connecting a calculator.</p>
 
 	<img src="../assets/img/michael-fenton-casio-all-platforms.jpg" alt="'Build It' activity - receiving sensor data from a Wemos D1 mini ESP8266 sensor unit." />
 
@@ -222,7 +229,7 @@
 
 <p><strong>A user-triggered field survey logger:</strong> Combining microcontroller-maintained elapsed-time recording and user-entered categorical observation. For example, using single numeric keys 0–9 provide 10 categories; alpha keys A–Z provide more categories for applications requiring finer classification. Examples: geological substrate (1 = scoria, 2 = sand, 3 = basalt), vegetation type, land use class, or surface condition.</p>
 
-<p><strong>Human-machine-interface:</strong> The calculator transmits user-entered numerical values to the microcontroller via the serial interface. The calculator’s tamper-evident keypad and display provide a secure input mechanism for applications requiring user-generated discrete values. One group sets up a model door lock with a 4-digit PIN and no lockout. A second group is asked to open it without being told the code. Teaches coding, cyber security, building systems safety, and the rule 'the secret belongs with the thing being protected, not with the thing a user is holding.</p>
+<p><strong>Human-machine-interface:</strong> The calculator transmits user-entered numerical values to the microcontroller via the serial interface. The calculator’s tamper-evident keypad and display provide a secure input mechanism for applications requiring user-generated discrete values. One group sets up a model door lock with a 4-digit PIN and no lockout. A second group is asked to open it without being told the code. Teaches coding, cyber security, building systems safety, and the rule 'the secret belongs with the thing being protected, not with the thing a user is holding'.</p>
 
 <p><strong>IMC simulator:</strong> The Casio calculator and connected microcontroller form a closed-loop measurement and control system. The microcontroller reads one or more sensors, transmits them to the calculator for display. The student observes the live readings, makes a control decision, and transmits a control value back to the microcontroller via the calculator keypad. The microcontroller receives that value and adjusts a physical output accordingly; motor speed, heater power, valve position, or light intensity. The student then observes the effect of their intervention in the next sensor reading.</p>
 
@@ -230,7 +237,7 @@
 
 	<p><strong>Sharing live data.</strong> Both ESP builds run their own WiFi access point and serve a status page and a CSV download to phones and laptops while logging continues, with no reading lost. Two clients at once has been tested.</p>
 
-	<img src="../assets/img/microbit-robot.jpg" alt="'Use It' Microbit robot controlled by Casio FX-9750 using radio." width="500" />
+	<img src="../assets/img/microbit-robot.jpg" alt="&lsquo;Use It&rsquo; micro:bit robot controlled by Casio FX-9750 using radio." width="500" />
 	
 	<blockquote><span lang="en">Casio calculator controlled robot - Casi II.</span></blockquote>
 
@@ -280,7 +287,26 @@
 
 	<p>This is one per student, because the expensive part is already in the school bag. That is the argument. The cost comparison is the smaller half of it.</p>
 
-	<h3 id="prior-work">Prior work</h3>
+	<h3 id="justification">A renewed justification in a post AI-era.</h3>
+<p><strong>When technology cost and availability is no longer a consideration, the use of simulated data for STEM learning is a decision that now requires justification, rather than being the default.</strong></p> 
+
+	<p>The original case for this work was equity: timed data logging for a few dollars instead of hundreds. There is now a second reason it matters. As generative AI is trained on a scientific literature increasingly polluted by fabricated paper mill studies (<a href="https://doi.org/10.1073/pnas.2420092122" target="_blank" rel="noopener">Richardson and Amaral, 2025, PNAS</a>), simulated datasets can no longer be assumed to reflect physical reality. Subverting the Casio serial protocol so learners can gather their own first-hand measurements gives them data whose provenance is transparent and which can still surprise. The exploit is no longer only about cost; it is about preserving access to real, trustworthy observation.</p>
+
+<h3 id="platform-guides">Build guides, one for each platform</h3>
+	<blockquote><span lang="en">Each board needs the same three wires and the same universal serial interface circuit, and then differs in the details that matter when you are at the bench: which pins, which serial settings, and what goes wrong. There is a dedicated page for each.</span></blockquote>
+	<table>
+	  <thead><tr><th>Platform</th><th>Why choose it</th><th>Build guide</th></tr></thead>
+	  <tbody>
+	    <tr><td><strong>PICAXE 08M2 / 14M2</strong></td><td>Cheap, simple. One chip, solderless breadboard friendly, BASIC coding. The original 2007 platform validated in classroom testing.</td><td><a href="casio-calculator-picaxe.html">PICAXE build guide</a></td></tr>
+	    <tr><td><strong>BBC micro:bit V1 / V2</strong></td><td>Three in-built sensor channels before you add external sensors. Radio for remote sensors or remote control.</td><td><a href="casio-calculator-microbit.html">micro:bit build guide</a></td></tr>
+	    <tr><td><strong>ESP8266</strong></td><td>Webserver to smart devices, ESP-NOW long range radio, at low cost. Only 1 ADC input, but I2C permits many others to be added.</td><td><a href="casio-calculator-esp8266.html">ESP8266 build guide</a></td></tr>
+	    <tr><td><strong>ESP32</strong></td><td>More sensors, more memory, logging and serving at once like the ESP8266. Add GPS for accurate date and time logging.</td><td><a href="casio-calculator-esp32.html">ESP32 build guide</a></td></tr>
+	    <tr><td><strong>Arduino Uno</strong></td><td>The board most schools already own. The only platform that must run at 5&nbsp;V.</td><td><a href="casio-calculator-arduino-uno.html">Arduino Uno build guide</a></td></tr>
+	  </tbody>
+	</table>
+	<p>All five have been tested on both an <strong>FX-9750G Plus</strong> and an <strong>FX-9750GIII</strong> &ndash; calculator generations twenty years apart &ndash; using one interface circuit and one Casio BASIC program.</p>
+
+<h3 id="prior-work">Prior work</h3>
 
 	<p>This builds on one other persons work.</p>
 
@@ -294,10 +320,6 @@
 
 	<p>Casio's own EA-100 and EA-200 data acquisition units are discontinued. The Casio New Zealand office confirmed in 2026 that the last unit was sold in this market in 2008.</p>
 
-	<h3 id="justification">A renewed justification in a post AI-era.</h3>
-<p><strong>When technology cost and availability is no longer a consideration, the use of simulated data for STEM learning is a decision that now requires justification, rather than being the default.</strong></p> 
-
-	<p>The original case for this work was equity: timed data logging for a few dollars instead of hundreds. There is now a second reason it matters. As generative AI is trained on a scientific literature increasingly polluted by fabricated paper mill studies (<a href="https://doi.org/10.1073/pnas.2420092122" target="_blank" rel="noopener">Richardson and Amaral, 2025, PNAS</a>), simulated datasets can no longer be assumed to reflect physical reality. Subverting the Casio serial protocol so learners can gather their own first-hand measurements gives them data whose provenance is transparent and which can still surprise. The exploit is no longer only about cost; it is about preserving access to real, trustworthy observation.</p>
 
 	<h3 id="original">The original project</h3>
 	<p><a href="casio-calculator-picaxe-data-logger.html" class="button" aria-label="See the original Casio - Picaxe data logger by Michael Fenton">Go to original Casio-Picaxe data logger</a></p>

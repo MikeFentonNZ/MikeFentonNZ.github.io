@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en" data-page="projects">
+<head>
+  <title>Casio calculator data logger with BBC micro:bit V1 and V2 - build guide</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Build a Casio FX-9750G Plus or FX-9750GIII data logger with a BBC micro:bit V1 or V2: interface circuit, P8 and P12 wiring, the code, and why the two boards need different serial settings." />
+  <meta name="author" content="Michael Fenton" />
+  <meta name="theme-color" content="#151a2f" />
+  <link rel="canonical" href="https://mikefentonnz.github.io/projects/casio-calculator-microbit.html" />
+  <meta property="og:title" content="Casio calculator data logger with BBC micro:bit V1 and V2 - build guide" />
+  <meta property="og:description" content="Build a Casio FX-9750G Plus or FX-9750GIII data logger with a BBC micro:bit V1 or V2: interface circuit, P8 and P12 wiring, the code, and why the two boards need different serial settings." />
+  <meta property="og:type" content="article" />
+  <meta property="og:image" content="https://MikeFentonNZ.github.io/assets/img/profile.png" />
+  <meta property="og:url" content="https://mikefentonnz.github.io/projects/casio-calculator-microbit.html" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Casio calculator data logger with BBC micro:bit V1 and V2 - build guide" />
+  <meta name="twitter:description" content="Build a Casio FX-9750G Plus or FX-9750GIII data logger with a BBC micro:bit V1 or V2: interface circuit, P8 and P12 wiring, the code, and why the two boards need different serial settings." />
+  <meta name="twitter:image" content="https://MikeFentonNZ.github.io/assets/img/profile.png" />
+  <script type="application/ld+json">{
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "BBC micro:bit V1 and V2",
+    "description": "Build a Casio FX-9750G Plus or FX-9750GIII data logger with a BBC micro:bit V1 or V2: Microbit interface circuit, P8 and P12 wiring, the code, and why the two boards need different serial settings.",
+    "keywords": "BBC micro:bit, micro:bit V2, microbit, nRF52833, nRF51, Casio data logger, FX-9750G Plus, FX-9750GIII, EasyDMA, stop bits, 9600 baud",
+    "author": { "@type": "Person", "name": "Michael Fenton, MRSNZ", "url": "https://MikeFentonNZ.github.io/" },
+    "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "isPartOf": { "@type": "CreativeWork", "name": "Casio calculator data logger", "url": "https://mikefentonnz.github.io/projects/casio-calculator-data-logger-hack.html" }
+  }</script>
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+  <link rel="manifest" href="../site.webmanifest" />
+  <link rel="shortcut icon" href="../favicon.ico" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="topbar" role="banner" aria-label="Primary site header">
+    <div class="brand">
+      <span class="brand__logo" aria-hidden="true">MF</span>
+      <a class="brand__name" href="../index.html" aria-label="Home page of Michael Fenton">Michael Fenton</a>
+    </div>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="mainnav" aria-label="Navigation menu">
+      <span class="nav-toggle__bar" aria-hidden="true"></span>
+      <span class="sr-only">Navigation</span>
+    </button>
+    <nav id="mainnav" class="mainnav" role="navigation" aria-label="Main menu">
+      <ul>
+        <li><a href="../research-outputs-publications-portfolio.html">Research</a></li>
+        <li><a href="../teaching-instructional-design-moderation.html">Teaching</a></li>
+        <li><a href="../projects-stem-inventions.html">Projects</a></li>
+        <li><a href="../workshops-talks-science-communication.html">Workshops &amp; Talks</a></li>
+        <li><a href="../nexus-research-group.html">Nexus</a></li>
+        <li><a href="../curriculum-vitae-michael-fenton.html">CV</a></li>
+      </ul>
+    </nav>
+    <button id="themeToggle" class="theme-toggle" aria-pressed="false" aria-label="Activate dark mode" title="Switch to dark mode">
+      <span class="icon" aria-hidden="true">&#127769;</span>
+      <span class="label">Dark</span>
+    </button>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" role="complementary" aria-label="Profile">
+      <div class="profile-card">
+        <img src="../assets/img/profile.png" alt="Portrait of Michael Fenton" class="profile-photo" width="120" height="120" />
+        <h1 class="name">Michael Fenton, MRSNZ</h1>
+        <p class="title">Scientist, STEM Education lecturer, Education innovator, Consultant, Writer</p>
+        <ul class="social" aria-label="Social and professional links">
+          <li><a href="https://nz.linkedin.com/in/mikefentonnz" target="_blank" aria-label="LinkedIn profile of Michael Fenton, MRSNZ">LinkedIn</a></li>
+          <li><a href="https://focus-consultancy.co.nz/" target="_blank" aria-label="Education Consultancy website for Michael Fenton">Consultancy Website</a></li>
+          <li><a href="https://www.youtube.com/@nznrg/videos" target="_blank" aria-label="Michael Fenton YouTube channel">YouTube channel</a></li>
+        </ul>
+      </div>
+    </aside>
+    <main id="content" class="content" role="main" tabindex="-1">
+      <section class="intro" aria-labelledby="intro-heading">
+        <h2 id="intro-heading">BBC micro:bit V1 and V2</h2>
+	<h3>Three sensor channels before you wire anything</h3>
+	<p><a href="casio-calculator-data-logger-hack.html">&larr; Casio calculator data logger &ndash; project overview</a></p>
+	<p>For junior classes, a new approach to upcycling old technology and greatly extending the capabilities of a calculator many learners&rsquo; older siblings own. DO NOT discard those V1 Microbits or old Casio FX-9750 G Plus calculators - upcycle and transform them into a general purpose tool for physical education, health, science, mathematics, Internet-of-things (IoT), and robotics / instrumentation. Reduce electronic waste at the same time!</p>
+	<p>The forgotten feature in the 2.5 mm port of a Casio FX-9750 and FX-9860 is now available on my GitHub, open-source and free. It takes the burden off the teacher, because the learners become the experts - constructing, coding and repairing their own smart data logger that also acts as a remote control, a PIN pad, and automation control interface.</p>
+	<p>This is an extension of my 2008 research, which carried classroom validation and student feedback, now with a modern facelift using all modern microcontrollers, including the micro:bit. Learners can record heart rate, temperature, sound level, and other readings using sensors they build themselves, for cents or a few dollars.</p>
+	<p>The calculator needs no modification or firmware change. It does not need to know what is on the other end of the cross-over cable.</p>
+	<p>The BBC micro:bit is the only platform here that logs something real with nothing wired to it. A V1 micro:bit has a die temperature sensor, a button and an accelerometer on the board, so three channels are already there. A class can plot data in the first lesson and build sensors in the second.</p>
+	<p><strong>V1 and V2 need different answers</strong>, because their UARTs differ. The wiring is identical; the code is not interchangeable.</p>
+      </section>
+	<h3 id="safety">Before you wire anything</h3>
+<blockquote><strong>Check the wiring of every conductor with a multimeter first.</strong> The wire colours inside a bought SB-62 cable may not match the colours in any diagram, including this one. Check the tip, ring and sleeve against your own cable before connecting a calculator.</blockquote>
+	<h3 id="parts">What you need</h3>
+	<ul>
+	  <li>A <strong>BBC micro:bit V1 or V2</strong>, and an edge connector breakout to reach P8 and P12.</li>
+	  <li>A calculator: <strong>FX-9750G Plus</strong> or <strong>FX-9750GIII</strong>.</li>
+	  <li>The four interface components below. The micro:bit runs at 3&nbsp;V, so the 10&nbsp;k&#8486; and the Schottky matter here if you use a G Plus.</li>
+	  <li>The <strong>Arduino IDE</strong> with micro:bit board support &ndash; these builds are C++, not MakeCode.</li>
+	</ul>
+	<h3 id="interface">The interface circuit</h3>
+	<p>Four components, and the same circuit on every platform. It serves both calculator generations and both board supply voltages.</p>
+	<img src="../assets/img/casio-universal-interface.png" alt="The universal Casio interface circuit: 1N4148 on the transmit line, 4.7k pull-up and 10k series resistor with a 1N5711 Schottky clamp on the receive line." width="700" />
+	<ul>
+	  <li><strong>1N4148 in the blue wire</strong>, band toward the board. This makes the board's output open-drain: it can only pull the line low, and the calculator raises it with its own internal pull-up. That is what lets one cable serve a 5&nbsp;V board and a 3.3&nbsp;V one.</li>
+	  <li><strong>4.7&nbsp;k&#8486; pull-up</strong> from the yellow wire to the <em>board's own</em> supply. Both calculators power their port down between transfers, so a board that is listening reads a permanent break without it.</li>
+	  <li><strong>10&nbsp;k&#8486; in series</strong> with the receive pin, and a <strong>1N5711 Schottky</strong> from that pin to the board's supply. These matter whenever the board's supply is below the calculator's transmit level &ndash; which on this platform means a 3&nbsp;V micro:bit with an FX-9750G Plus, whose line sits at 4.75&nbsp;V. On every other combination the Schottky is idle and costs nothing.</li>
+	</ul>
+	<blockquote><strong>The 10&nbsp;k&#8486; is in series only.</strong> Nothing connects the receive pin to ground. Add a resistor there and it becomes a divider, which drops an FX-9750GIII's 2.75&nbsp;V mark to about 1.8&nbsp;V and stops working.</blockquote>
+
+	<h3 id="pins">Pins &ndash; the same on both boards</h3>
+	<table>
+	  <thead><tr><th>Signal</th><th>Edge pin</th><th>Note</th></tr></thead>
+	  <tbody>
+	    <tr><td>To Casio RX &ndash; <strong>blue</strong>, ring, via the 1N4148</td><td>P8</td><td>band toward the micro:bit</td></tr>
+	    <tr><td>From Casio TX &ndash; <strong>yellow</strong>, tip</td><td>P12</td><td>with the 4.7&nbsp;k&#8486; pull-up to 3&nbsp;V</td></tr>
+	    <tr><td>Ground &ndash; <strong>black</strong>, sleeve</td><td>GND</td><td>connect this one first</td></tr>
+	    <tr><td>External sensors</td><td>P0, P1, P2</td><td>left free deliberately</td></tr>
+	  </tbody>
+	</table>
+	<p><strong>P8 and P12 are chosen, not arbitrary.</strong> They are ordinary GPIO that share nothing &ndash; not the LED matrix, not the buttons, not I2C. Move the link to a pin the display uses and you will spend an evening finding out why.</p>
+	<h3 id="code">The code</h3>
+	<table>
+	  <thead><tr><th>Board</th><th>File</th><th>Stop bits</th><th>How it supplies the idle</th></tr></thead>
+	  <tbody>
+	    <tr><td>micro:bit V1 (nRF51)</td><td><code>Casio-MicrobitV1-NSN.ino</code></td><td>1, and no way to change it</td><td><code>CASIO_BYTE_GAP_US 250</code> after each byte</td></tr>
+	    <tr><td>micro:bit V2 (nRF52833)</td><td><code>Casio-MicrobitV2-NSN.ino</code></td><td><strong>2</strong></td><td><code>STOP_BITS_TO_CASIO 2</code></td></tr>
+	  </tbody>
+	</table>
+	<p>Both set <code>TURNAROUND_MS 5</code>. On the V2 the turnaround belongs at the head of the write routine, so single-byte sends are covered too; on the V1 it goes once per packet, <em>not</em> per byte.</p>
+	<h3 id="sensors">Sensors you already have</h3>
+	<ul>
+	  <li><strong>V1:</strong> internal die temperature, button A state, and accelerometer X. Three channels, nothing wired.</li>
+	  <li><strong>V2:</strong> internal channels plus an analogue channel on P0.</li>
+	  <li>P0, P1 and P2 stay free on both, for the sensors a learner builds.</li>
+	</ul>
+	<p>Three requirements apply to every platform. They are why this works at all, and each of them was found by a link that would not run without it.</p>
+	<ol>
+	  <li><strong>Idle between bytes.</strong> An FX-9750G Plus needs roughly one bit period &ndash; about 104&nbsp;&micro;s at 9600 baud &ndash; of idle line between one byte and the next. A second stop bit supplies it; so does a deliberate delay. An FX-9750GIII does not care.</li>
+	  <li><strong>A turnaround delay.</strong> About 5&nbsp;ms before every transmission, so the calculator can switch its port from sending to listening. Without it the calculator answers <code>0x22</code> and never sends its request packet.</li>
+	  <li><strong>Build the packet, then send it.</strong> Nothing computed part-way through a transmission &ndash; a checksum between the last two bytes will insert a pause a G Plus refuses.</li>
+	</ol>
+	<h3 id="gotchas">What goes wrong</h3>
+	<h4>A V2 with one stop bit will not talk to an FX-9750G Plus</h4>
+	<p>The V2's UARTE1 transmits by EasyDMA &ndash; it is handed the whole packet and clocks it out with no gap between bytes at all. That is exactly the gapless 8N1 stream a G Plus refuses. Setting <code>STOP_BITS_TO_CASIO 2</code> sets one bit in the peripheral's config register, the DMA stays gapless, and the second stop bit supplies the idle. Nothing else in the send path changes.</p>
+	<h4>A V1 cannot set stop bits at all</h4>
+	<p>The nRF51's UART has no stop-bit field. The V1 build therefore delays deliberately after every byte: one frame time of 1042&nbsp;&micro;s plus a 250&nbsp;&micro;s gap. It arrives at the same place by another road, and it is why the V1 works on a G Plus despite sending a single stop bit.</p>
+	<h4>Other things worth knowing</h4>
+	<ul>
+	  <li><strong>The pull-up is not optional.</strong> Both calculators power their port down between transfers, so a micro:bit that is listening reads a permanent break without it and logs rubbish.</li>
+	  <li><strong>The calculator must stay connected</strong> for the whole run.</li>
+	  <li><strong>Use the interface circuit with a G Plus.</strong> A 3&nbsp;V micro:bit reading a 4.75&nbsp;V transmit line without the 10&nbsp;k&#8486; puts the current through the chip's own protection diode.</li>
+	</ul>
+	<h3 id="more">Code, manual and the other platforms</h3>
+	<ul>
+	  <li><strong>Repository, all platforms:</strong> <a href="https://github.com/MikeFentonNZ/Casio-calculator-datalogger-picaxe-esp-microbit-arduino" target="_blank" rel="noopener">github.com/MikeFentonNZ/Casio-calculator-datalogger-picaxe-esp-microbit-arduino</a></li>
+	  <li><strong>Technical manual</strong> &ndash; wiring, the full <code>Receive(</code> sequence, every packet and checksum: <a href="https://doi.org/10.5281/zenodo.22095227" target="_blank" rel="noopener">https://doi.org/10.5281/zenodo.22095227</a></li>
+	  <li><strong>Project overview:</strong> <a href="casio-calculator-data-logger-hack.html">Casio calculator data logger &ndash; the $10 upgrade</a></li>
+	</ul>
+
+	<div class="warning-box">
+  <p><strong>WARNING - TAKE CARE!</strong></p>
+  <p><strong>NEVER connect mains electricity (240 V / 110 V)</strong> to the calculator, to the microcontroller, or to any sensor wiring.</p>
+ <p><strong>NEVER use mains-connected equipment near water.</strong></p>
+  <p><strong>Keep every sensor signal within 0 V to 3.3 V.</strong> The ESP32 and ESP8266 are <strong>not</strong> 5 V tolerant. A bare ESP8266 A0 pin reads 0 to 1.0 V only; 3.3 V will destroy it. However, popular development boards like NodeMCU and Wemos D1 Mini include an onboard resistor voltage divider, which safely extends their external board tolerance to 0 to 3.2V–3.3V</p>
+  <p><strong>Special Warning: DO NOT let students test boiling water.</strong></p>
+ <p>There is no need to calibrate temperature sensors using boiling water. Where in the real world would a student expect to record that temperature? If you are investigating cooling curves, YOU should safely get sensor readings at 100 &degC and PROVIDE THIS to learners.</p>
+<p><strong>READ THE DISCLAIMER in the Technical manual</strong> - No responsibility is taken for how you use this information! This is a research project provided open-source to educators.</p>
+</div>
+
+<h3 id="use-it">Use it</h3>
+
+	<p><strong>Always remind learners that scientists and engineers work carefully and safely,</strong> no matter what they see in movies or TV.</p>
+	<p><strong>Sensor Lab</strong>: With a breakout adapter, check the in-built temperature sensor against an external temperature sensor. Try inventing your own ultra-low-cost sensors. Anything that changes its electrical resistance due to one environmental factor is a good start. You may need a 10k pull-up resistor - learn about these and what they do. Alternatively, try low cost NTC temperature thermistors, light dependent resistors (LDR). Advanced learners can try DS18B20 temperature sensors, HC-SR04 range-finders, and DHT-11 modules. Build a colorimeter to detect light changes with a LDR and an LED as a light source for chemistry investigations. You do not need a LED to log the change in glow stick brightness over time - does temperature affect this?</p>
+<img src="../assets/img/casio-microbit.png" alt="Casio FX-9750 GIII calculator micro:bit data logging" width="400" />
+<img src="../assets/img/colorimeter-2.jpg" alt="Casio FX-9750 GIII calculator colorimeter - chemical reaction rates" width="400" />
+<img src="../assets/img/colorimeter-1.jpg" alt="Light source for the colorimeter - coin button cell and LED - uses a 120 ohm resistor!" width="300" />
+<p><strong>NOTE:</strong> Use a current limiting resistor on the LED!</p> 
+	<p><strong>Medical Lab</strong>: With a breakout adapter, connect a low-cost heart beat sensor, and code the Micro:bit to calculate heart rate. Send this to the Casio FX-9750 to see trends before and after exercise, or see if you can make a lie detector!</p>
+<img src="../assets/img/heartbeat-sensor-MF.jpg" alt="Casio FX-9750 GIII calculator micro:bit heart rate monitor - real heart beat of MF" width="400" />
+	<p><strong>Casi II - the 2025 successor to the original Picaxe Casio calculator controlled robot</strong>. The Casio sends calculator key presses by micro:bit radio to the robot (see the 2008 E-Learning report <a href="https://doi.org/10.5281/zenodo.19302276" target="_blank" rel="noopener">https://doi.org/10.5281/zenodo.19302276</a>).</p>
+<img src="../assets/img/microbit-robot.jpg" alt="CASI II - Casio FX-9750 calculator remote controlled robot" width="400" />
+<p><strong>Build a Halloween &lsquo;Creepy R2D2&rsquo;:</strong> A larger fun project for a movie prop - loads of maths, science, and creativity! Press a number on the keypad (or use the letters) to activate voice and sound effects, play specific song tracks, and drive him around!</p>
+<img src="../assets/img/michael-fenton-creepy-r2d2.png" alt="Creepy R2D2 - Casio FX-9750 calculator remote controlled Halloween prop" width="400" />
+
+<p><strong>Mars surface surveyor:</strong> Attach a low-cost ultrasonic rangefinder module (Aliexpress) and map a simulated Martian surface from the air (see the 2008 E-Learning report <a href="https://doi.org/10.5281/zenodo.19302276" target="_blank" rel="noopener">https://doi.org/10.5281/zenodo.19302276</a>).</p>
+<img src="../assets/img/casio-picaxe-mission-to-mars.jpg" alt="Casio calculator range finder - Mars orbital surveyor calculus lesson" width="500" />
+<img src="../assets/img/motion_sensor.jpg" alt="CASI - Casio FX-9750 calculator remote controlled robot" width="400" />
+
+	<div class="video-container">
+<iframe 
+        src="https://www.youtube.com/embed/ulXrOckG5Lw"
+        title="Casio FX-9750 calculator as a PIN pad with a Microbit V1 and V2"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+</iframe>
+</div>
+
+	<p><strong>Over distance.</strong> Use the Bluetooth or radio functions; send data to the Casio and to another remote device using BT or radio. Alternatively, use a second microbit as a remote sensor unit to radio to the Casio micro:bit.</p>
+	<img src="../assets/img/micrrobit-radio-sensor-unit.jpg" alt="Portable data logger units - wireless remote control mode" />
+
+	<h3 id="justification">A renewed justification in a post AI-era.</h3>
+<p><strong>When technology cost and availability is no longer a consideration, the use of simulated data for STEM learning is a decision that now requires justification, rather than being the default.</strong></p> 
+
+	<p>The original case for this work was equity: timed data logging for a few dollars instead of hundreds. There is now a second reason it matters. As generative AI is trained on a scientific literature increasingly polluted by fabricated paper mill studies (<a href="https://doi.org/10.1073/pnas.2420092122" target="_blank" rel="noopener">Richardson and Amaral, 2025, PNAS</a>), simulated datasets can no longer be assumed to reflect physical reality. Subverting the Casio serial protocol so learners can gather their own first-hand measurements gives them data whose provenance is transparent and which can still surprise. The exploit is no longer only about cost; it is about preserving access to real, trustworthy observation.</p>
+
+	<p>Other platform build guides:
+	  <a href="casio-calculator-picaxe.html">PICAXE</a> &middot;
+	  <a href="casio-calculator-esp8266.html">ESP8266</a> &middot;
+	  <a href="casio-calculator-esp32.html">ESP32</a> &middot;
+	  <a href="casio-calculator-arduino-uno.html">Arduino Uno</a></p>
+
+	<h3>Back to Projects/Research</h3>
+	<p><a href="../projects-stem-inventions.html" class="button" aria-label="See projects and research by Michael Fenton">Back to Projects</a></p>
+
+      
+    </main>
+</div>
+
+  <footer class="footer" role="contentinfo" aria-label="Site footer">
+  <p>&copy; <span id="year"></span> Michael Fenton.</p>
+<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license">
+    <small>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)</small>
+  </a>
+  <p>This work may be copied, shared, remixed, and adapted for non-commercial purposes under the terms of the license.</p>
+  <p>Requirements: give appropriate credit, provide a link to the license, and indicate if changes were made. Derivatives must be licensed under identical terms.</p>
+  <p><small>Attribution example: <strong>Casio Calculator Data Logger: timed sensor sampling using host-wait windows in the Casio serial protocol - Michael Fenton</strong> - CC BY-NC-SA 4.0 - https://creativecommons.org/licenses/by-nc-sa/4.0/</small></p>
+  </footer>
+
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

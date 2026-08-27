@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" data-page="projects">
+<head>
+  <title>Casio calculator data logger with PICAXE 08M2 and 14M2 - build guide</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Build a Casio FX-9750G Plus or FX-9750GIII data logger with a PICAXE 08M2 or 14M2: interface circuit, pin table, BASIC code, serial timing and the faults to avoid." />
+  <meta name="author" content="Michael Fenton" />
+  <meta name="theme-color" content="#151a2f" />
+  <link rel="canonical" href="https://mikefentonnz.github.io/projects/casio-calculator-picaxe.html" />
+  <meta property="og:title" content="Casio calculator data logger with PICAXE 08M2 and 14M2 - build guide" />
+  <meta property="og:description" content="Build a Casio FX-9750G Plus or FX-9750GIII data logger with a PICAXE 08M2 or 14M2: interface circuit, pin table, BASIC code, serial timing and the faults to avoid." />
+  <meta property="og:type" content="article" />
+  <meta property="og:image" content="https://MikeFentonNZ.github.io/assets/img/profile.png" />
+  <meta property="og:url" content="https://mikefentonnz.github.io/projects/casio-calculator-picaxe.html" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Casio calculator data logger with PICAXE 08M2 and 14M2 - build guide" />
+  <meta name="twitter:description" content="Build a Casio FX-9750G Plus or FX-9750GIII data logger with a PICAXE 08M2 or 14M2: interface circuit, pin table, BASIC code, serial timing and the faults to avoid." />
+  <meta name="twitter:image" content="https://MikeFentonNZ.github.io/assets/img/profile.png" />
+  <script type="application/ld+json">{
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "PICAXE 08M2 and 14M2",
+    "description": "Build a Casio FX-9750G Plus or FX-9750GIII data logger with a PICAXE 08M2 or 14M2: interface circuit, pin table, BASIC code, serial timing and the faults to avoid.",
+    "keywords": "PICAXE 08M2, PICAXE 14M2, Casio data logger, FX-9750G Plus, FX-9750GIII, SB-62, hserout, 9600 baud, PICAXE BASIC",
+    "author": { "@type": "Person", "name": "Michael Fenton, MRSNZ", "url": "https://MikeFentonNZ.github.io/" },
+    "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "isPartOf": { "@type": "CreativeWork", "name": "Casio calculator data logger", "url": "https://mikefentonnz.github.io/projects/casio-calculator-data-logger-hack.html" }
+  }</script>
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+  <link rel="manifest" href="../site.webmanifest" />
+  <link rel="shortcut icon" href="../favicon.ico" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="topbar" role="banner" aria-label="Primary site header">
+    <div class="brand">
+      <span class="brand__logo" aria-hidden="true">MF</span>
+      <a class="brand__name" href="../index.html" aria-label="Home page of Michael Fenton">Michael Fenton</a>
+    </div>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="mainnav" aria-label="Navigation menu">
+      <span class="nav-toggle__bar" aria-hidden="true"></span>
+      <span class="sr-only">Navigation</span>
+    </button>
+    <nav id="mainnav" class="mainnav" role="navigation" aria-label="Main menu">
+      <ul>
+        <li><a href="../research-outputs-publications-portfolio.html">Research</a></li>
+        <li><a href="../teaching-instructional-design-moderation.html">Teaching</a></li>
+        <li><a href="../projects-stem-inventions.html">Projects</a></li>
+        <li><a href="../workshops-talks-science-communication.html">Workshops &amp; Talks</a></li>
+        <li><a href="../nexus-research-group.html">Nexus</a></li>
+        <li><a href="../curriculum-vitae-michael-fenton.html">CV</a></li>
+      </ul>
+    </nav>
+    <button id="themeToggle" class="theme-toggle" aria-pressed="false" aria-label="Activate dark mode" title="Switch to dark mode">
+      <span class="icon" aria-hidden="true">&#127769;</span>
+      <span class="label">Dark</span>
+    </button>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" role="complementary" aria-label="Profile">
+      <div class="profile-card">
+        <img src="../assets/img/profile.png" alt="Portrait of Michael Fenton" class="profile-photo" width="120" height="120" />
+        <h1 class="name">Michael Fenton, MRSNZ</h1>
+        <p class="title">Scientist, STEM Education lecturer, Education innovator, Consultant, Writer</p>
+        <ul class="social" aria-label="Social and professional links">
+          <li><a href="https://nz.linkedin.com/in/mikefentonnz" target="_blank" aria-label="LinkedIn profile of Michael Fenton, MRSNZ">LinkedIn</a></li>
+          <li><a href="https://focus-consultancy.co.nz/" target="_blank" aria-label="Education Consultancy website for Michael Fenton">Consultancy Website</a></li>
+          <li><a href="https://www.youtube.com/@nznrg/videos" target="_blank" aria-label="Michael Fenton YouTube channel">YouTube channel</a></li>
+        </ul>
+      </div>
+    </aside>
+    <main id="content" class="content" role="main" tabindex="-1">
+      <section class="intro" aria-labelledby="intro-heading">
+        <h2 id="intro-heading">PICAXE 08M2 and 14M2</h2>
+	<h3>The cheapest Casio data logger - $4 chip, homemade sensor, BASIC (free)</h3>
+	<p><a href="casio-calculator-data-logger-hack.html">&larr; Casio calculator data logger &ndash; project overview</a></p>
+	<p>What if a calculator many students already own, or can buy second hand for $10, could be transformed into a general purpose tool for physical education, health, science, mathematics, Internet-of-things (IoT), and robotics / instrumentation?</p>
+	<p>The forgotten feature in the 2.5 mm port of a Casio FX-9750 and FX-9860 is now available on my GitHub, open-source and free. It takes the burden off the teacher, because the learners become the experts - constructing, coding and repairing their own smart data logger that also acts as a remote control, a PIN pad, and automation control interface.</p>
+	<p>This is an extension of my 2008 research, which carried classroom validation and student feedback, now with a modern facelift for the Picaxe family of microcontrollers. Learners can record heart rate, temperature, sound level, and other readings using sensors they build themselves, for cents or a few dollars.</p>
+	<p>The calculator needs no modification or firmware change. It does not need to know what is on the other end of the cross-over cable.</p>
+<p>The cheapest way in. A PICAXE 08M2 is a single 8-pin chip that costs a few dollars, needs no development board, and is programmed in BASIC from a free editor. It was the platform the original 2007 datalogger was built on, and it is still the one to start a class on.</p>
+      </section>
+	<h3 id="safety">Before you wire anything</h3>
+	<blockquote><strong>Check the wiring of every conductor with a multimeter first.</strong> The wire colours inside a bought SB-62 cable may not match the colours in any diagram, including this one. Check the tip, ring and sleeve against your own cable before connecting a calculator.</blockquote>
+	<h3 id="parts">What you need</h3>
+	<ul>
+	  <li><strong>PICAXE 08M2</strong> (8 pins, three sensor channels) or <strong>PICAXE 14M2</strong> (more pins, same code).</li>
+	  <li>A calculator: <strong>FX-9750G Plus</strong> or <strong>FX-9750GIII</strong>. Both are supported by one program.</li>
+	  <li>The four interface components below, and a 2.5&nbsp;mm TRS socket or a cut SB-62 cable.</li>
+	  <li><strong>A supply, 3.3&nbsp;V or 5&nbsp;V &ndash; and the choice matters.</strong> A PICAXE runs happily on either. At <strong>3.3&nbsp;V</strong> the pull-up goes to 3.3&nbsp;V, and an FX-9750G Plus will present 4.75&nbsp;V to the input pin, so the 10&nbsp;k&#8486; and the Schottky below are doing real work. At <strong>5&nbsp;V</strong> &ndash; a PC USB port, for instance &ndash; the pull-up goes to 5&nbsp;V, nothing exceeds the supply, and the Schottky sits idle. Either way <strong>the pull-up goes to whatever the chip is running on</strong>, never to a fixed rail.</li>
+	  <li><a href="https://picaxe.com/software/" target="_blank" rel="noopener">PICAXE Editor</a> &ndash; free, Windows, and there is a browser-based editor too.</li>
+	</ul>
+	<h3 id="interface">The interface circuit</h3>
+	<p>Four components, and the same circuit on every platform. It serves both calculator generations and both board supply voltages.</p>
+	<img src="../assets/img/casio-universal-interface.png" alt="The universal Casio interface circuit: 1N4148 on the transmit line, 4.7k pull-up and 10k series resistor with a 1N5711 Schottky clamp on the receive line." width="700" />
+	<ul>
+	  <li><strong>1N4148 in the blue wire</strong>, band toward the board. This makes the board's output open-drain: it can only pull the line low, and the calculator raises it with its own internal pull-up. That is what lets one cable serve a 5&nbsp;V board and a 3.3&nbsp;V one.</li>
+	  <li><strong>4.7&nbsp;k&#8486; pull-up</strong> from the yellow wire to the <em>board's own</em> supply. Both calculators power their port down between transfers, so a board that is listening reads a permanent break without it.</li>
+	  <li><strong>10&nbsp;k&#8486; in series</strong> with the receive pin, and a <strong>1N5711 Schottky</strong> from that pin to the board's supply, band toward the supply. These two matter whenever the board's supply is below the calculator's transmit level &ndash; which on this platform means <strong>a PICAXE running at 3.3&nbsp;V with an FX-9750G Plus</strong>, whose line sits at 4.75&nbsp;V. Without them that 4.75&nbsp;V goes into the chip's own protection diode. Run the PICAXE at 5&nbsp;V, or use an FX-9750GIII, and the Schottky never conducts &ndash; but it costs nothing to fit, and fitting it once means the same interface works with either calculator and either supply.</li>
+	  <li><strong>The 10&nbsp;k&#8486; is in series only.</strong> Nothing connects the receive pin to ground. A resistor there makes it a divider, which drops a GIII's 2.75&nbsp;V mark to about 1.8&nbsp;V and stops working.</li>
+	</ul>
+
+	<h3 id="pins">Pins</h3>
+	<table>
+	  <thead><tr><th>Signal</th><th>PICAXE 08M2</th><th>PICAXE 14M2</th></tr></thead>
+	  <tbody>
+	    <tr><td>To Casio RX &ndash; <strong>blue</strong>, ring, via the 1N4148</td><td>C.0</td><td>B.0</td></tr>
+	    <tr><td>From Casio TX &ndash; <strong>yellow</strong>, tip, with the pull-up</td><td>C.1</td><td>B.1</td></tr>
+	    <tr><td>Sensor 1, analogue</td><td>C.2</td><td>B.2</td></tr>
+	    <tr><td>Sensor 2</td><td>C.3 (digital)</td><td>B.3 (analogue)</td></tr>
+	    <tr><td>Sensor 3, analogue or DS18B20</td><td>C.4</td><td>B.4</td></tr>
+	    <tr><td>Ground &ndash; <strong>black</strong>, sleeve</td><td colspan="2">0&nbsp;V, connect this one first</td></tr>
+	  </tbody>
+	</table>
+	<p>C.1 is the hardware serial input, not an arbitrary choice. The receive pin has to be the one the EUSART owns.</p>
+	<h3 id="code">The code</h3>
+	<ul>
+	  <li><code>Casio-NSN-08M2.bas</code> and <code>Casio-NSN-14M2.bas</code> &ndash; one sensor value per <code>Receive(</code> call, up to three channels. Both tested on both calculator generations.</li>
+	  <li><code>Casio-HMI-08M2.bas</code> &ndash; the calculator as a keypad and display for the chip.</li>
+	</ul>
+	<p>Two settings in the source are important:</p>
+	<pre><code>setfreq m16                 ; 16 MHz - needed for clean 9600 baud
+hsersetup B9600_16, %00     ; %00 = true polarity, idle high</code></pre>
+	<p>Three requirements apply to every platform. They are why this works at all, and each of them was found by a link that would not run without it.</p>
+	<ol>
+	  <li><strong>Idle between bytes.</strong> An FX-9750G Plus needs roughly one bit period &ndash; about 104&nbsp;&micro;s at 9600 baud &ndash; of idle line between one byte and the next. A second stop bit supplies it; so does a deliberate delay. An FX-9750GIII does not care.</li>
+	  <li><strong>A turnaround delay.</strong> About 5&nbsp;ms before every transmission, so the calculator can switch its port from sending to listening. Without it the calculator answers <code>0x22</code> and never sends its request packet. <strong>On a PICAXE you get this for free</strong> &ndash; the shipped code sets <code>symbol TURNAROUND = 0</code> and works on both calculators, because the interpreter is slow enough to supply the pause by itself. If you ever do see a Com ERROR here, set it to 20, which is 5&nbsp;ms at 16&nbsp;MHz.</li>
+	  <li><strong>Build the packet, then send it.</strong> Nothing computed part-way through a transmission &ndash; a checksum between the last two bytes will insert a pause a G Plus refuses.</li>
+	</ol>
+	<h3 id="gotchas">What goes wrong</h3>
+	<h4>Never send a packet with a single multi-byte <code>hserout</code></h4>
+	<p>The EUSART is 8N1 only and has no second stop bit to offer. A block <code>hserout</code> hands the hardware the whole packet and the bytes leave back to back, with no idle between them &ndash; which an FX-9750G Plus refuses. The shipped code emits one byte at a time through a <code>put_byte</code> routine, and the interpreter's own per-byte cost is comfortably more than one bit period. That is the entire fix, and it costs nothing in practice because a fifty-byte packet still takes about fifty milliseconds either way.</p>
+	<h4>Other things worth knowing</h4>
+	<ul>
+	  <li><strong><code>pause 300</code>, not 200</strong>, after reading the request-packet header. 200 works on a GIII and fails on a G Plus; 300 keeps one program compatible with both.</li>
+	  <li><strong>The calculator must stay connected</strong> for the whole run. A PICAXE has nowhere to store readings on its own.</li>
+	  <li><strong>A noisy 5&nbsp;V USB supply causes Com ERRORs</strong> that look exactly like a wiring or protocol fault. Battery or laptop USB is reliable.</li>
+	</ul>
+	<h3 id="more">Code, technical and teaching manual and the other platforms</h3>
+	<ul>
+	  <li><strong>Repository, all platforms:</strong> <a href="https://github.com/MikeFentonNZ/Casio-calculator-datalogger-picaxe-esp-microbit-arduino" target="_blank" rel="noopener">github.com/MikeFentonNZ/Casio-calculator-datalogger-picaxe-esp-microbit-arduino</a></li>
+	  <li><strong>Technical manual</strong> &ndash; wiring, the full <code>Receive(</code> sequence, every packet and checksum: <a href="https://doi.org/10.5281/zenodo.22095227" target="_blank" rel="noopener">https://doi.org/10.5281/zenodo.22095227</a></li>
+	  <li><strong>Project overview:</strong> <a href="casio-calculator-data-logger-hack.html">Casio calculator data logger &ndash; the $10 upgrade</a></li>
+	</ul>
+
+	<div class="warning-box">
+  <p><strong>WARNING - TAKE CARE!</strong></p>
+  <p><strong>NEVER connect mains electricity (240 V / 110 V)</strong> to the calculator, to the microcontroller, or to any sensor wiring.</p>
+ <p><strong>NEVER use mains-connected equipment near water.</strong></p>
+  <p><strong>Keep every sensor signal within 0 V to 3.3 V.</strong> The ESP32 and ESP8266 are <strong>not</strong> 5 V tolerant. A bare ESP8266 A0 pin reads 0 to 1.0 V only; 3.3 V will destroy it. However, popular development boards like NodeMCU and Wemos D1 Mini include an onboard resistor voltage divider, which safely extends their external board tolerance to 0 to 3.2V–3.3V</p>
+  <p><strong>Special Warning: DO NOT let students test boiling water.</strong></p>
+ <p>There is no need to calibrate temperature sensors using boiling water. Where in the real world would a student expect to record that temperature? If you are investigating cooling curves, YOU should safely get sensor readings at 100 &degC and PROVIDE THIS to learners.</p>
+<p><strong>READ THE DISCLAIMER in the Technical manual</strong> - No responsibility is taken for how you use this information! This is a research project provided open-source to educators.</p>
+</div>
+
+<h3 id="use-it">Use it</h3>
+
+	<p><strong>Always remind learners that scientists and engineers work carefully and safely,</strong> no matter what they see in movies or TV.</p>
+	<p><strong>Crime scene investigation</strong>: Make your own temperature sensor using a 50 cent NTC thermistor. Then test it by calibrating it (see the photo). Use it to investigate cooling curves - how long has the victim's coffee been cooling?</p>
+<img src="../assets/img/casio-picaxe-temperature-calibration.png" alt="Casio FX-9750 calculator temperature data logging" width="400" />
+<img src="../assets/img/casio-picaxe-graphed-data.jpg" alt="Casio FX-9750 calculator temperature data logging" width="400" />
+	<p><strong>Casi the Casio calculator controlled robot</strong>: The original Casio calculator-controlled robot. The Casio sends calculator key presses by radio to the robot (see the 2008 E-Learning report <a href="https://doi.org/10.5281/zenodo.19302276" target="_blank" rel="noopener">https://doi.org/10.5281/zenodo.19302276</a>).</p>
+<img src="../assets/img/CASI-robot.jpg" alt="CASI - Casio FX-9750 calculator remote controlled robot" width="400" />
+
+<p><strong>Mars surface surveyor:</strong> Attach a low-cost ultrasonic rangefinder module (Aliexpress) and map a simulated Martian surface from the air (see the 2008 E-Learning report <a href="https://doi.org/10.5281/zenodo.19302276" target="_blank" rel="noopener">https://doi.org/10.5281/zenodo.19302276</a>).</p>
+<img src="../assets/img/casio-picaxe-mission-to-mars.jpg" alt="Casio calculator range finder - Mars orbital surveyor calculus lesson" width="500" />
+<img src="../assets/img/motion_sensor.jpg" alt="CASI - Casio FX-9750 calculator remote controlled robot" width="400" />
+
+<p><strong>Human-machine-interface:</strong> The calculator transmits user-entered numerical values to the microcontroller via the serial interface. The calculator’s tamper-evident keypad and display provide a secure input mechanism for applications requiring user-generated discrete values. One group sets up a model door lock with a 4-digit PIN and no lockout. A second group is asked to open it without being told the code. Teaches coding, cyber security, building systems safety, and the rule 'the secret belongs with the thing being protected, not with the thing a user is holding'.</p>
+	<p>INSERT PICAXE HMI VIDEO HERE!!!</p>
+<div class="video-container">
+<iframe 
+        src="https://www.youtube.com/embed/khCzVW4PZOY" 
+        title="Casio FX-9750 calculator as a PIN pad with a Picaxe 08M2"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+</iframe>
+</div>
+
+	<p><strong>IMC simulator:</strong> The Casio calculator and connected microcontroller form a closed-loop measurement and control system. The microcontroller reads one or more sensors, transmits them to the calculator for display. The student observes the live readings, makes a control decision, and transmits a control value back to the microcontroller via the calculator keypad. The microcontroller receives that value and adjusts a physical output accordingly; motor speed, heater power, valve position, or light intensity. The student then observes the effect of their intervention in the next sensor reading.</p>
+
+	<p><strong>Over distance.</strong> A 433 MHz radio link has been proven. Use wireless remote control or wireless sensors.</p>
+	<img src="../assets/img/michael-fenton-picaxe-casio.jpg" alt="Portable data logger units - wireless remote control mode" />
+
+	<h3 id="justification">A renewed justification in a post AI-era.</h3>
+<p><strong>When technology cost and availability is no longer a consideration, the use of simulated data for STEM learning is a decision that now requires justification, rather than being the default.</strong></p> 
+
+	<p>The original case for this work was equity: timed data logging for a few dollars instead of hundreds. There is now a second reason it matters. As generative AI is trained on a scientific literature increasingly polluted by fabricated paper mill studies (<a href="https://doi.org/10.1073/pnas.2420092122" target="_blank" rel="noopener">Richardson and Amaral, 2025, PNAS</a>), simulated datasets can no longer be assumed to reflect physical reality. Subverting the Casio serial protocol so learners can gather their own first-hand measurements gives them data whose provenance is transparent and which can still surprise. The exploit is no longer only about cost; it is about preserving access to real, trustworthy observation.</p>
+
+	<p>Other platform build guides:
+	  <a href="casio-calculator-microbit.html">BBC micro:bit</a> &middot;
+	  <a href="casio-calculator-esp8266.html">ESP8266</a> &middot;
+	  <a href="casio-calculator-esp32.html">ESP32</a> &middot;
+	  <a href="casio-calculator-arduino-uno.html">Arduino Uno</a></p>
+
+	<h3>Back to Projects/Research</h3>
+	<p><a href="../projects-stem-inventions.html" class="button" aria-label="See projects and research by Michael Fenton">Back to Projects</a></p>
+
+    </main>
+</div>
+
+  <footer class="footer" role="contentinfo" aria-label="Site footer">
+  <p>&copy; <span id="year"></span> Michael Fenton.</p>
+<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license">
+    <small>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)</small>
+  </a>
+  <p>This work may be copied, shared, remixed, and adapted for non-commercial purposes under the terms of the license.</p>
+  <p>Requirements: give appropriate credit, provide a link to the license, and indicate if changes were made. Derivatives must be licensed under identical terms.</p>
+  <p><small>Attribution example: <strong>Casio Calculator Data Logger: timed sensor sampling using host-wait windows in the Casio serial protocol - Michael Fenton</strong> - CC BY-NC-SA 4.0 - https://creativecommons.org/licenses/by-nc-sa/4.0/</small></p>
+  </footer>
+
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>
