@@ -12,7 +12,12 @@ https://mikefentonnz.github.io/projects/artificial-intelligence-has-learnt-to-li
 https://mikefentonnz.github.io/projects/artificial-intelligence-in-education.html
 https://mikefentonnz.github.io/projects/aztec-story.html
 https://mikefentonnz.github.io/projects/b9-robot-mobile-laboratory.html
+https://mikefentonnz.github.io/projects/casio-calculator-arduino-uno.html
 https://mikefentonnz.github.io/projects/casio-calculator-data-logger-hack.html
+https://mikefentonnz.github.io/projects/casio-calculator-esp32.html
+https://mikefentonnz.github.io/projects/casio-calculator-esp8266.html
+https://mikefentonnz.github.io/projects/casio-calculator-microbit.html
+https://mikefentonnz.github.io/projects/casio-calculator-picaxe.html
 https://mikefentonnz.github.io/projects/casio-calculator-picaxe-data-logger.html
 https://mikefentonnz.github.io/projects/digital-multimeters-as-data-loggers.html
 https://mikefentonnz.github.io/projects/game-design-coding-learning.html
@@ -20,5 +25,6 @@ https://mikefentonnz.github.io/projects/maker-science-robotics-electronics.html
 https://mikefentonnz.github.io/projects/rigel-games-electronics-link.html
 https://mikefentonnz.github.io/projects/rigel-web.html
 https://mikefentonnz.github.io/projects/science-is-not-everywhere-but-it-can-begin-anywhere.html
-https://mikefentonnz.github.io/projects/smart.html
 https://mikefentonnz.github.io/projects/skill-standards-navigating-narrative-traps.html
+https://mikefentonnz.github.io/projects/smart.html
+https://mikefentonnz.github.io/projects/tune_write.html
