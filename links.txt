@@ -19,6 +19,7 @@ https://mikefentonnz.github.io/projects/casio-calculator-esp8266.html
 https://mikefentonnz.github.io/projects/casio-calculator-microbit.html
 https://mikefentonnz.github.io/projects/casio-calculator-picaxe.html
 https://mikefentonnz.github.io/projects/casio-calculator-picaxe-data-logger.html
+https://mikefentonnz.github.io/projects/casio-calculator-r2d2-droidx.html
 https://mikefentonnz.github.io/projects/digital-multimeters-as-data-loggers.html
 https://mikefentonnz.github.io/projects/game-design-coding-learning.html
 https://mikefentonnz.github.io/projects/maker-science-robotics-electronics.html
