@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" data-page="projects">
+<head>
+  <title>Casio calculator to Bluetooth droid - reviving a Hasbro Smart R2-D2 with an ESP32</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="A Casio FX-9750 graphing calculator drives a discontinued Hasbro Smart R2-D2 over Bluetooth LE through an ESP32, with DroidX - a block-coding web app served from the chip - replacing the dead Android app." />
+  <meta name="author" content="Michael Fenton" />
+  <meta name="theme-color" content="#151a2f" />
+  <link rel="canonical" href="https://mikefentonnz.github.io/projects/casio-calculator-r2d2-droidx.html" />
+  <meta property="og:title" content="Casio calculator to Bluetooth droid - reviving a Hasbro Smart R2-D2 with an ESP32" />
+  <meta property="og:description" content="A Casio FX-9750 graphing calculator drives a discontinued Hasbro Smart R2-D2 over Bluetooth LE through an ESP32, with DroidX - a block-coding web app served from the chip - replacing the dead Android app." />
+  <meta property="og:type" content="article" />
+  <meta property="og:image" content="https://MikeFentonNZ.github.io/assets/img/profile.png" />
+  <meta property="og:url" content="https://mikefentonnz.github.io/projects/casio-calculator-r2d2-droidx.html" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Casio calculator to Bluetooth droid - reviving a Hasbro Smart R2-D2 with an ESP32" />
+  <meta name="twitter:description" content="A Casio FX-9750 graphing calculator drives a discontinued Hasbro Smart R2-D2 over Bluetooth LE through an ESP32, with DroidX - a block-coding web app served from the chip - replacing the dead Android app." />
+  <meta name="twitter:image" content="https://MikeFentonNZ.github.io/assets/img/profile.png" />
+  <script type="application/ld+json">{
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Casio calculator to Bluetooth droid",
+    "description": "A Casio FX-9750 graphing calculator drives a discontinued Hasbro Smart R2-D2 over Bluetooth LE through an ESP32, with DroidX - a block-coding web app served from the chip - replacing the dead Android app.",
+    "keywords": "Casio FX-9750, ESP32, Bluetooth LE, NimBLE, block coding, e-waste, obsolescence, robot control, STEM education, host-wait window, protocol reverse engineering, app-mode hold",
+    "author": { "@type": "Person", "name": "Michael Fenton, MRSNZ", "url": "https://MikeFentonNZ.github.io/" },
+    "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "isPartOf": { "@type": "CreativeWork", "name": "Casio calculator data logger", "url": "https://mikefentonnz.github.io/projects/casio-calculator-data-logger-hack.html" }
+  }</script>
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+  <link rel="manifest" href="../site.webmanifest" />
+  <link rel="shortcut icon" href="../favicon.ico" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="topbar" role="banner" aria-label="Primary site header">
+    <div class="brand">
+      <span class="brand__logo" aria-hidden="true">MF</span>
+      <a class="brand__name" href="../index.html" aria-label="Home page of Michael Fenton">Michael Fenton</a>
+    </div>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="mainnav" aria-label="Navigation menu">
+      <span class="nav-toggle__bar" aria-hidden="true"></span>
+      <span class="sr-only">Navigation</span>
+    </button>
+    <nav id="mainnav" class="mainnav" role="navigation" aria-label="Main menu">
+      <ul>
+        <li><a href="../research-outputs-publications-portfolio.html">Research</a></li>
+        <li><a href="../teaching-instructional-design-moderation.html">Teaching</a></li>
+        <li><a href="../projects-stem-inventions.html">Projects</a></li>
+        <li><a href="../workshops-talks-science-communication.html">Workshops &amp; Talks</a></li>
+        <li><a href="../nexus-research-group.html">Nexus</a></li>
+        <li><a href="../curriculum-vitae-michael-fenton.html">CV</a></li>
+      </ul>
+    </nav>
+    <button id="themeToggle" class="theme-toggle" aria-pressed="false" aria-label="Activate dark mode" title="Switch to dark mode">
+      <span class="icon" aria-hidden="true">&#127769;</span>
+      <span class="label">Dark</span>
+    </button>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" role="complementary" aria-label="Profile">
+      <div class="profile-card">
+        <img src="../assets/img/profile.png" alt="Portrait of Michael Fenton" class="profile-photo" width="120" height="120" />
+        <h1 class="name">Michael Fenton, MRSNZ</h1>
+        <p class="title">Scientist, STEM Education lecturer, Education innovator, Consultant, Writer</p>
+        <ul class="social" aria-label="Social and professional links">
+          <li><a href="https://nz.linkedin.com/in/mikefentonnz" target="_blank" aria-label="LinkedIn profile of Michael Fenton, MRSNZ">LinkedIn</a></li>
+          <li><a href="https://focus-consultancy.co.nz/" target="_blank" aria-label="Education Consultancy website for Michael Fenton">Consultancy Website</a></li>
+          <li><a href="https://www.youtube.com/@nznrg/videos" target="_blank" aria-label="Michael Fenton YouTube channel">YouTube channel</a></li>
+        </ul>
+      </div>
+    </aside>
+    <main id="content" class="content" role="main" tabindex="-1">
+      <section class="intro" aria-labelledby="intro-heading">
+        <h2 id="intro-heading">The droid that outlived its app</h2>
+        <h3>A graphing calculator, an ESP32, and a toy nobody can switch on any more</h3>
+        <p><a href="casio-calculator-data-logger-hack.html">&larr; Casio calculator data logger &ndash; project overview</a></p>
+
+        <p>Hasbro's <strong>Smart R2-D2</strong> was sold in 2016 with an Android app that controlled it over Bluetooth. The app was built with a Unity version of that year and ships only 32-bit native libraries. Modern phones are 64-bit only. <strong>The app will not install, so the toy will not move.</strong></p>
+
+        <p>Nothing is wrong with the robot. Its motors turn, its lamps light, its speaker works, and it still advertises itself over Bluetooth to anything that knows how to ask. What died was the software, and with it every one of these toys still sitting in a cupboard.</p>
+
+        <p>This project puts a <strong>Casio FX-9750 graphing calculator</strong> in charge of it, through the same 2.5&nbsp;mm serial port and the same four-component interface circuit as every other build in this family. It then adds <strong>DroidX</strong>, a block-coding web page served by the ESP32 itself, so a phone or tablet can drive the droid with no app, no install, and no internet connection.</p>
+
+	<blockquote><p><strong>Restore phone control of your Hasbro Smart R2D2</strong> The Casio remains a teaching tool connecting to R2D2 AT THE SAME TIME as the ESP32 serves an app to your phone, tablet or laptop webbrowser.</p><p>The calculator sends the commands. The ESP32 translates them into Bluetooth. The droid moves. And the calculator screen shows what the droid is actually doing, read back from the robot rather than assumed.</p> </blockquote>
+	<img src="../assets/img/droidx-r2d2.jpg" alt="The replacement for the Hasbro Smart R2D2 app - DroidX provides remote control and block coding actions thorugh your web browser."/>
+
+
+      </section>
+
+      <h3 id="why">Why bother</h3>
+      <p><strong>This is an e-waste problem wearing a toy costume.</strong> A working machine is unusable because a company stopped maintaining a phone app, and no amount of care by the owner can fix that. Learners meet planned and unplanned obsolescence as an abstraction; here it is a robot on the table that will not move, and a route to making it move again.</p>
+      <p>It is also the first endpoint in my Casio calculator research project that <strong>talks back</strong>. Simple sensors used in data logging do not disagree with commands. However, a droid reports its own head position, its own cam position, its button, and a forward proximity reading, so a learner can compare what was commanded with what actually happened. That gap is where the science is.</p>
+
+      <h3 id="build">What was built</h3>
+      <table>
+        <thead><tr><th>Part</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Casio FX-9750</strong></td><td>Sends commands from the keypad. Displays the droid's reported state. No modification, no firmware change.</td></tr>
+          <tr><td><strong>Interface circuit</strong></td><td>Four components, unchanged from every other platform in this family. 1N4148, 4.7&nbsp;k&#8486; pull-up, 10&nbsp;k&#8486; series, 1N5711 Schottky.</td></tr>
+          <tr><td><strong>ESP32</strong></td><td>Casio serial on one side, Bluetooth LE on the other. Translates one protocol into the other, and keeps telling the droid that an application is in charge.</td></tr>
+          <tr><td><strong>DroidX</strong></td><td>A block-coding page served from the ESP32's own WiFi. Replaces the dead Android app.</td></tr>
+          <tr><td><strong>Smart R2-D2</strong></td><td>Unmodified. It does not know that the app it was sold with no longer exists.</td></tr>
+        </tbody>
+      </table>
+      <p>The wiring and the interface are identical to the <a href="casio-calculator-esp32.html">ESP32 build guide</a>. If you have built the data logger, you have already built the hardware for this.</p>
+
+      <h3 id="calculator">What the calculator does</h3>
+      <p>Commands go out in the <strong>two-step form</strong> used throughout this project: send the parameter number, then send its value. The calculator can only send a bare number, so the label goes first and is remembered. That is also, as it happens, exactly the shape of the droid's own protocol, which is an opcode followed by a payload.</p>
+      <p>Telemetry comes back the other way as <strong>three ordinary numbers, one per <code>Receive(</code></strong>: the forward infrared reading, the age of the last app-mode hold packet, and the head position the droid reports for itself. The first and third are captured together, so although they are transmitted one at a time they describe the <em>same instant</em> &ndash; which matters when the thing being measured is driving across the floor.</p>
+      <p>A dropped Bluetooth link &ndash; a flat battery, a droid carried out of range, a power switch &ndash; is invisible from the calculator: the machine would go on accepting keypresses and go on being acknowledged by a board with nothing on the other end. So <strong>the values carry the news themselves</strong>. Anything unavailable reads <code>-999</code>, which is not a plausible measurement of any of them, and when the droid goes they all go together. A value that cannot be a real reading is proof of a fault. <strong>A fault must never resemble a result.</strong></p>
+
+      <h3 id="finding">What the droid taught the project</h3>
+      <p>Every endpoint this interface had served until now was indifferent to how long the microcontroller sat waiting inside the calculator's <code>Receive(</code>. A heater does not care. A thermistor never notices that it has been ignored.</p>
+      <p><strong>A Bluetooth droid notices.</strong> It expects a small packet every couple of seconds, and it is the first endpoint in this work whose clock keeps running while the calculator is thinking. An unbounded wait starves it.</p>
+      <p>The remedy is structural rather than a patch: that periodic packet must live <em>outside</em> the transaction loop, on its own task, firing whether or not the application is blocked. Once it does, the calculator's transaction time stops being a constraint at all.</p>
+      <p><strong>And the failure it prevents turned out to be quieter than expected.</strong> The published work calls that packet a keepalive; measured on the bench, it is nothing of the kind. Starve it and the droid does not disconnect &ndash; the link stays up, the telemetry keeps arriving, the commands keep being obeyed. What lapses is the droid's agreement to stay out of the way. It picks a mode for itself and starts performing while still answering everything you ask it. <strong>A fault that leaves everything apparently working is harder to find than one that disconnects</strong>, which is the whole argument for carrying an instrument.</p>
+      <blockquote>This generalises well beyond one toy. <strong>Any endpoint that expects to hear from its controller on a schedule has the same shape</strong> &ndash; Bluetooth, MQTT, anything session-based &ndash; and what it withdraws when it stops hearing need not be the connection. The finding is a limitation of the method and its remedy, and both were observed on the bench on the same afternoon.</blockquote>
+
+      <h3 id="measured">What the bench measured</h3>
+      <p>Two of the numbers this build was running on had been <em>inherited</em> rather than established: the interval the droid needs between packets, taken from somebody else's working code, and a 1200&nbsp;ms pause held inside the calculator's read window, chosen years ago for a program of a different shape. Both were guesses wearing the clothes of requirements. The controller carries a small serial console that makes each of them settable while it runs, which turned what would have been a dozen reflash-and-retest cycles into one session at the bench.</p>
+
+      <h4>What the droid actually does when the packets stop</h4>
+      <table>
+        <thead><tr><th>Interval between packets</th><th>What the droid did</th><th>Dropped connections</th></tr></thead>
+        <tbody>
+          <tr><td>1500&nbsp;ms &ndash; the default</td><td>sits quietly, obeys every command</td><td>0</td></tr>
+          <tr><td>5000&nbsp;ms</td><td>sits quietly, obeys every command</td><td>0</td></tr>
+          <tr><td><strong>6000&nbsp;ms</strong></td><td><strong>whistles each cycle and runs its own routines</strong></td><td><strong>0</strong></td></tr>
+        </tbody>
+      </table>
+      <p><strong>Nothing disconnected, at any setting.</strong> Right through the 6000&nbsp;ms run the infrared telemetry kept arriving, the head position kept being reported, and commands typed on the calculator were still obeyed &ndash; while the droid whistled and drove itself in between. It announces the changeover in plain text on a debug channel the published parser does not read at all.</p>
+
+      <h4>A pause that was doing nothing, and cost 44 per cent</h4>
+      <p>Stepped down on an <strong>FX-9750G&nbsp;Plus</strong> &ndash; the stricter of the two calculators &ndash; with the error counters read at every setting.</p>
+      <table>
+        <thead><tr><th>Pause</th><th>Cycle time</th><th>Errors of any kind</th></tr></thead>
+        <tbody>
+          <tr><td>1200&nbsp;ms</td><td>2736&nbsp;ms</td><td>0</td></tr>
+          <tr><td>800&nbsp;ms</td><td>2338&nbsp;ms</td><td>0</td></tr>
+          <tr><td>500&nbsp;ms</td><td>2041&nbsp;ms</td><td>0</td></tr>
+          <tr><td>300&nbsp;ms</td><td>1840&nbsp;ms</td><td>0</td></tr>
+          <tr><td>150&nbsp;ms</td><td>1687&nbsp;ms</td><td>0</td></tr>
+          <tr><td><strong>0&nbsp;ms</strong></td><td><strong>1539&nbsp;ms</strong></td><td><strong>0</strong></td></tr>
+        </tbody>
+      </table>
+      <p>That is <code>cycle = 1539 + 0.998 &times; pause</code> milliseconds, with every residual inside &plusmn;2&nbsp;ms across six settings. Short packets, bad preambles, bad checksums, timeouts and flushed bytes were <strong>zero cumulatively across the whole step-down, including at zero pause</strong>, and 140 consecutive cycles contained no outlier.</p>
+      <blockquote><strong>The slope is the evidence, not the zeros.</strong> Every millisecond taken off the pause came off the cycle, which can only be true if the pause was the only thing changing. A pause protecting something real would have shown a threshold somewhere. There is none, right down to zero.</blockquote>
+      <p>It was doing nothing because this program already reads all three values before it draws anything, so a read never begins while the machine is still busy with the screen &ndash; which is the actual fix, and the pause was insurance against a failure the structure had already ruled out. <strong>That is a result about this program's shape, not about the calculator</strong>: a program that draws between reads still needs the pause.</p>
+      <p>So the pause is now zero by default, and survives as a <em>teaching control</em>: set it back to 1200&nbsp;ms and the long wait reappears on demand, which is how the finding above is demonstrated to a class.</p>
+
+      <h4>Three smaller results, free</h4>
+      <ul>
+        <li><strong>The finding holds on both calculator generations.</strong> An FX-9750G&nbsp;Plus and an FX-9750GIII, machines twenty years apart, on one interface circuit and one calculator program.</li>
+        <li><strong>Adding WiFi cost the Bluetooth link nothing measurable.</strong> WiFi and Bluetooth share one radio in an ESP32, so this was measured rather than assumed: 2685&nbsp;ms per cycle with the access point alone, 2682&nbsp;ms with the access point, the web server, the WebSocket and two background tasks all running. Three milliseconds apart, same floor, same spread.</li>
+        <li><strong>The infrared consistency check held over roughly 571 frames</strong> with zero failures, checked in firmware on every frame. It had been established on 17 frames copied out by eye.</li>
+      </ul>
+
+      <h4>Still open</h4>
+      <p>Where between 5000 and 6000&nbsp;ms the changeover actually happens has not been bisected, and whether ordinary traffic of any kind will satisfy the droid in place of the specific packet is a test that is designed but not yet run. Both are recorded as open rather than rounded off &ndash; a project that corrects somebody else's inherited numbers has no business quietly inheriting its own.</p>
+
+      <h3 id="corrections">Four corrections to the published protocol work</h3>
+      <p>The droid's Bluetooth protocol was reverse-engineered by a third party from the decompiled Android app and published openly. That work made this project possible and is not mine. Building against it on real hardware, however, turned up four things worth passing back.</p>
+      <table>
+        <thead><tr><th>What the published work has</th><th>What the hardware showed</th><th>Why it matters</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>The infrared packet's first 16-bit field is read past and discarded.</td>
+            <td>It is exactly <code>4095 &minus; (lit &minus; ambient)</code> on every frame &ndash; the droid's own computed proximity.</td>
+            <td>A free per-frame integrity check on the packet, thrown away. This build uses it, and discards frames that fail it.</td>
+          </tr>
+          <tr>
+            <td>The <em>command</em> enumeration is applied to the <em>reported</em> head field.</td>
+            <td>All three labels are wrong, and a fourth code exists for a head in transit.</td>
+            <td>Every value returned is a legal enumeration member, so nothing signals that anything is amiss. A wrong answer that looks right.</td>
+          </tr>
+          <tr>
+            <td><code>LEFT</code> and <code>RIGHT</code>, unqualified.</td>
+            <td>They are the droid's left and right, not the observer's.</td>
+            <td>Silently inverts any instruction written from where the person is standing.</td>
+          </tr>
+          <tr>
+            <td><code>0x50&nbsp;0x8D</code> sent every 2.0&nbsp;s, named a keepalive.</td>
+            <td>Not a keepalive. Stop it and nothing disconnects; the droid simply stops deferring to the application.</td>
+            <td>The name tells you to watch for a dropped link. The real failure leaves the link up and everything apparently working.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>None of this is a complaint about the original work, which is careful and generous and without which none of this would exist. Three of the four are only visible with the toy on the bench answering back, and the fourth needed an interval knob that nobody had reason to build.</p>
+      <h4>The toy computes the proximity value, and the published parser discards it</h4>
+      <p>The infrared packet carries three 16-bit values. The published parser reads two of them, ambient and lit, and ignores the first. Across <strong>17 frames from four captures and three connections</strong>, the discarded field is exactly <code>4095 &minus; (lit &minus; ambient)</code>, every time. It is the toy's own computed proximity, inverted against 12-bit full scale. It carries no new information, <strong>but it is a free per-frame consistency check on the packet</strong>, and nobody is reading it.</p>
+      <h4>The reported head position is mislabelled</h4>
+      <p>The published parser applies the <em>command</em> enumeration to the <em>reported</em> field. Measured by commanding each position and watching the head move, all three labels are wrong, and a fourth code exists for a head still in transit between positions. Every value the parser returns is a legal enumeration member, so nothing signals that anything is amiss.</p>
+      <h4>Left and right belong to the droid, not to you</h4>
+      <p>Commanding the position the published work calls <code>LEFT</code> turns the head towards <strong>your right</strong> when you are facing the robot. This is correct &ndash; it is what "the robot's left" means &ndash; but nothing in the published work says so, and it silently inverts any instruction written from the observer's point of view. It is a good first lesson in frames of reference, and a better one for having been discovered rather than told.</p>
+
+      <h4>The packet everyone calls a keepalive is not one</h4>
+      <p>The published work sends <code>0x50&nbsp;0x8D</code> every two seconds and calls it a keepalive, and this project inherited the name along with the belief that came with it: that the toy drops its Bluetooth connection without it. <a href="#measured">Stretching the interval on the bench</a> tells a different story. It is not a keepalive but an <strong>app-mode hold</strong> &ndash; a standing claim that an application is driving, which the droid honours by suspending its own behaviour for as long as the claim keeps arriving. Let it lapse and the droid concludes nobody is at the controls and starts entertaining itself, without dropping anything.</p>
+      <p><strong>The name was doing real damage, not merely sitting there.</strong> "Keepalive" tells you to watch for a disconnection. The thing to watch for is a Hasbro R2D2 droid that carries on answering, reporting and obeying while quietly ignoring what it was told. Every mention of the word has been replaced across the firmware, the calculator programs and the documentation, and the calculator now labels that reading <code>HOLD AGE</code>.</p>
+
+      <h3 id="droidx">DroidX &ndash; the Hasbro R2D2 app you are looking for</h3>
+      <p>The calculator is the interesting control surface, but it is not the only one. Because the ESP32 has WiFi, it can run as its own access point and serve a page. <strong>A phone will not find the Hasbro R2D2 droid in its Bluetooth list, but it will find the ESP32 in its WiFi list.</strong> Join it, open a browser, and the controller appears.</p>
+      <p><strong>DroidX</strong> is that page: snap blocks together into a sequence, press Run, and watch the droid execute it while the calculator mirrors each step. There is no app to install, no store, no account, and no internet connection anywhere in the chain.</p>
+      <pre><code>[ Phone / tablet browser ]  --WiFi WebSocket-->  [ ESP32 ]  --serial-->  [ Casio screen ]
+        DroidX block UI                              |
+                                                     +--Bluetooth LE-->  [ droid ]</code></pre>
+      <p>The whole page is <strong>about 11&nbsp;kB compressed</strong> and holds its own block editor, so it lives inside the firmware as a single string with no filesystem to keep in step. It also runs standalone in any browser with the controller absent, saying so plainly in its toolbar, which means a class can build and check sequences without a droid each.</p>
+      <blockquote><strong>Every sequence ends with a stop</strong>, whether it finishes or is interrupted. The drive motor latches on, and a sequence that ended without one would leave the droid driving.</blockquote>
+
+      <h3 id="commands">Command set</h3>
+      <table>
+        <thead><tr><th>#</th><th>Function</th><th>Accepted values</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Head position</td><td>0, 1, 2</td><td>the droid's frame, not yours</td></tr>
+          <tr><td>2</td><td>Drive motor</td><td>0 stop, 1 forward, 2 backward</td><td>runs until stopped</td></tr>
+          <tr><td>3</td><td>Cam position</td><td>0 to 8</td><td>selects what the single motor drives</td></tr>
+          <tr><td>4</td><td>Lamp, red</td><td>0 to 100 %</td><td>one command carries both channels</td></tr>
+          <tr><td>5</td><td>Lamp, blue</td><td>0 to 100 %</td><td>the other is re-sent with it</td></tr>
+          <tr><td>6</td><td>Sound</td><td>0 to 174</td><td>stored clips; none can be added</td></tr>
+          <tr><td>7</td><td>Lamp sequence</td><td>0 to 264</td><td>the toy's own stored routines</td></tr>
+          <tr><td>8</td><td>Motion sequence</td><td>0 to 477</td><td>as above</td></tr>
+          <tr><td>9</td><td>Stop everything</td><td>any value</td><td>value ignored deliberately</td></tr>
+        </tbody>
+      </table>
+      <p>Every value is range-checked before it is acted on, and a rejection is counted and raised on the calculator rather than silently ignored. <strong>Power-down is deliberately absent from the menu</strong> &ndash; a typing error should not end the lesson.</p>
+
+      <h3 id="drivetrain">One motor, and a cam that chooses what it drives</h3>
+      <p>The droid is not a two-motor robot. It has <strong>one drive motor and a cam</strong> that selects among eight positions: head, drive, pivot left, pivot right and their upright variants. So the head cannot turn until the cam has moved to a head position, and a head command quietly moves the cam first. Nothing in the published protocol work documents this. It fell out of watching the reported cam position change in response to a head command.</p>
+      <p>That constraint is worth having in a classroom. There is no proportional steering and no odometry, so a learner navigating this robot has eight discrete states and has to think about sequence rather than about joystick angles.</p>
+
+      <div class="warning-box">
+        <p><strong>WARNING - TAKE CARE!</strong></p>
+        <p><strong>NEVER connect mains electricity (240 V / 110 V)</strong> to the calculator, to the microcontroller, or to any wiring attached to either.</p>
+        <p><strong>The ESP32 is not 5 V tolerant.</strong> Keep every signal within 0 V to 3.3 V.</p>
+        <p><strong>The drive motor runs until it is stopped.</strong> Keep the droid on the floor, clear of stairs and clear of drops. If the controller loses contact with the calculator or the browser mid-run, the motor does not stop by itself unless the firmware makes it.</p>
+        <p><strong>READ THE DISCLAIMER in the Technical manual</strong> - No responsibility is taken for how you use this information! This is a research project provided open-source to educators.</p>
+      </div>
+
+      <h3 id="use-it">Use it</h3>
+      <p><strong>Obsolescence, made concrete.</strong> Start with the toy that will not switch on. Ask why. The answer is not mechanical and not electrical; it is a 32-bit library in a file nobody will rebuild. Then fix it anyway.</p>
+      <p><strong>Frames of reference.</strong> Command the head left and watch it turn right. Do not explain it first. The correction is more durable when the robot supplies it.</p>
+      <p><strong>Commanded against actual.</strong> The droid reports where its head really is. Have learners predict, command, then read back, and find the cases where the two disagree &ndash; a head still in transit, a cam that had to move first, a command that arrived while the link was down.</p>
+      <p><strong>Proximity and distance.</strong> The forward infrared sensor reports ambient and reflected light separately. Drive the droid towards a wall, log the reflected signal against time with the existing Casio interval logger, and the result is a genuine investigation rather than a demonstration.</p>
+      <p><strong>Sequencing without a screen full of syntax.</strong> DroidX gives block coding to learners who are not ready to type, on hardware they can watch, with the executing step visible on a second screen.</p>
+
+      <!-- Photographs to add: the ESP32 wired to the calculator and droid; DroidX open on a phone;
+           the calculator mirror showing an executing step. -->
+
+      <h3 id="more">Code, manual and the other platforms</h3>
+      <ul>
+        <li><strong>Repository, all platforms:</strong> <a href="https://github.com/MikeFentonNZ/Casio-calculator-datalogger-picaxe-esp-microbit-arduino" target="_blank" rel="noopener">github.com/MikeFentonNZ/Casio-calculator-datalogger-picaxe-esp-microbit-arduino</a></li>
+        <li><strong>Technical manual</strong> &ndash; wiring, the full <code>Receive(</code> sequence, every packet and checksum: <a href="https://doi.org/10.5281/zenodo.22095227" target="_blank" rel="noopener">https://doi.org/10.5281/zenodo.22095227</a></li>
+        <li><strong>Priority disclosure</strong> &ndash; the timing discoveries, the encoding invention and the operational modes: <a href="https://doi.org/10.5281/zenodo.19303911" target="_blank" rel="noopener">https://doi.org/10.5281/zenodo.19303911</a></li>
+        <li><strong>The 2008 origin</strong> &ndash; Ministry of Education E-Learning Fellowship report, which first put the calculator in charge of a robot: <a href="https://doi.org/10.5281/zenodo.19302276" target="_blank" rel="noopener">https://doi.org/10.5281/zenodo.19302276</a></li>
+        <li><strong>The droid's Bluetooth protocol</strong>, reverse-engineered and published by a third party: <a href="https://github.com/elitistphoenix/r2d2-robot-apps" target="_blank" rel="noopener">github.com/elitistphoenix/r2d2-robot-apps</a></li>
+      </ul>
+
+      <p>Other platform build guides:
+        <a href="casio-calculator-picaxe.html">PICAXE</a> &middot;
+        <a href="casio-calculator-microbit.html">BBC micro:bit</a> &middot;
+        <a href="casio-calculator-esp8266.html">ESP8266</a> &middot;
+        <a href="casio-calculator-esp32.html">ESP32</a> &middot;
+        <a href="casio-calculator-arduino-uno.html">Arduino Uno</a></p>
+
+      <p><a href="b9-robot-mobile-laboratory.html">B9 robot mobile science lab &ndash; <i>Lost in Space</i></a></p>
+
+      <h3 id="affiliation">Not affiliated</h3>
+      <p>This is a preservation, education and interoperability project. It is <strong>not affiliated with or endorsed by Hasbro, Disney or Lucasfilm</strong>, and the toy, its name and its likeness remain the property of their respective owners. The droid's Bluetooth protocol is third-party reverse-engineering work, credited above, and is not mine. No original manufacturer code or assets are redistributed here.</p>
+
+      <h3>Back to Projects/Research</h3>
+      <p><a href="../projects-stem-inventions.html" class="button" aria-label="See projects and research by Michael Fenton">Back to Projects</a></p>
+
+    </main>
+  </div>
+
+  <footer class="footer" role="contentinfo" aria-label="Site footer">
+  <p>&copy; <span id="year"></span> Michael Fenton.</p>
+<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license">
+    <small>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)</small>
+  </a>
+  <p>This work may be copied, shared, remixed, and adapted for non-commercial purposes under the terms of the license.</p>
+  <p>Requirements: give appropriate credit, provide a link to the license, and indicate if changes were made. Derivatives must be licensed under identical terms.</p>
+  <p><small>Attribution example: <strong>Casio calculator to Bluetooth droid: reviving a discontinued Hasbro Smart R2-D2 with an ESP32 - Michael Fenton</strong> - CC BY-NC-SA 4.0 - https://creativecommons.org/licenses/by-nc-sa/4.0/</small></p>
+  </footer>
+
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>
