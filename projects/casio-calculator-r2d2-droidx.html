@@ -145,8 +145,8 @@
       <p><strong>Which is why nothing shows.</strong> Link up, values true, commands obeyed, every transaction counter at zero. There is no symptom to find, because nothing has failed in any sense the apparatus can test for. The only evidence is how long it has been since the last packet.</p>
 
       <h4>The telemetry pause can be zero</h4>
-      <p>Stepped down on an <strong>FX-9750G&nbsp;Plus</strong>, the stricter of the two calculators, with the error counters read at every setting.</p>
-            <p>It stays in the build as a teaching control: set it back to 1200&nbsp;ms and the long wait reappears on demand, which is how the finding above is shown to a class.</p>
+      <p>Measured on an <strong>FX-9750G&nbsp;Plus</strong> and found to be doing nothing: removing it takes the cycle from 2736&nbsp;ms to 1539&nbsp;ms, with no error of any kind at any setting including zero.</p>
+      <p>The pause stays in the build as a teaching control: set it back to 1200&nbsp;ms and the long wait reappears on demand, which is how the finding above is shown to a class.</p>
 
       <h4>Three smaller results</h4>
       <ul>
@@ -174,8 +174,8 @@
       <p>Nothing here is an error in the published work &ndash; those opcodes are listed and the strings are printed. The difference is only in what one does with them, which is why it sits apart from the list below. But it is the part worth passing on: <strong>the machine describes its own state in words, and the standard tooling classifies the words as noise.</strong></p>
       <p>One of those lines is still unexplained. <code>Queue overflow!</code> appears without an obvious trigger, and nothing here should be read as knowing what it means.</p>
 
-      <h3 id="corrections">Four things the published protocol work does not tell you</h3>
-      <p>The droid's Bluetooth protocol was reverse-engineered by a third party from the decompiled Android app and published openly. That work made this project possible and is not mine &ndash; it was the starting point for every line of the ESP32 firmware. Building against it on real hardware turns up four things worth passing back.</p>
+      <h3 id="corrections">Three things the published protocol work does not tell you</h3>
+      <p>The droid's Bluetooth protocol was reverse-engineered by a third party from the decompiled Android app and published openly. That work made this project possible and is not mine &ndash; it was the starting point for every line of the ESP32 firmware. Building against it on real hardware turns up three things worth passing back.</p>
       <table>
         <thead><tr><th>What the published work has</th><th>What the hardware showed</th><th>Why it matters</th></tr></thead>
         <tbody>
@@ -190,11 +190,6 @@
             <td>Every value returned is a legal enumeration member, so nothing signals that anything is amiss. A wrong answer that looks right.</td>
           </tr>
           <tr>
-            <td><code>LEFT</code> and <code>RIGHT</code>, unqualified.</td>
-            <td>They are the droid's left and right, not the observer's.</td>
-            <td>Silently inverts any instruction written from where the person is standing.</td>
-          </tr>
-          <tr>
             <td><code>0x50&nbsp;0x8D</code> sent every 2.0&nbsp;s, named a keepalive.</td>
             <td>Not a keepalive. Stop it altogether and nothing disconnects, and commands are still obeyed &ndash; the droid simply stops deferring to the application after 5.0&nbsp;s. Ordinary traffic will not stand in for it.</td>
             <td>The name tells you to watch for a dropped link. The real failure leaves the link up, the readings true and the commands working &ndash; it costs you sole occupancy, not control.</td>
@@ -206,8 +201,6 @@
       <p>The infrared packet carries three 16-bit values. The published parser reads two of them, ambient and lit, and ignores the first. Across <strong>17 frames from four captures and three connections</strong>, the discarded field is exactly <code>4095 &minus; (lit &minus; ambient)</code>, every time. It is the toy's own computed proximity, inverted against 12-bit full scale. It carries no new information, <strong>but it is a free per-frame consistency check on the packet</strong>, and nobody is reading it.</p>
       <h4>The reported head position is mislabelled</h4>
       <p>The published parser applies the <em>command</em> enumeration to the <em>reported</em> field. Measured by commanding each position and watching the head move, all three labels are wrong, and a fourth code exists for a head still in transit between positions. Every value the parser returns is a legal enumeration member, so nothing signals that anything is amiss.</p>
-      <h4>Left and right belong to the droid, not to you</h4>
-      <p>Commanding the position the published work calls <code>LEFT</code> turns the head towards <strong>your right</strong> when you are facing the robot. This is correct &ndash; it is what "the robot's left" means &ndash; but nothing in the published work says so, and it silently inverts any instruction written from the observer's point of view. It is a good first lesson in frames of reference, and a better one for having been discovered rather than told.</p>
 
       <h4>The packet everyone calls a keepalive is not one</h4>
       <p>The published work sends <code>0x50&nbsp;0x8D</code> every two seconds and calls it a keepalive, which invites the obvious inference: that the droid drops its Bluetooth connection without it. <a href="#measured">Stretching the interval on the bench</a> shows otherwise. It is an <strong>app-mode hold</strong> &ndash; a standing claim that an application is driving, which the droid honours by suspending its own behaviour for as long as the claim keeps arriving. Let it lapse and the droid concludes nobody is at the controls and starts entertaining itself, without dropping anything.</p>
@@ -226,7 +219,7 @@
       <table>
         <thead><tr><th>#</th><th>Function</th><th>Accepted values</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td>1</td><td>Head position</td><td>0, 1, 2</td><td>the droid's frame, not yours</td></tr>
+          <tr><td>1</td><td>Head position</td><td>0, 1, 2</td><td>0 left, 1 centre, 2 right</td></tr>
           <tr><td>2</td><td>Drive motor</td><td>0 stop, 1 forward, 2 backward</td><td>runs until stopped</td></tr>
           <tr><td>3</td><td>Cam position</td><td>0 to 8</td><td>selects what the single motor drives</td></tr>
           <tr><td>4</td><td>Lamp, red</td><td>0 to 100 %</td><td>one command carries both channels</td></tr>
@@ -253,7 +246,6 @@
 
       <h3 id="use-it">Use it</h3>
       <p><strong>Obsolescence, made concrete.</strong> Start with the toy that will not switch on. Ask why. The answer is not mechanical and not electrical; it is a 32-bit library in a file nobody will rebuild. Then fix it anyway.</p>
-      <p><strong>Frames of reference.</strong> Command the head left and watch it turn right. Do not explain it first. The correction is more durable when the robot supplies it.</p>
       <p><strong>Commanded against actual.</strong> The droid reports where its head really is. Have learners predict, command, then read back, and find the cases where the two disagree &ndash; a head still in transit, a cam that had to move first, a command that arrived while the link was down.</p>
       <p><strong>Proximity and distance.</strong> The forward infrared sensor reports ambient and reflected light separately. Drive the droid towards a wall, log the reflected signal against time with the existing Casio interval logger, and the result is a genuine investigation rather than a demonstration.</p>
       <p><strong>Sequencing without a screen full of syntax.</strong> DroidX gives block coding to learners who are not ready to type, on hardware they can watch, with the executing step visible on a second screen.</p>
