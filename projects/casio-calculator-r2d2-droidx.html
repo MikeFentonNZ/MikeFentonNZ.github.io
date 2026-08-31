@@ -114,7 +114,7 @@
       <p>Telemetry comes back the other way as <strong>three numbers, one per <code>Receive()</code></strong>: the forward infrared reading, the age of the last app-mode hold packet, and the head position the droid reports for itself. The first and third are captured together, so although they are transmitted one at a time they describe the <em>same instant</em> &ndash; which matters when the thing being measured is driving across the floor.</p>
       <p>A dropped Bluetooth link &ndash; a flat battery, a droid carried out of range, a power switch &ndash; is invisible from the calculator: the machine would go on accepting keypresses and go on being acknowledged by a board with nothing on the other end. So <strong>the values carry the news themselves</strong>. Anything unavailable reads <code>-999</code>, which is not a plausible measurement of any of them, and when the droid goes they all go together. A value that cannot be a real reading is proof of a fault. <strong>A fault must never resemble a result.</strong></p>
 
-      <h3 id="finding">What the droid taught the project</h3>
+      <h3 id="finding">What the droid taught the Casio calculator research project</h3>
       <p>The other Casio calculator-to-microcontroller projects are indifferent to how long the microcontroller sat waiting inside the calculator's <code>Receive(</code>. A heater does not care. A thermistor never notices that it has been ignored.</p>
       <p><strong>A Bluetooth droid notices.</strong> It expects a small packet every couple of seconds, and it is the first endpoint in this work whose clock keeps running while the calculator is thinking. An unbounded wait starves it.</p>
       <p>The fix is structural: that periodic packet must live <em>outside</em> the transaction loop, on its own task, firing whether or not the application is blocked. Once it does, the calculator's transaction time stops being a constraint at all.</p>
@@ -175,32 +175,32 @@
       <p>One of those lines is still unexplained. <code>Queue overflow!</code> appears without an obvious trigger, and nothing here should be read as knowing what it means.</p>
 
       <h3 id="corrections">Three things the published protocol work does not tell you</h3>
-      <p>The droid's Bluetooth protocol was reverse-engineered by a third party from the decompiled Android app and published openly. That work made this project possible and is not mine &ndash; it was the starting point for every line of the ESP32 firmware. Building against it on real hardware turns up three things worth passing back.</p>
+      <p>The droid's Bluetooth protocol was reverse-engineered by a third party from the decompiled Android app and published openly. That work made this project possible and is not mine. Building against code for Andoid APK use on ESP32 microcontroller hardware revealed three things worth passing back.</p>
       <table>
         <thead><tr><th>What the published work has</th><th>What the hardware showed</th><th>Why it matters</th></tr></thead>
         <tbody>
           <tr>
             <td>The infrared packet's first 16-bit field is read past and discarded.</td>
-            <td>It is exactly <code>4095 &minus; (lit &minus; ambient)</code> on every frame &ndash; the droid's own computed proximity.</td>
+            <td>It is exactly <code>4095 &minus; (lit &minus; ambient)</code> on every frame; the droid's own computed proximity.</td>
             <td>A free per-frame integrity check on the packet, thrown away. This build uses it, and discards frames that fail it.</td>
           </tr>
           <tr>
             <td>The <em>command</em> enumeration is applied to the <em>reported</em> head field.</td>
             <td>All three labels are wrong, and a fourth code exists for a head in transit.</td>
-            <td>Every value returned is a legal enumeration member, so nothing signals that anything is amiss. A wrong answer that looks right.</td>
+            <td>Every value returned is a legal enumeration member; a wrong answer that looks right.</td>
           </tr>
           <tr>
             <td><code>0x50&nbsp;0x8D</code> sent every 2.0&nbsp;s, named a keepalive.</td>
-            <td>Not a keepalive. Stop it altogether and nothing disconnects, and commands are still obeyed &ndash; the droid simply stops deferring to the application after 5.0&nbsp;s. Ordinary traffic will not stand in for it.</td>
-            <td>The name tells you to watch for a dropped link. The real failure leaves the link up, the readings true and the commands working &ndash; it costs you sole occupancy, not control.</td>
+            <td>Not a keepalive. Stop it and nothing 'dies', nothing disconnects, and commands are still obeyed; the droid simply stops deferring to the application after 5.0&nbsp;s. Ordinary traffic will not stand in for it.</td>
+            <td>The real failure leaves the link up, the readings true and the commands working; it costs you sole occupancy, not control.</td>
           </tr>
         </tbody>
       </table>
-      <p>None of this is a complaint about the original work, which is careful and generous and without which none of this would exist. Three of the four are only visible with the toy on the bench answering back, and the fourth needed an interval knob that nobody had reason to build.</p>
+      <p>None of this is a complaint about the original work, which is careful and generous and without which none of this would exist.</p>
       <h4>The toy computes the proximity value, and the published parser discards it</h4>
       <p>The infrared packet carries three 16-bit values. The published parser reads two of them, ambient and lit, and ignores the first. Across <strong>17 frames from four captures and three connections</strong>, the discarded field is exactly <code>4095 &minus; (lit &minus; ambient)</code>, every time. It is the toy's own computed proximity, inverted against 12-bit full scale. It carries no new information, <strong>but it is a free per-frame consistency check on the packet</strong>, and nobody is reading it.</p>
       <h4>The reported head position is mislabelled</h4>
-      <p>The published parser applies the <em>command</em> enumeration to the <em>reported</em> field. Measured by commanding each position and watching the head move, all three labels are wrong, and a fourth code exists for a head still in transit between positions. Every value the parser returns is a legal enumeration member, so nothing signals that anything is amiss.</p>
+      <p>The published parser applies the <em>command</em> enumeration to the <em>reported</em> field. Measured by commanding each position and reading back the code the droid reports for itself, all three labels are wrong, and a fourth code exists for a head still in transit between positions. Every value the parser returns is a legal enumeration member, so nothing signals that anything is amiss &ndash; a wrong answer wearing the shape of a right one. This build translates the reported codes back into the commanded convention, so a learner who types 1 reads 1.</p>
 
       <h4>The packet everyone calls a keepalive is not one</h4>
       <p>The published work sends <code>0x50&nbsp;0x8D</code> every two seconds and calls it a keepalive, which invites the obvious inference: that the droid drops its Bluetooth connection without it. <a href="#measured">Stretching the interval on the bench</a> shows otherwise. It is an <strong>app-mode hold</strong> &ndash; a standing claim that an application is driving, which the droid honours by suspending its own behaviour for as long as the claim keeps arriving. Let it lapse and the droid concludes nobody is at the controls and starts entertaining itself, without dropping anything.</p>
