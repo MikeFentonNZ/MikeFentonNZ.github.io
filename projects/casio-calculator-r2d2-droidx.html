@@ -80,21 +80,20 @@
         <h3>A graphing calculator, an ESP32, and a toy nobody can switch on any more</h3>
         <p><a href="casio-calculator-data-logger-hack.html">&larr; Casio calculator data logger &ndash; project overview</a></p>
 
-        <p>Hasbro's <strong>Smart R2-D2</strong> was sold in 2016 with an Android app that controlled it over Bluetooth. The app was built with a Unity version of that year and ships only 32-bit native libraries. Modern phones are 64-bit only. <strong>The app will not install, so the toy will not move.</strong></p>
+        <p>Hasbro's <strong>Smart R2-D2</strong> was sold in 2016 with an Android app that controlled it over Bluetooth. Modern phones <strong>will not install it, so the toy has lost a lot of its playability - until now!</strong></p>
 
-        <p>Nothing is wrong with the robot. Its motors turn, its lamps light, its speaker works, and it still advertises itself over Bluetooth to anything that knows how to ask. What died was the software, and with it every one of these toys still sitting in a cupboard.</p>
+        <p>Nothing is wrong with the robot. It still advertises itself over Bluetooth LE to anything that knows how to ask. What died was the software, and with it every one of these toys still sitting in a cupboard.</p>
 
         <p>This project puts a <strong>Casio FX-9750 graphing calculator</strong> in charge of it, through the same 2.5&nbsp;mm serial port and the same four-component interface circuit as every other build in this family. It then adds <strong>DroidX</strong>, a block-coding web page served by the ESP32 itself, so a phone or tablet can drive the droid with no app, no install, and no internet connection.</p>
 
 	<blockquote><p><strong>Restore phone control of your Hasbro Smart R2D2</strong> The Casio remains a teaching tool connecting to R2D2 AT THE SAME TIME as the ESP32 serves an app to your phone, tablet or laptop webbrowser.</p><p>The calculator sends the commands. The ESP32 translates them into Bluetooth. The droid moves. And the calculator screen shows what the droid is actually doing, read back from the robot rather than assumed.</p> </blockquote>
 	<img src="../assets/img/droidx-r2d2.jpg" alt="The replacement for the Hasbro Smart R2D2 app - DroidX provides remote control and block coding actions thorugh your web browser."/>
 
-
       </section>
 
       <h3 id="why">Why bother</h3>
-      <p><strong>This is an e-waste problem wearing a toy costume.</strong> A working machine is unusable because a company stopped maintaining a phone app, and no amount of care by the owner can fix that. Learners meet planned and unplanned obsolescence as an abstraction; here it is a robot on the table that will not move, and a route to making it move again.</p>
-      <p>It is also the first endpoint in my Casio calculator research project that <strong>talks back</strong>. Simple sensors used in data logging do not disagree with commands. However, a droid reports its own head position, its own cam position, its button, and a forward proximity reading, so a learner can compare what was commanded with what actually happened. That gap is where the science is.</p>
+      <p><strong>This is an e-waste problem wearing a toy costume.</strong> A working machine is unusable because a company stopped maintaining a phone app, and no amount of care by the owner can fix that. Learners meet planned and unplanned obsolescence in a concrete example; here it is a robot on the table that will not move. But there is a route to making it move again at low cost.</p>
+      <p>This project is also the first endpoint in my Casio calculator research project that <strong>talks back</strong>. Simple sensors used in data logging do not disagree with commands. However, a droid reports its own head position, its own cam position, its button, and a forward proximity reading, so a learner can compare what was commanded with what actually happened. That gap is where the science is. Get the block coding ability back is where the fun is!</p>
 
       <h3 id="build">What was built</h3>
       <table>
@@ -117,8 +116,8 @@
       <h3 id="finding">What the droid taught the Casio calculator research project</h3>
       <p>The other Casio calculator-to-microcontroller projects are indifferent to how long the microcontroller sat waiting inside the calculator's <code>Receive(</code>. A heater does not care. A thermistor never notices that it has been ignored.</p>
       <p><strong>A Bluetooth droid notices.</strong> It expects a small packet every couple of seconds, and it is the first endpoint in this work whose clock keeps running while the calculator is thinking. An unbounded wait starves it.</p>
-      <p>The fix is structural: that periodic packet must live <em>outside</em> the transaction loop, on its own task, firing whether or not the application is blocked. Once it does, the calculator's transaction time stops being a constraint at all.</p>
-      <p><strong>And the failure it prevents is quieter than the name suggests.</strong> Nothing dies...the published work calls that packet a keepalive. Measured on the bench, it is nothing of the kind. Starve it and the droid does not disconnect; the link stays up, the telemetry keeps arriving, the commands keep being obeyed. What lapses is the droid's agreement to stay out of the way. It picks a mode for itself and starts performing while still answering everything you ask it. <strong>A fault that leaves everything apparently working is harder to find than one that disconnects</strong>, which is the whole argument for carrying an instrument.</p>
+      <p>The fix is structural: that periodic packet must live <em>outside</em> the transaction loop, on its own task, firing whether or not the application is blocked. Once it does, the calculator's transaction time stops being a constraint.</p>
+      <p><strong>And the failure of the 'Keep Alive' packet is quieter than the name suggests.</strong> Nothing dies...the published work calls that packet a keepalive. Measured on the bench, it is nothing of the kind. Starve it and the droid does not disconnect; the link stays up, the telemetry keeps arriving, the commands keep being obeyed. What lapses is the droid's agreement to stay out of the way of user control commands. The droid picks a mode for itself and starts performing while still answering everything you ask it. <strong>A fault that leaves everything apparently working is harder to find than one that disconnects</strong>, which is the whole argument for the Casio caclulator as a diagnostic instrument.</p>
       <blockquote>This generalises well beyond one toy. <strong>Any endpoint that expects to hear from its controller on a schedule has the same shape</strong> &ndash; Bluetooth, MQTT, anything session-based &ndash; and what it withdraws when it stops hearing might not be the connection.</blockquote>
 
       <h3 id="measured">What the bench established</h3>
@@ -138,7 +137,7 @@
       <p><strong>The packet also stops what has already begun.</strong> At 5100&nbsp;ms the droid starts a routine and is cut off mid-flash when the next one lands.</p>
       <p><strong>If you are building one of these: anything at or below 5000&nbsp;ms is safe</strong>, and there is nothing to gain by going far below. This build sends one every 1500&nbsp;ms.</p>
 
-      <h4>What the packet buys</h4>
+      <h4>What the 'keep alive' packet buys</h4>
       <p>Suppressed entirely, with the routine input-state request still going out every three seconds, the droid takes over anyway &ndash; so ordinary traffic will not stand in for it. Commands are still accepted while it does.</p>
       <blockquote><strong>The packet does not buy control. It buys sole occupancy.</strong></blockquote>
       <p>The command channel and the claim to be driving are independent of each other. Losing the claim does not take the droid away from you &ndash; it stops the droid being <em>yours alone</em>. This build already ran two control surfaces at once, the calculator and DroidX, neither aware of the other. A lapsed claim adds an uninvited third, and the third one is the droid.</p>
@@ -155,9 +154,9 @@
         <li><strong>The infrared consistency check held over roughly 571 frames</strong> with zero failures, checked in firmware on every frame.</li>
       </ul>
 
-      <blockquote><strong>A bench note.</strong> The droid switches itself off after about ten minutes, sooner as the batteries fall, and it watches its own supply well enough to say so. That registers as a lost connection without being one, so it bounds a measuring session and it is worth checking the droid is still awake before believing a drop.</blockquote>
+      <blockquote><strong>A bench note.</strong> The droid switches itself off after about ten minutes IF THE CONNECTION IS LOST, sooner as the batteries fail. It is worth checking the droid is still awake before believing a drop.</blockquote>
 
-      <h3 id="narration">The droid was narrating the whole time</h3>
+      <h3 id="narration">The droid narrates its state the whole time</h3>
       <p>None of the measurements above would have been possible without a channel the published work documents and then treats as noise. Three opcodes &ndash; <code>0x60</code>, <code>0x61</code> and <code>0x62</code> &ndash; carry ordinary null-terminated text: debug, log and error. The reference parser lists them and prints them only in verbose mode, among everything else too dull to read.</p>
       <p>They are not dull. This is the droid describing its own internal state in English:</p>
       <table>
@@ -202,9 +201,9 @@
       <h4>The reported head position is mislabelled</h4>
       <p>The published parser applies the <em>command</em> enumeration to the <em>reported</em> field. Measured by commanding each position and reading back the code the droid reports for itself, all three labels are wrong, and a fourth code exists for a head still in transit between positions. Every value the parser returns is a legal enumeration member, so nothing signals that anything is amiss &ndash; a wrong answer wearing the shape of a right one. This build translates the reported codes back into the commanded convention, so a learner who types 1 reads 1.</p>
 
-      <h4>The packet everyone calls a keepalive is not one</h4>
-      <p>The published work sends <code>0x50&nbsp;0x8D</code> every two seconds and calls it a keepalive, which invites the obvious inference: that the droid drops its Bluetooth connection without it. <a href="#measured">Stretching the interval on the bench</a> shows otherwise. It is an <strong>app-mode hold</strong> &ndash; a standing claim that an application is driving, which the droid honours by suspending its own behaviour for as long as the claim keeps arriving. Let it lapse and the droid concludes nobody is at the controls and starts entertaining itself, without dropping anything.</p>
-      <p><strong>The name matters more than a name usually does.</strong> "Keepalive" tells you to watch for a disconnection. The thing to watch for is a droid that carries on answering, reporting and obeying while quietly ignoring what it was told. This build calls it a hold throughout, and the calculator labels that reading <code>HOLD AGE</code>.</p>
+      <h4>The packet called a keepalive is not one</h4>
+      <p>The published work sends <code>0x50&nbsp;0x8D</code> every two seconds and calls it a keepalive, which suggests that the droid drops its Bluetooth connection without it. <a href="#measured">Stretching the interval on the bench</a> shows otherwise. It is an <strong>app-mode hold</strong> &ndash; a standing claim that an application is driving, which the droid honours by suspending its own behaviour for as long as the claim keeps arriving. Let it lapse and the droid concludes nobody is at the controls and starts entertaining itself, without dropping anything.</p>
+      <p><strong>The name matters:</strong> "Keepalive" tells you to watch for a disconnection. The thing to watch for is a droid that carries on answering, reporting and obeying while quietly ignoring what it was told. This build calls it a hold throughout, and the calculator labels that reading <code>HOLD AGE</code>.</p>
 
       <h3 id="droidx">DroidX &ndash; the Hasbro R2D2 app you are looking for</h3>
       <p>The calculator is the interesting control surface, but it is not the only one. Because the ESP32 has WiFi, it can run as its own access point and serve a page. <strong>A phone will not find the Hasbro R2D2 droid in its Bluetooth list, but it will find the ESP32 in its WiFi list.</strong> Join it, open a browser, and the controller appears.</p>
