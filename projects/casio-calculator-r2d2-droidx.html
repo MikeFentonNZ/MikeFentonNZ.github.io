@@ -111,60 +111,71 @@
 
       <h3 id="calculator">What the calculator does</h3>
       <p>Commands go out in the <strong>two-step form</strong> used throughout this project: send the parameter number, then send its value. The calculator can only send a bare number, so the label goes first and is remembered. That is also, as it happens, exactly the shape of the droid's own protocol, which is an opcode followed by a payload.</p>
-      <p>Telemetry comes back the other way as <strong>three ordinary numbers, one per <code>Receive(</code></strong>: the forward infrared reading, the age of the last app-mode hold packet, and the head position the droid reports for itself. The first and third are captured together, so although they are transmitted one at a time they describe the <em>same instant</em> &ndash; which matters when the thing being measured is driving across the floor.</p>
+      <p>Telemetry comes back the other way as <strong>three numbers, one per <code>Receive()</code></strong>: the forward infrared reading, the age of the last app-mode hold packet, and the head position the droid reports for itself. The first and third are captured together, so although they are transmitted one at a time they describe the <em>same instant</em> &ndash; which matters when the thing being measured is driving across the floor.</p>
       <p>A dropped Bluetooth link &ndash; a flat battery, a droid carried out of range, a power switch &ndash; is invisible from the calculator: the machine would go on accepting keypresses and go on being acknowledged by a board with nothing on the other end. So <strong>the values carry the news themselves</strong>. Anything unavailable reads <code>-999</code>, which is not a plausible measurement of any of them, and when the droid goes they all go together. A value that cannot be a real reading is proof of a fault. <strong>A fault must never resemble a result.</strong></p>
 
       <h3 id="finding">What the droid taught the project</h3>
-      <p>Every endpoint this interface had served until now was indifferent to how long the microcontroller sat waiting inside the calculator's <code>Receive(</code>. A heater does not care. A thermistor never notices that it has been ignored.</p>
+      <p>The other Casio calculator-to-microcontroller projects are indifferent to how long the microcontroller sat waiting inside the calculator's <code>Receive(</code>. A heater does not care. A thermistor never notices that it has been ignored.</p>
       <p><strong>A Bluetooth droid notices.</strong> It expects a small packet every couple of seconds, and it is the first endpoint in this work whose clock keeps running while the calculator is thinking. An unbounded wait starves it.</p>
-      <p>The remedy is structural rather than a patch: that periodic packet must live <em>outside</em> the transaction loop, on its own task, firing whether or not the application is blocked. Once it does, the calculator's transaction time stops being a constraint at all.</p>
-      <p><strong>And the failure it prevents turned out to be quieter than expected.</strong> The published work calls that packet a keepalive; measured on the bench, it is nothing of the kind. Starve it and the droid does not disconnect &ndash; the link stays up, the telemetry keeps arriving, the commands keep being obeyed. What lapses is the droid's agreement to stay out of the way. It picks a mode for itself and starts performing while still answering everything you ask it. <strong>A fault that leaves everything apparently working is harder to find than one that disconnects</strong>, which is the whole argument for carrying an instrument.</p>
-      <blockquote>This generalises well beyond one toy. <strong>Any endpoint that expects to hear from its controller on a schedule has the same shape</strong> &ndash; Bluetooth, MQTT, anything session-based &ndash; and what it withdraws when it stops hearing need not be the connection. The finding is a limitation of the method and its remedy, and both were observed on the bench on the same afternoon.</blockquote>
+      <p>The fix is structural: that periodic packet must live <em>outside</em> the transaction loop, on its own task, firing whether or not the application is blocked. Once it does, the calculator's transaction time stops being a constraint at all.</p>
+      <p><strong>And the failure it prevents is quieter than the name suggests.</strong> Nothing dies...the published work calls that packet a keepalive. Measured on the bench, it is nothing of the kind. Starve it and the droid does not disconnect; the link stays up, the telemetry keeps arriving, the commands keep being obeyed. What lapses is the droid's agreement to stay out of the way. It picks a mode for itself and starts performing while still answering everything you ask it. <strong>A fault that leaves everything apparently working is harder to find than one that disconnects</strong>, which is the whole argument for carrying an instrument.</p>
+      <blockquote>This generalises well beyond one toy. <strong>Any endpoint that expects to hear from its controller on a schedule has the same shape</strong> &ndash; Bluetooth, MQTT, anything session-based &ndash; and what it withdraws when it stops hearing might not be the connection.</blockquote>
 
-      <h3 id="measured">What the bench measured</h3>
-      <p>Two of the numbers this build was running on had been <em>inherited</em> rather than established: the interval the droid needs between packets, taken from somebody else's working code, and a 1200&nbsp;ms pause held inside the calculator's read window, chosen years ago for a program of a different shape. Both were guesses wearing the clothes of requirements. The controller carries a small serial console that makes each of them settable while it runs, which turned what would have been a dozen reflash-and-retest cycles into one session at the bench.</p>
+      <h3 id="measured">What the bench established</h3>
+      <p>Two numbers this build depends on came from elsewhere: the interval the droid needs between packets, taken from the published controller, and a pause inside the calculator's read window inherited from an older program of a different shape. Both are settable from a small serial console while the controller runs, so both could be measured.</p>
 
-      <h4>What the droid actually does when the packets stop</h4>
+      <h4>The droid's timeout is 5.0 seconds</h4>
       <table>
-        <thead><tr><th>Interval between packets</th><th>What the droid did</th><th>Dropped connections</th></tr></thead>
+        <thead><tr><th>Interval between packets</th><th>What the droid does</th><th>Dropped connections</th></tr></thead>
         <tbody>
           <tr><td>1500&nbsp;ms &ndash; the default</td><td>sits quietly, obeys every command</td><td>0</td></tr>
-          <tr><td>5000&nbsp;ms</td><td>sits quietly, obeys every command</td><td>0</td></tr>
-          <tr><td><strong>6000&nbsp;ms</strong></td><td><strong>whistles each cycle and runs its own routines</strong></td><td><strong>0</strong></td></tr>
+          <tr><td><strong>5000&nbsp;ms</strong></td><td><strong>the limit &ndash; quiet for minutes on end</strong></td><td><strong>0</strong></td></tr>
+          <tr><td><strong>5100&nbsp;ms</strong></td><td><strong>takes over every cycle: one lamp flash, or the first note of a whistle, then it stops</strong></td><td><strong>0</strong></td></tr>
+          <tr><td>6000&nbsp;ms</td><td>about a second of self-driving &ndash; a whole whistle sequence</td><td>0</td></tr>
         </tbody>
       </table>
-      <p><strong>Nothing disconnected, at any setting.</strong> Right through the 6000&nbsp;ms run the infrared telemetry kept arriving, the head position kept being reported, and commands typed on the calculator were still obeyed &ndash; while the droid whistled and drove itself in between. It announces the changeover in plain text on a debug channel the published parser does not read at all.</p>
+      <p><strong>Nothing disconnects at any setting</strong>, telemetry keeps arriving, and commands are obeyed throughout. The edge is a step rather than a fuzzy region, because the droid's timer is <em>reset by each packet</em>.</p>
+      <p><strong>The packet also stops what has already begun.</strong> At 5100&nbsp;ms the droid starts a routine and is cut off mid-flash when the next one lands.</p>
+      <p><strong>If you are building one of these: anything at or below 5000&nbsp;ms is safe</strong>, and there is nothing to gain by going far below. This build sends one every 1500&nbsp;ms.</p>
 
-      <h4>A pause that was doing nothing, and cost 44 per cent</h4>
-      <p>Stepped down on an <strong>FX-9750G&nbsp;Plus</strong> &ndash; the stricter of the two calculators &ndash; with the error counters read at every setting.</p>
-      <table>
-        <thead><tr><th>Pause</th><th>Cycle time</th><th>Errors of any kind</th></tr></thead>
-        <tbody>
-          <tr><td>1200&nbsp;ms</td><td>2736&nbsp;ms</td><td>0</td></tr>
-          <tr><td>800&nbsp;ms</td><td>2338&nbsp;ms</td><td>0</td></tr>
-          <tr><td>500&nbsp;ms</td><td>2041&nbsp;ms</td><td>0</td></tr>
-          <tr><td>300&nbsp;ms</td><td>1840&nbsp;ms</td><td>0</td></tr>
-          <tr><td>150&nbsp;ms</td><td>1687&nbsp;ms</td><td>0</td></tr>
-          <tr><td><strong>0&nbsp;ms</strong></td><td><strong>1539&nbsp;ms</strong></td><td><strong>0</strong></td></tr>
-        </tbody>
-      </table>
-      <p>That is <code>cycle = 1539 + 0.998 &times; pause</code> milliseconds, with every residual inside &plusmn;2&nbsp;ms across six settings. Short packets, bad preambles, bad checksums, timeouts and flushed bytes were <strong>zero cumulatively across the whole step-down, including at zero pause</strong>, and 140 consecutive cycles contained no outlier.</p>
-      <blockquote><strong>The slope is the evidence, not the zeros.</strong> Every millisecond taken off the pause came off the cycle, which can only be true if the pause was the only thing changing. A pause protecting something real would have shown a threshold somewhere. There is none, right down to zero.</blockquote>
-      <p>It was doing nothing because this program already reads all three values before it draws anything, so a read never begins while the machine is still busy with the screen &ndash; which is the actual fix, and the pause was insurance against a failure the structure had already ruled out. <strong>That is a result about this program's shape, not about the calculator</strong>: a program that draws between reads still needs the pause.</p>
-      <p>So the pause is now zero by default, and survives as a <em>teaching control</em>: set it back to 1200&nbsp;ms and the long wait reappears on demand, which is how the finding above is demonstrated to a class.</p>
+      <h4>What the packet buys</h4>
+      <p>Suppressed entirely, with the routine input-state request still going out every three seconds, the droid takes over anyway &ndash; so ordinary traffic will not stand in for it. Commands are still accepted while it does.</p>
+      <blockquote><strong>The packet does not buy control. It buys sole occupancy.</strong></blockquote>
+      <p>The command channel and the claim to be driving are independent of each other. Losing the claim does not take the droid away from you &ndash; it stops the droid being <em>yours alone</em>. This build already ran two control surfaces at once, the calculator and DroidX, neither aware of the other. A lapsed claim adds an uninvited third, and the third one is the droid.</p>
+      <p><strong>Which is why nothing shows.</strong> Link up, values true, commands obeyed, every transaction counter at zero. There is no symptom to find, because nothing has failed in any sense the apparatus can test for. The only evidence is how long it has been since the last packet.</p>
 
-      <h4>Three smaller results, free</h4>
+      <h4>The telemetry pause can be zero</h4>
+      <p>Stepped down on an <strong>FX-9750G&nbsp;Plus</strong>, the stricter of the two calculators, with the error counters read at every setting.</p>
+            <p>It stays in the build as a teaching control: set it back to 1200&nbsp;ms and the long wait reappears on demand, which is how the finding above is shown to a class.</p>
+
+      <h4>Three smaller results</h4>
       <ul>
         <li><strong>The finding holds on both calculator generations.</strong> An FX-9750G&nbsp;Plus and an FX-9750GIII, machines twenty years apart, on one interface circuit and one calculator program.</li>
-        <li><strong>Adding WiFi cost the Bluetooth link nothing measurable.</strong> WiFi and Bluetooth share one radio in an ESP32, so this was measured rather than assumed: 2685&nbsp;ms per cycle with the access point alone, 2682&nbsp;ms with the access point, the web server, the WebSocket and two background tasks all running. Three milliseconds apart, same floor, same spread.</li>
-        <li><strong>The infrared consistency check held over roughly 571 frames</strong> with zero failures, checked in firmware on every frame. It had been established on 17 frames copied out by eye.</li>
+        <li><strong>Adding WiFi costs the Bluetooth link nothing measurable.</strong> The two share one radio in an ESP32, so this was measured rather than assumed: 2685&nbsp;ms per cycle with the access point alone, 2682&nbsp;ms with the access point, the web server, the WebSocket and two background tasks all running.</li>
+        <li><strong>The infrared consistency check held over roughly 571 frames</strong> with zero failures, checked in firmware on every frame.</li>
       </ul>
 
-      <h4>Still open</h4>
-      <p>Where between 5000 and 6000&nbsp;ms the changeover actually happens has not been bisected, and whether ordinary traffic of any kind will satisfy the droid in place of the specific packet is a test that is designed but not yet run. Both are recorded as open rather than rounded off &ndash; a project that corrects somebody else's inherited numbers has no business quietly inheriting its own.</p>
+      <blockquote><strong>A bench note.</strong> The droid switches itself off after about ten minutes, sooner as the batteries fall, and it watches its own supply well enough to say so. That registers as a lost connection without being one, so it bounds a measuring session and it is worth checking the droid is still awake before believing a drop.</blockquote>
 
-      <h3 id="corrections">Four corrections to the published protocol work</h3>
-      <p>The droid's Bluetooth protocol was reverse-engineered by a third party from the decompiled Android app and published openly. That work made this project possible and is not mine. Building against it on real hardware, however, turned up four things worth passing back.</p>
+      <h3 id="narration">The droid was narrating the whole time</h3>
+      <p>None of the measurements above would have been possible without a channel the published work documents and then treats as noise. Three opcodes &ndash; <code>0x60</code>, <code>0x61</code> and <code>0x62</code> &ndash; carry ordinary null-terminated text: debug, log and error. The reference parser lists them and prints them only in verbose mode, among everything else too dull to read.</p>
+      <p>They are not dull. This is the droid describing its own internal state in English:</p>
+      <table>
+        <thead><tr><th>What the droid says</th><th>What it means</th></tr></thead>
+        <tbody>
+          <tr><td><code>LVD Sample</code></td><td>it is checking its own battery voltage</td></tr>
+          <tr><td><code>NewModeIdx:10</code></td><td><strong>it has chosen a mode for itself</strong></td></tr>
+          <tr><td><code>MODE SELECTED</code></td><td>and committed to it</td></tr>
+          <tr><td><code>Queue overflow!</code></td><td>an error from its own firmware</td></tr>
+          <tr><td><code>Mic NOT Clear</code></td><td>its microphone gate, refusing</td></tr>
+        </tbody>
+      </table>
+      <p><strong>The second and third lines are where the droid announces that it has taken itself off app control.</strong> Not on <code>0x50</code>, which is where the published enumeration of droid-to-app messages would lead you to look. It is in a debug string, in plain English, on a channel the tooling filters out by default.</p>
+      <p>Nothing here is an error in the published work &ndash; those opcodes are listed and the strings are printed. The difference is only in what one does with them, which is why it sits apart from the list below. But it is the part worth passing on: <strong>the machine describes its own state in words, and the standard tooling classifies the words as noise.</strong></p>
+      <p>One of those lines is still unexplained. <code>Queue overflow!</code> appears without an obvious trigger, and nothing here should be read as knowing what it means.</p>
+
+      <h3 id="corrections">Four things the published protocol work does not tell you</h3>
+      <p>The droid's Bluetooth protocol was reverse-engineered by a third party from the decompiled Android app and published openly. That work made this project possible and is not mine &ndash; it was the starting point for every line of the ESP32 firmware. Building against it on real hardware turns up four things worth passing back.</p>
       <table>
         <thead><tr><th>What the published work has</th><th>What the hardware showed</th><th>Why it matters</th></tr></thead>
         <tbody>
@@ -185,8 +196,8 @@
           </tr>
           <tr>
             <td><code>0x50&nbsp;0x8D</code> sent every 2.0&nbsp;s, named a keepalive.</td>
-            <td>Not a keepalive. Stop it and nothing disconnects; the droid simply stops deferring to the application.</td>
-            <td>The name tells you to watch for a dropped link. The real failure leaves the link up and everything apparently working.</td>
+            <td>Not a keepalive. Stop it altogether and nothing disconnects, and commands are still obeyed &ndash; the droid simply stops deferring to the application after 5.0&nbsp;s. Ordinary traffic will not stand in for it.</td>
+            <td>The name tells you to watch for a dropped link. The real failure leaves the link up, the readings true and the commands working &ndash; it costs you sole occupancy, not control.</td>
           </tr>
         </tbody>
       </table>
@@ -199,8 +210,8 @@
       <p>Commanding the position the published work calls <code>LEFT</code> turns the head towards <strong>your right</strong> when you are facing the robot. This is correct &ndash; it is what "the robot's left" means &ndash; but nothing in the published work says so, and it silently inverts any instruction written from the observer's point of view. It is a good first lesson in frames of reference, and a better one for having been discovered rather than told.</p>
 
       <h4>The packet everyone calls a keepalive is not one</h4>
-      <p>The published work sends <code>0x50&nbsp;0x8D</code> every two seconds and calls it a keepalive, and this project inherited the name along with the belief that came with it: that the toy drops its Bluetooth connection without it. <a href="#measured">Stretching the interval on the bench</a> tells a different story. It is not a keepalive but an <strong>app-mode hold</strong> &ndash; a standing claim that an application is driving, which the droid honours by suspending its own behaviour for as long as the claim keeps arriving. Let it lapse and the droid concludes nobody is at the controls and starts entertaining itself, without dropping anything.</p>
-      <p><strong>The name was doing real damage, not merely sitting there.</strong> "Keepalive" tells you to watch for a disconnection. The thing to watch for is a Hasbro R2D2 droid that carries on answering, reporting and obeying while quietly ignoring what it was told. Every mention of the word has been replaced across the firmware, the calculator programs and the documentation, and the calculator now labels that reading <code>HOLD AGE</code>.</p>
+      <p>The published work sends <code>0x50&nbsp;0x8D</code> every two seconds and calls it a keepalive, which invites the obvious inference: that the droid drops its Bluetooth connection without it. <a href="#measured">Stretching the interval on the bench</a> shows otherwise. It is an <strong>app-mode hold</strong> &ndash; a standing claim that an application is driving, which the droid honours by suspending its own behaviour for as long as the claim keeps arriving. Let it lapse and the droid concludes nobody is at the controls and starts entertaining itself, without dropping anything.</p>
+      <p><strong>The name matters more than a name usually does.</strong> "Keepalive" tells you to watch for a disconnection. The thing to watch for is a droid that carries on answering, reporting and obeying while quietly ignoring what it was told. This build calls it a hold throughout, and the calculator labels that reading <code>HOLD AGE</code>.</p>
 
       <h3 id="droidx">DroidX &ndash; the Hasbro R2D2 app you are looking for</h3>
       <p>The calculator is the interesting control surface, but it is not the only one. Because the ESP32 has WiFi, it can run as its own access point and serve a page. <strong>A phone will not find the Hasbro R2D2 droid in its Bluetooth list, but it will find the ESP32 in its WiFi list.</strong> Join it, open a browser, and the controller appears.</p>
