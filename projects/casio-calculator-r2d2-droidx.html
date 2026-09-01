@@ -87,7 +87,7 @@
         <p>This project puts a <strong>Casio FX-9750 graphing calculator</strong> in charge of it, through the same 2.5&nbsp;mm serial port and the same four-component interface circuit as every other build in this family. It then adds <strong>DroidX</strong>, a block-coding web page served by the ESP32 itself, so a phone or tablet can drive the droid with no app, no install, and no internet connection.</p>
 
 	<blockquote><p><strong>Restore phone control of your Hasbro Smart R2D2</strong> The Casio remains a teaching tool connecting to R2D2 AT THE SAME TIME as the ESP32 serves an app to your phone, tablet or laptop webbrowser.</p><p>The calculator sends the commands. The ESP32 translates them into Bluetooth. The droid moves. And the calculator screen shows what the droid is actually doing, read back from the robot rather than assumed.</p> </blockquote>
-	<img src="../assets/img/droidx-r2d2.jpg" alt="The replacement for the Hasbro Smart R2D2 app - DroidX provides remote control and block coding actions thorugh your web browser."/>
+	<img src="../assets/img/droidx-r2d2.jpg" alt="The replacement for the Hasbro Smart R2D2 app - DroidX provides remote control and block coding actions through your web browser."/>
 
       </section>
 
@@ -107,6 +107,8 @@
         </tbody>
       </table>
       <p>The wiring and the interface are identical to the <a href="casio-calculator-esp32.html">ESP32 build guide</a>. If you have built the data logger, you have already built the hardware for this.</p>
+
+	<img src="../assets/img/casio-hasbro-r2d2.jpg" alt="The Hasbro Smart R2D2 - controlled by a Casio FX_9750GIII or a FX-9750G Plus." width="500" />
 
       <h3 id="calculator">What the calculator does</h3>
       <p>Commands go out in the <strong>two-step form</strong> used throughout this project: send the parameter number, then send its value. The calculator can only send a bare number, so the label goes first and is remembered. That is also, as it happens, exactly the shape of the droid's own protocol, which is an opcode followed by a payload.</p>
@@ -249,8 +251,14 @@
       <p><strong>Proximity and distance.</strong> The forward infrared sensor reports ambient and reflected light separately. Drive the droid towards a wall, log the reflected signal against time with the existing Casio interval logger, and the result is a genuine investigation rather than a demonstration.</p>
       <p><strong>Sequencing without a screen full of syntax.</strong> DroidX gives block coding to learners who are not ready to type, on hardware they can watch, with the executing step visible on a second screen.</p>
 
-      <!-- Photographs to add: the ESP32 wired to the calculator and droid; DroidX open on a phone;
-           the calculator mirror showing an executing step. -->
+<div class="video-container">
+<iframe 
+        src="https://www.youtube.com/embed/7bs8HlcWaaY"
+        title="Casio FX-9750 calculator remote control for Hasbro Smart R2D2"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+</iframe>
+</div>
 
       <h3 id="more">Code, manual and the other platforms</h3>
       <ul>
